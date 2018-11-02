@@ -1,0 +1,1060 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: FS Poster v1.0\n"
+"POT-Creation-Date: 2018-06-21 16:22+0400\n"
+"PO-Revision-Date: 2018-06-21 16:22+0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.8\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-KeywordsList: __;esc_html__\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: languages_\n"
+"X-Poedit-SearchPathExcluded-1: lib\n"
+
+#: includes/AdminMenuClass.php:39
+msgid "Accounts"
+msgstr ""
+
+#: includes/AdminMenuClass.php:42
+msgid "Nodes"
+msgstr ""
+
+#: includes/AdminMenuClass.php:45
+msgid "Schedule"
+msgstr ""
+
+#: includes/AdminMenuClass.php:48
+msgid "Posts"
+msgstr ""
+
+#: includes/AdminMenuClass.php:51
+msgid "Insights"
+msgstr ""
+
+#: includes/AdminMenuClass.php:54
+msgid "Apps"
+msgstr ""
+
+#: includes/AdminMenuClass.php:57 views/app_menus/settings.php:164
+msgid "Settings"
+msgstr ""
+
+#: includes/AjaxClass/Accounts.php:24 includes/AjaxClass/Accounts.php:63
+msgid "No FB App found!"
+msgstr ""
+
+#: includes/AjaxClass/Accounts.php:93
+msgid "Account not found!"
+msgstr ""
+
+#: includes/AjaxClass/Accounts.php:97
+msgid "You do not have a permission to delete this account!"
+msgstr ""
+
+#: includes/AjaxClass/Accounts.php:156
+msgid "Please enter the instagram username and password!"
+msgstr ""
+
+#: includes/AjaxClass/Accounts.php:215 views/modals/add_vk_account.php:117
+msgid "Access token is empty!"
+msgstr ""
+
+#: includes/AjaxClass/App.php:16
+msgid "App not found!"
+msgstr ""
+
+#: includes/AjaxClass/App.php:20
+msgid "You do not have a permission to delete this app!"
+msgstr ""
+
+#: includes/AjaxClass/App.php:24
+msgid "You can not delete this app!"
+msgstr ""
+
+#: includes/AjaxClass/App.php:62
+msgid "field is empty!"
+msgstr ""
+
+#: includes/AjaxClass/App.php:73
+msgid "This app has already been added."
+msgstr ""
+
+#: includes/AjaxClass/App.php:83
+msgid "App ID or Secret is invalid!"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:17
+msgid "Validation error"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:26
+msgid "Start date is wrong!"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:74 includes/AjaxClass/Schedule.php:100
+msgid "Schedule not found!"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:78
+msgid "You do not have a permission to delete this schedule!"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:104
+msgid "You do not have a permission to Pause/Play this schedule!"
+msgstr ""
+
+#: includes/AjaxClass/Schedule.php:109
+msgid "This schedule has finished!"
+msgstr ""
+
+#: includes/Config.php:306
+msgid "This app does not include certain permissions!"
+msgstr ""
+
+#: includes/PostMetaBox.php:21 includes/PostMetaBox.php:39
+msgid "Share"
+msgstr ""
+
+#: includes/PostMetaBox.php:28 includes/PostMetaBox.php:46
+msgid "Share post"
+msgstr ""
+
+#: includes/SiteController.php:113 includes/SiteController.php:261
+#: includes/SiteController.php:276 includes/SiteController.php:290
+#: includes/SiteController.php:306 includes/SiteController.php:322
+msgid "Loading..."
+msgstr ""
+
+#: includes/SiteController.php:113 includes/SiteController.php:261
+#: includes/SiteController.php:276 includes/SiteController.php:290
+#: includes/SiteController.php:306 includes/SiteController.php:322
+msgid "Error! Please try again!"
+msgstr ""
+
+#: views/app_base.php:19
+msgid "ACCOUNTS"
+msgstr ""
+
+#: views/app_base.php:24 views/app_menus/account/vk.php:48
+msgid "COMMUNITIES"
+msgstr ""
+
+#: views/app_base.php:29 views/app_menus/schedule.php:11
+msgid "SCHEDULE"
+msgstr ""
+
+#: views/app_base.php:34
+msgid "POSTS"
+msgstr ""
+
+#: views/app_base.php:39
+msgid "INSIGHTS"
+msgstr ""
+
+#: views/app_base.php:44
+msgid "APPS"
+msgstr ""
+
+#: views/app_base.php:49
+msgid "SETTINGS"
+msgstr ""
+
+#: views/app_install.php:15 views/app_install.php:16
+msgid "Purchase key"
+msgstr ""
+
+#: views/app_install.php:17
+msgid "ACTIVATE"
+msgstr ""
+
+#: views/app_menus/account.php:161 views/app_menus/app.php:231
+#: views/app_menus/schedule.php:98
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+#: views/app_menus/account/fb.php:37
+msgid "Facebook account added"
+msgstr ""
+
+#: views/app_menus/account/fb.php:38 views/app_menus/account/instagram.php:34
+#: views/app_menus/account/linkedin.php:41
+#: views/app_menus/account/pinterest.php:34
+#: views/app_menus/account/reddit.php:34 views/app_menus/account/tumblr.php:41
+#: views/app_menus/account/twitter.php:34 views/app_menus/account/vk.php:41
+#: views/modals/add_instagram_account.php:35 views/modals/add_vk_account.php:92
+msgid "ADD ACCOUNT"
+msgstr ""
+
+#: views/app_menus/account/fb.php:44 views/app_menus/account/instagram.php:40
+#: views/app_menus/account/linkedin.php:47
+#: views/app_menus/account/pinterest.php:40
+#: views/app_menus/account/reddit.php:40 views/app_menus/account/tumblr.php:47
+#: views/app_menus/account/twitter.php:40 views/app_menus/account/vk.php:47
+#: views/app_menus/app.php:155
+msgid "NAME"
+msgstr ""
+
+#: views/app_menus/account/fb.php:45
+msgid "GROUPS"
+msgstr ""
+
+#: views/app_menus/account/fb.php:46
+msgid "MY PAGES"
+msgstr ""
+
+#: views/app_menus/account/fb.php:47
+msgid "LIKED PAGES"
+msgstr ""
+
+#: views/app_menus/account/fb.php:48 views/app_menus/account/instagram.php:42
+#: views/app_menus/account/linkedin.php:49
+#: views/app_menus/account/pinterest.php:42
+#: views/app_menus/account/reddit.php:42 views/app_menus/account/twitter.php:42
+#: views/app_menus/account/vk.php:49
+msgid "SHARE ON PROFILE"
+msgstr ""
+
+#: views/app_menus/account/fb.php:60 views/app_menus/account/instagram.php:54
+#: views/app_menus/account/linkedin.php:61
+#: views/app_menus/account/pinterest.php:56
+#: views/app_menus/account/reddit.php:56 views/app_menus/account/tumblr.php:61
+#: views/app_menus/account/twitter.php:54 views/app_menus/account/vk.php:61
+#: views/app_menus/nodes.php:412 views/app_menus/posts.php:227
+msgid "Profile link"
+msgstr ""
+
+#: views/app_menus/account/fb.php:62 views/app_menus/account/fb.php:63
+#: views/app_menus/account/fb.php:64 views/app_menus/account/linkedin.php:63
+#: views/app_menus/account/tumblr.php:63 views/app_menus/account/vk.php:63
+msgid "Click to see list"
+msgstr ""
+
+#: views/app_menus/account/fb.php:62
+msgid "group(s)"
+msgstr ""
+
+#: views/app_menus/account/fb.php:63 views/app_menus/account/fb.php:64
+msgid "page(s)"
+msgstr ""
+
+#: views/app_menus/account/fb.php:66 views/app_menus/account/instagram.php:58
+#: views/app_menus/account/linkedin.php:68
+#: views/app_menus/account/pinterest.php:60
+#: views/app_menus/account/reddit.php:60 views/app_menus/account/twitter.php:58
+#: views/app_menus/account/vk.php:65 views/app_menus/nodes.php:418
+msgid "Click to change status"
+msgstr ""
+
+#: views/app_menus/account/fb.php:69 views/app_menus/account/instagram.php:61
+#: views/app_menus/account/linkedin.php:71
+#: views/app_menus/account/pinterest.php:63
+#: views/app_menus/account/reddit.php:63 views/app_menus/account/tumblr.php:65
+#: views/app_menus/account/twitter.php:61 views/app_menus/account/vk.php:68
+msgid "Delete account"
+msgstr ""
+
+#: views/app_menus/account/fb.php:77
+msgid "No account found"
+msgstr ""
+
+#: views/app_menus/account/google.php:33
+#, php-format
+msgid "%d Google account added"
+msgstr ""
+
+#: views/app_menus/account/instagram.php:33
+msgid "instagram account added"
+msgstr ""
+
+#: views/app_menus/account/instagram.php:41
+#: views/app_menus/account/twitter.php:41
+msgid "USERNAME"
+msgstr ""
+
+#: views/app_menus/account/instagram.php:69
+#: views/app_menus/account/linkedin.php:79
+#: views/app_menus/account/pinterest.php:71
+#: views/app_menus/account/reddit.php:71 views/app_menus/account/tumblr.php:73
+#: views/app_menus/account/twitter.php:69 views/app_menus/account/vk.php:76
+msgid "No accound found"
+msgstr ""
+
+#: views/app_menus/account/linkedin.php:40
+msgid "linkedin account added"
+msgstr ""
+
+#: views/app_menus/account/linkedin.php:48
+msgid "COMPANY PAGES"
+msgstr ""
+
+#: views/app_menus/account/linkedin.php:65
+msgid "company"
+msgstr ""
+
+#: views/app_menus/account/pinterest.php:33
+msgid "pinterest account added"
+msgstr ""
+
+#: views/app_menus/account/pinterest.php:41
+msgid "POST TO BOARD"
+msgstr ""
+
+#: views/app_menus/account/pinterest.php:58
+#: views/app_menus/account/reddit.php:58
+msgid "Edit default board"
+msgstr ""
+
+#: views/app_menus/account/reddit.php:33
+msgid "reddit account added"
+msgstr ""
+
+#: views/app_menus/account/reddit.php:41
+msgid "SUBMIT TO SUBREDDIT"
+msgstr ""
+
+#: views/app_menus/account/tumblr.php:40
+msgid "tumblr account added"
+msgstr ""
+
+#: views/app_menus/account/tumblr.php:48
+msgid "BLOGS"
+msgstr ""
+
+#: views/app_menus/account/twitter.php:33
+msgid "twitter account added"
+msgstr ""
+
+#: views/app_menus/account/vk.php:40
+msgid "vk account added"
+msgstr ""
+
+#: views/app_menus/app.php:148
+msgid "app(s) added"
+msgstr ""
+
+#: views/app_menus/app.php:149 views/modals/add_app.php:15
+msgid "ADD APP"
+msgstr ""
+
+#: views/app_menus/app.php:156
+msgid "CREDENTIALS"
+msgstr ""
+
+#: views/app_menus/app.php:192
+msgid "You can't delete this app"
+msgstr ""
+
+#: views/app_menus/app.php:200
+msgid "Delete app"
+msgstr ""
+
+#: views/app_menus/app.php:213
+msgid "No app found"
+msgstr ""
+
+#: views/app_menus/insights.php:138
+msgid "Shares this month"
+msgstr ""
+
+#: views/app_menus/insights.php:143
+msgid "Views this month"
+msgstr ""
+
+#: views/app_menus/insights.php:148
+msgid "Active accounts"
+msgstr ""
+
+#: views/app_menus/insights.php:152
+msgid "Total accounts"
+msgstr ""
+
+#: views/app_menus/insights.php:157
+msgid "Active nodes"
+msgstr ""
+
+#: views/app_menus/insights.php:161
+msgid "Total nodes"
+msgstr ""
+
+#: views/app_menus/insights.php:166
+msgid "Active schedules"
+msgstr ""
+
+#: views/app_menus/insights.php:168
+msgid "Paused schedules"
+msgstr ""
+
+#: views/app_menus/insights.php:170
+msgid "Scheudles"
+msgstr ""
+
+#: views/app_menus/insights.php:177
+msgid "Shares count"
+msgstr ""
+
+#: views/app_menus/insights.php:179 views/app_menus/insights.php:259
+msgid "Daily"
+msgstr ""
+
+#: views/app_menus/insights.php:180 views/app_menus/insights.php:260
+msgid "Monthly"
+msgstr ""
+
+#: views/app_menus/insights.php:181 views/app_menus/insights.php:261
+msgid "Annually"
+msgstr ""
+
+#: views/app_menus/insights.php:257
+msgid "View count"
+msgstr ""
+
+#: views/app_menus/insights.php:327
+msgid "Social networks comparison ( by views )"
+msgstr ""
+
+#: views/app_menus/insights.php:403
+msgid "Accounts comparison ( by views )"
+msgstr ""
+
+#: views/app_menus/nodes.php:368
+msgid "Account filter:"
+msgstr ""
+
+#: views/app_menus/nodes.php:371
+msgid "All"
+msgstr ""
+
+#: views/app_menus/nodes.php:395 views/modals/add_node_to_list.php:218
+#: views/modals/show_nodes_list.php:271
+msgid "Search..."
+msgstr ""
+
+#: views/app_menus/nodes.php:421
+msgid "Delete"
+msgstr ""
+
+#: views/app_menus/nodes.php:479 views/modals/show_nodes_list.php:337
+msgid "Are you sure you want to delete your account?"
+msgstr ""
+
+#: views/app_menus/posts.php:135
+msgid "Last posts"
+msgstr ""
+
+#: views/app_menus/posts.php:141
+msgid "PROFILE / POST"
+msgstr ""
+
+#: views/app_menus/posts.php:142
+msgid "POST LINK"
+msgstr ""
+
+#: views/app_menus/posts.php:143 views/app_menus/schedule.php:22
+msgid "STATUS"
+msgstr ""
+
+#: views/app_menus/posts.php:144
+msgid "LIKES"
+msgstr ""
+
+#: views/app_menus/posts.php:153
+msgid "Prev"
+msgstr ""
+
+#: views/app_menus/posts.php:154
+msgid "Next"
+msgstr ""
+
+#: views/app_menus/posts.php:207
+msgid "success"
+msgstr ""
+
+#: views/app_menus/posts.php:211 views/modals/share_feeds.php:132
+#: views/modals/share_feeds.php:183
+msgid "error"
+msgstr ""
+
+#: views/app_menus/posts.php:215
+msgid "not sent"
+msgstr ""
+
+#: views/app_menus/posts.php:237
+msgid "Post Link"
+msgstr ""
+
+#: views/app_menus/schedule.php:10
+msgid "schedule added"
+msgstr ""
+
+#: views/app_menus/schedule.php:18
+msgid "TITLE"
+msgstr ""
+
+#: views/app_menus/schedule.php:19
+msgid "START DATE"
+msgstr ""
+
+#: views/app_menus/schedule.php:20
+msgid "END DATE"
+msgstr ""
+
+#: views/app_menus/schedule.php:21
+msgid "INTERVAL"
+msgstr ""
+
+#: views/app_menus/schedule.php:62
+msgid "Pause"
+msgstr ""
+
+#: views/app_menus/schedule.php:68
+msgid "Play"
+msgstr ""
+
+#: views/app_menus/schedule.php:73
+msgid "Show posts list"
+msgstr ""
+
+#: views/app_menus/schedule.php:75
+msgid "Delete schedule"
+msgstr ""
+
+#: views/app_menus/settings.php:169
+msgid "General settings"
+msgstr ""
+
+#: views/app_menus/settings.php:170
+msgid "Facebook settings"
+msgstr ""
+
+#: views/app_menus/settings.php:171
+msgid "Instagram settings"
+msgstr ""
+
+#: views/app_menus/settings.php:172
+msgid "VK settings"
+msgstr ""
+
+#: views/app_menus/settings.php:180
+msgid "SAVE CHANGES"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:11
+msgid "Load my pages:"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:12
+msgid ""
+"Once a new account has been added all the included 'my' pages will be "
+"automatically added as well. You will be able to share any posts to these "
+"pages."
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:28
+msgid "Load groups:"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:29
+msgid ""
+"Once a new account has been added all the included groups will be "
+"automatically added as well. You will be able to share any posts to these "
+"groups."
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:42
+msgid "Maximum groups to load:"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:43
+msgid ""
+"Within the added account, groups will have a limit in regards to amount of "
+"loads (you will have a MAX of 100 groups to load)."
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:56
+msgid "Load my liked pages:"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:57
+msgid ""
+"Once a new account has been added all the included 'liked' pages will be "
+"automatically added as well. You will be able to share any posts to these "
+"pages."
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:70
+msgid "Maximum liked pages to load:"
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:71
+msgid ""
+"Within the added account, 'liked' pages will have a limit in regards to "
+"amount of loads (you will have a MAX of 100 'liked' pages to load)."
+msgstr ""
+
+#: views/app_menus/settings/facebook.php:90
+#: views/app_menus/settings/general.php:91
+#: views/app_menus/settings/instagram.php:90 views/app_menus/settings/vk.php:62
+msgid "Save successful!"
+msgstr ""
+
+#: views/app_menus/settings/general.php:25
+msgid "Unique post link:"
+msgstr ""
+
+#: views/app_menus/settings/general.php:26
+msgid ""
+"You will have the ability to the share the same post in numerous amount of "
+"communities. In this case Facebook will block your duplicate post. If you "
+"activate this choice, the ending of every link of a post will include random "
+"symbols, therefore creating a unique post."
+msgstr ""
+
+#: views/app_menus/settings/general.php:41
+msgid "Custom text:"
+msgstr ""
+
+#: views/app_menus/settings/general.php:43
+msgid ""
+"Text of shared post. Using keywords, you can create your wanted text. "
+"Keywords:"
+msgstr ""
+
+#: views/app_menus/settings/general.php:46
+msgid "Post title"
+msgstr ""
+
+#: views/app_menus/settings/general.php:47
+#: views/app_menus/settings/general.php:51
+#: views/app_menus/settings/general.php:55
+#: views/app_menus/settings/general.php:59
+#: views/app_menus/settings/general.php:63
+#: views/app_menus/settings/general.php:67
+#: views/app_menus/settings/general.php:71
+msgid "Click to append in text"
+msgstr ""
+
+#: views/app_menus/settings/general.php:50
+msgid "Post content (first 40 symbols)"
+msgstr ""
+
+#: views/app_menus/settings/general.php:54
+msgid "Post content Full"
+msgstr ""
+
+#: views/app_menus/settings/general.php:58 views/modals/share_feeds.php:122
+msgid "Post link"
+msgstr ""
+
+#: views/app_menus/settings/general.php:62
+msgid "WooCommerce - product price"
+msgstr ""
+
+#: views/app_menus/settings/general.php:66
+msgid "WooCommerce - product sale price"
+msgstr ""
+
+#: views/app_menus/settings/general.php:70
+msgid "Unique ID"
+msgstr ""
+
+#: views/app_menus/settings/instagram.php:7
+msgid "Will post in story as well:"
+msgstr ""
+
+#: views/app_menus/settings/instagram.php:8
+msgid "Instagram posts together with the profile will be shared in the story."
+msgstr ""
+
+#: views/app_menus/settings/instagram.php:24
+msgid "Add link in story:"
+msgstr ""
+
+#: views/app_menus/settings/instagram.php:25
+msgid ""
+"The post link shared within the story will be automatically added ( ONLY if "
+"you have a business account with >= 10k followers )."
+msgstr ""
+
+#: views/app_menus/settings/vk.php:11
+msgid "Load own communities:"
+msgstr ""
+
+#: views/app_menus/settings/vk.php:12
+msgid ""
+"Once a new account has been added all the included 'own' communities (page / "
+"group / event) will be automatically added as well. You will be able to "
+"share any posts to these communities."
+msgstr ""
+
+#: views/app_menus/settings/vk.php:28
+msgid "Load communities:"
+msgstr ""
+
+#: views/app_menus/settings/vk.php:29
+msgid ""
+"Once a new account has been added all the included communities (page / "
+"group / event) will be automatically added as well. You will be able to "
+"share any posts to these communities."
+msgstr ""
+
+#: views/app_menus/settings/vk.php:42
+msgid "Maximum communities to load:"
+msgstr ""
+
+#: views/app_menus/settings/vk.php:43
+msgid ""
+"Within the added account, communities will have a limit in regards to amount "
+"of loads (you will have a MAX of 100 communities to load)."
+msgstr ""
+
+#: views/modals/add_app.php:32
+msgid "App has been added successfully!"
+msgstr ""
+
+#: views/modals/add_fb_account.php:394
+msgid "Select authorization method"
+msgstr ""
+
+#: views/modals/add_fb_account.php:400
+msgid "Login & Pass"
+msgstr ""
+
+#: views/modals/add_fb_account.php:404
+msgid "Third-Party App"
+msgstr ""
+
+#: views/modals/add_fb_account.php:408
+msgid "Own App"
+msgstr ""
+
+#: views/modals/add_fb_account.php:414 views/modals/add_fb_account.php:443
+#: views/modals/add_fb_account.php:480 views/modals/add_fb_account.php:508
+msgid "NEXT STEP"
+msgstr ""
+
+#: views/modals/add_fb_account.php:426
+msgid "Enter your Facebook email and password"
+msgstr ""
+
+#: views/modals/add_fb_account.php:429
+msgid ""
+"Your Facebook account password will NOT be stored. We only use the password "
+"to generate a facebook token."
+msgstr ""
+
+#: views/modals/add_fb_account.php:456
+msgid "For Firefox"
+msgstr ""
+
+#: views/modals/add_fb_account.php:457
+msgid "For other browsers"
+msgstr ""
+
+#: views/modals/add_fb_account.php:462
+msgid "CLICK AND OPEN FACEBOOK"
+msgstr ""
+
+#: views/modals/add_fb_account.php:463 views/modals/add_vk_account.php:85
+msgid "When the authorize operation has finished, copy the URL"
+msgstr ""
+
+#: views/modals/add_fb_account.php:465 views/modals/add_vk_account.php:87
+msgid "Paste copied URL here..."
+msgstr ""
+
+#: views/modals/add_fb_account.php:472
+msgid "Copy code"
+msgstr ""
+
+#: views/modals/add_fb_account.php:472
+msgid "and paste the console ( within Facebook tab ) and press enter"
+msgstr ""
+
+#: views/modals/add_fb_account.php:474
+msgid "Copy access token and paste here..."
+msgstr ""
+
+#: views/modals/add_fb_account.php:493
+msgid "Select your APP"
+msgstr ""
+
+#: views/modals/add_fb_account.php:526
+msgid "OPEN PROFILE"
+msgstr ""
+
+#: views/modals/add_fb_account.php:528
+msgid "FINISH"
+msgstr ""
+
+#: views/modals/add_fb_account.php:535
+msgid "groups"
+msgstr ""
+
+#: views/modals/add_fb_account.php:542
+msgid "my pages"
+msgstr ""
+
+#: views/modals/add_fb_account.php:549
+msgid "liked pages"
+msgstr ""
+
+#: views/modals/add_fb_account.php:566
+msgid "Error! Please try again later!"
+msgstr ""
+
+#: views/modals/add_fb_account.php:603
+msgid "'Load own-pages' option is disabled in settings"
+msgstr ""
+
+#: views/modals/add_fb_account.php:620
+msgid "'Load my liked pages' option is disabled in settings"
+msgstr ""
+
+#: views/modals/add_fb_account.php:636
+msgid "'Load groups' option is disabled in settings"
+msgstr ""
+
+#: views/modals/add_fb_account.php:651
+msgid "New account successfully added"
+msgstr ""
+
+#: views/modals/add_fb_account.php:680
+msgid "Email or Password is empty!"
+msgstr ""
+
+#: views/modals/add_fb_account.php:704
+msgid "Error! Access steps not completed!"
+msgstr ""
+
+#: views/modals/add_fb_account.php:727 views/modals/add_vk_account.php:104
+msgid "Please select an application!"
+msgstr ""
+
+#: views/modals/add_fb_account.php:761
+msgid "Code has been copied!"
+msgstr ""
+
+#: views/modals/add_instagram_account.php:23
+msgid "Add new instagram account"
+msgstr ""
+
+#: views/modals/add_instagram_account.php:36
+#: views/modals/add_linkedin_account.php:41
+#: views/modals/add_pinterest_account.php:41
+#: views/modals/add_reddit_account.php:41
+#: views/modals/add_tumblr_account.php:41
+#: views/modals/add_twitter_account.php:40
+msgid "CANCEL"
+msgstr ""
+
+#: views/modals/add_instagram_account.php:53
+#: views/modals/add_linkedin_account.php:55
+#: views/modals/add_pinterest_account.php:53
+#: views/modals/add_reddit_account.php:53
+#: views/modals/add_tumblr_account.php:53
+#: views/modals/add_twitter_account.php:51 views/modals/add_vk_account.php:123
+msgid "Account added successfully!"
+msgstr ""
+
+#: views/modals/add_linkedin_account.php:26
+#: views/modals/add_pinterest_account.php:26
+#: views/modals/add_reddit_account.php:26
+#: views/modals/add_tumblr_account.php:26
+#: views/modals/add_twitter_account.php:25
+msgid ""
+"Select an app. Next click the \"GET ACCESS\" button. Next, click the "
+"\"Authorize App\" button within an open window."
+msgstr ""
+
+#: views/modals/add_linkedin_account.php:40
+#: views/modals/add_pinterest_account.php:40
+#: views/modals/add_reddit_account.php:40
+#: views/modals/add_tumblr_account.php:40
+#: views/modals/add_twitter_account.php:39 views/modals/add_vk_account.php:84
+msgid "GET ACCESS"
+msgstr ""
+
+#: views/modals/add_node_to_list.php:214
+msgid "SELECT"
+msgstr ""
+
+#: views/modals/add_node_to_list.php:262
+msgid "Added to list!"
+msgstr ""
+
+#: views/modals/add_schedule.php:11
+msgid "Title"
+msgstr ""
+
+#: views/modals/add_schedule.php:14
+msgid "Start date"
+msgstr ""
+
+#: views/modals/add_schedule.php:15
+msgid "End date"
+msgstr ""
+
+#: views/modals/add_schedule.php:19
+msgid "Interval"
+msgstr ""
+
+#: views/modals/add_schedule.php:32
+msgid "Hour"
+msgstr ""
+
+#: views/modals/add_schedule.php:33
+msgid "Day"
+msgstr ""
+
+#: views/modals/add_schedule.php:37
+msgid "Share time:"
+msgstr ""
+
+#: views/modals/add_schedule.php:37
+msgid "Share time"
+msgstr ""
+
+#: views/modals/add_schedule.php:44
+msgid "SAVE SCHEDULE"
+msgstr ""
+
+#: views/modals/add_schedule.php:45
+msgid "Cancel"
+msgstr ""
+
+#: views/modals/add_schedule.php:68
+msgid "Please type the title field!"
+msgstr ""
+
+#: views/modals/add_schedule.php:73
+msgid "Please type the start date!"
+msgstr ""
+
+#: views/modals/add_schedule.php:78
+msgid "Please type the end date!"
+msgstr ""
+
+#: views/modals/add_schedule.php:83
+msgid "Please type the interval!"
+msgstr ""
+
+#: views/modals/add_vk_account.php:74
+msgid "Select an App:"
+msgstr ""
+
+#: views/modals/edit_pinterest_account_board.php:45
+msgid "Select board:"
+msgstr ""
+
+#: views/modals/edit_pinterest_account_board.php:56
+msgid "SAVE BOARD SETTINGS"
+msgstr ""
+
+#: views/modals/edit_pinterest_account_board.php:75
+msgid "Board saved!"
+msgstr ""
+
+#: views/modals/edit_reddit_account_subreddit.php:40
+msgid "SubReddit:"
+msgstr ""
+
+#: views/modals/edit_reddit_account_subreddit.php:40
+msgid ""
+"Keep the field empty in order to post your profile or to be able to type the "
+"subreddit name (example: r/AskReddit)"
+msgstr ""
+
+#: views/modals/edit_reddit_account_subreddit.php:42
+msgid "Your profile"
+msgstr ""
+
+#: views/modals/edit_reddit_account_subreddit.php:44
+msgid "SAVE SUBREDDIT"
+msgstr ""
+
+#: views/modals/edit_reddit_account_subreddit.php:60
+msgid "Subreddit saved!"
+msgstr ""
+
+#: views/modals/share_feeds.php:76
+msgid "Posting feeds..."
+msgstr ""
+
+#: views/modals/share_feeds.php:86
+msgid "Community"
+msgstr ""
+
+#: views/modals/share_feeds.php:87
+msgid "Link"
+msgstr ""
+
+#: views/modals/share_feeds.php:88
+msgid "Status"
+msgstr ""
+
+#: views/modals/share_feeds.php:138 views/modals/share_feeds.php:178
+msgid "ok"
+msgstr ""
+
+#: views/modals/share_feeds.php:171
+msgid "sending..."
+msgstr ""
+
+#: views/modals/share_feeds.php:188
+msgid "waiting interval..."
+msgstr ""
+
+#: views/modals/share_feeds.php:194
+msgid "Process Finished!"
+msgstr ""
+
+#: views/modals/share_feeds.php:194
+msgid "Close window"
+msgstr ""
+
+#: views/modals/share_saved_post.php:24
+msgid "Select accounts to share post"
+msgstr ""
+
+#: views/modals/share_saved_post.php:37
+msgid "SHARE"
+msgstr ""
+
+#: views/modals/share_saved_post.php:54
+msgid "No selected account!"
+msgstr ""
+
+#: views/modals/show_nodes_list.php:304
+msgid "Empty!"
+msgstr ""
+
+#: views/modals/show_nodes_list.php:341
+msgid "'Community' has been deleted!"
+msgstr ""
+
+#: views/post_meta_box.php:211
+msgid "Share"
+msgstr ""
+
+#: views/post_meta_box.php:287
+msgid "Do you want to remove the 'community'?"
+msgstr ""
+
+#: views/post_meta_box_edit.php:122
+msgid "Posted successfully"
+msgstr ""
+
+#: views/post_meta_box_edit.php:125
+msgid "Open post in facebook!"
+msgstr ""
+
+#: views/post_meta_box_edit.php:131
+#, php-format
+msgid "Post failed! %s"
+msgstr ""

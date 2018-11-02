@@ -1,0 +1,6 @@
+{
+    "require": {
+        "mgp25/instagram-php": "^4.1",
+        "tumblr/tumblr": "^0.4.0"
+    }
+}
