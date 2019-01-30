@@ -32,7 +32,7 @@ trait FSPShare
 			response(false);
 		}
 
-		$postInterval = (int)get_option('post_interval' , '3');
+		$postInterval = (int)get_option('fs_post_interval' , '3');
 
 		$postCats = getPostCatsArr( $postId );
 		$insertedCount = 0;
@@ -112,14 +112,14 @@ trait FSPShare
 
 				$customMessage = isset($custom_messages[$driver]) && is_string($custom_messages[$driver]) ? $custom_messages[$driver] : null;
 
-				if( $customMessage == get_option( 'post_text_message_' . $driver , "{title}" ) )
+				if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
 				{
 					$customMessage = null;
 				}
 
 				$insertedCount++;
 
-				if( !($driver == 'instagram' && get_option('instagram_post_in_type', '1') == '2') )
+				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
 					wpDB()->insert( wpTable('feeds'), [
 						'driver'                =>  $driver,
@@ -127,11 +127,12 @@ trait FSPShare
 						'node_type'             =>  $nodeType,
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
-						'custom_post_message'   =>  $customMessage
+						'custom_post_message'   =>  $customMessage,
+						'send_time'				=>	sendTime()
 					]);
 				}
 
-				if( $driver == 'instagram' && (get_option('instagram_post_in_type', '1') == '2' || get_option('instagram_post_in_type', '1') == '3') )
+				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
 					wpDB()->insert( wpTable('feeds'), [
 						'driver'                =>  $driver,
@@ -140,7 +141,8 @@ trait FSPShare
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
 						'feed_type'             =>  'story',
-						'custom_post_message'   =>  $customMessage
+						'custom_post_message'   =>  $customMessage,
+						'send_time'				=>	sendTime()
 					]);
 				}
 			}

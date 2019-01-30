@@ -19,7 +19,6 @@ class SocialNetworkPost
 		$accessTokenSecret   = $nInf['access_token_secret'];
 		$proxy               = $nInf['info']['proxy'];
 
-
 		$link           = '';
 		$message        = '';
 		$sendType       = 'status';
@@ -57,6 +56,7 @@ class SocialNetworkPost
 
 		$shortLink = '';
 		$longLink = '';
+
 		if( $postType == 'fs_post' )
 		{
 			$message = $postInf['post_content'];
@@ -87,14 +87,14 @@ class SocialNetworkPost
 
 			$link = customizePostLink($link , $feedId);
 
-			if( get_option('unique_link', '1') == 1 && !empty($link) )
+			if( get_option('fs_unique_link', '1') == 1 && !empty($link) )
 			{
 				$link .= ( strpos($link , '?') === false ? '?' : '&' ) . '_unique_id=' . uniqid();
 			}
 
 			if( empty( $custom_post_message ) )
 			{
-				$custom_post_message = get_option( 'post_text_message_' . $driver , "{title}" );
+				$custom_post_message = get_option( 'fs_post_text_message_' . $driver , "{title}" );
 			}
 
 			$longLink = $link;
@@ -107,12 +107,61 @@ class SocialNetworkPost
 
 		if( $driver == 'fb' )
 		{
+			if( $sendType != 'image' && $sendType != 'video' )
+			{
+				$pMethod = get_option('fs_facebook_posting_type', '1');
+				if( $pMethod == '2' )
+				{
+					$mediaId = get_post_thumbnail_id($postId);
+
+					if( empty($mediaId) )
+					{
+						$media = get_attached_media( 'image' , $postId);
+						$first = reset($media);
+						$mediaId = isset($first->ID) ? $first->ID : 0;
+					}
+
+					$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+
+					if( !empty($url) )
+					{
+						$sendType = 'image';
+						$images = [$url];
+					}
+				}
+				else if( $pMethod == '3' )
+				{
+					$images = [];
+
+					$mediaId = get_post_thumbnail_id($postId);
+					if( $mediaId > 0 )
+					{
+						$images[] = wp_get_attachment_url( $mediaId );
+					}
+
+					$allImgaes = get_attached_media( 'image' , $postId);
+					foreach( $allImgaes AS $mediaInf )
+					{
+						$mediaId2 = isset($mediaInf->ID) ? $mediaInf->ID : 0;
+						if( $mediaId2 > 0 )
+						{
+							$images[] = wp_get_attachment_url($mediaId2);
+						}
+					}
+
+					if( !empty($images) )
+					{
+						$sendType = 'image';
+					}
+				}
+			}
+
 			require_once LIB_DIR . "fb/FacebookLib.php";
 			$res = FacebookLib::sendPost($nodeProfileId , $sendType , $message , 0 , $link , $images , $videoURL , $accessToken , $proxy);
 		}
 		else if( $driver == 'instagram' )
 		{
-			require_once LIB_DIR . "instagram/Instagram.php";
+			require_once LIB_DIR . "instagram/FSInstagram.php";
 
 			if( $sendType != 'image' && $sendType != 'video' )
 			{
@@ -127,20 +176,20 @@ class SocialNetworkPost
 
 				$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-				if( !empty($url) )
+				if( !empty($url) && file_exists( $url ) )
 				{
 					$sendType = 'image';
-					$imagesLocale = [$url];
+					$imagesLocale = [ $url ];
 				}
 			}
 
 			if( $feedInf['feed_type'] == 'story' )
 			{
-				$res = Instagram::sendStory($nInf['info'] , $sendType , $message , $link , $imagesLocale , $videoURLLocale);
+				$res = FSInstagram::sendStory($nInf['info'] , $sendType , $message , $link , $imagesLocale , $videoURLLocale);
 			}
 			else
 			{
-				$res = Instagram::sendPost($nInf['info'] , $sendType , $message , $link , $imagesLocale , $videoURLLocale);
+				$res = FSInstagram::sendPost($nInf['info'] , $sendType , $message , $link , $imagesLocale , $videoURLLocale);
 			}
 		}
 		else if( $driver == 'linkedin' )
@@ -163,7 +212,7 @@ class SocialNetworkPost
 
 				$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-				if( !empty($url) )
+				if( !empty($url) && file_exists( $url ) )
 				{
 					$sendType = 'image_link';
 					$imagesLocale = [$url];
@@ -249,7 +298,7 @@ class SocialNetworkPost
 
 					$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-					if( !empty($url) )
+					if( !empty($url) && file_exists( $url ) )
 					{
 						$imagesLocale = [$url];
 						$sendType = 'image';
@@ -305,6 +354,62 @@ class SocialNetworkPost
 
 			$res = $google->sendPost( $shareTo , $message , $link);
 		}
+		else if( $driver == 'ok' )
+		{
+			if( $sendType != 'image' && $sendType != 'video' )
+			{
+				$pMethod = get_option('fs_ok_posting_type', '1');
+				if( $pMethod == '2' )
+				{
+					$mediaId = get_post_thumbnail_id($postId);
+
+					if( empty($mediaId) )
+					{
+						$media = get_attached_media( 'image' , $postId);
+						$first = reset($media);
+						$mediaId = isset($first->ID) ? $first->ID : 0;
+					}
+
+					$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
+
+					if( !empty($url) && file_exists( $url ) )
+					{
+						$imagesLocale = [$url];
+						$sendType = 'image';
+					}
+				}
+				else if( $pMethod == '3' )
+				{
+					$imagesLocale = [];
+
+					$mediaId = get_post_thumbnail_id($postId);
+					if( $mediaId > 0 )
+					{
+						$imagesLocale[] = get_attached_file( $mediaId );
+					}
+
+					$allImgaes = get_attached_media( 'image' , $postId);
+					foreach( $allImgaes AS $mediaInf )
+					{
+						$mediaId2 = isset($mediaInf->ID) ? $mediaInf->ID : 0;
+						if( $mediaId2 > 0 )
+						{
+							$imagesLocale[] = get_attached_file($mediaId2);
+						}
+					}
+
+					if( !empty($imagesLocale) )
+					{
+						$sendType = 'image';
+					}
+				}
+			}
+
+			require_once LIB_DIR . "ok/OdnoKlassniki.php";
+			$appInf = wpFetch('apps' , ['id' => $appId]);
+
+			$res = OdnoKlassniki::sendPost($nInf['info'] , $sendType , $message , $link , $imagesLocale , $videoURLLocale , $accessToken, $appInf['app_key'] , $appInf['app_secret'] , $proxy);
+		}
 		else
 		{
 			$res = ['status' => 'error' , 'error_msg' => 'Driver error! Driver type: ' . htmlspecialchars($driver)];
@@ -319,7 +424,14 @@ class SocialNetworkPost
 			'driver_post_id2'   => isset($res['id2']) ? $res['id2'] : null
 		];
 
-		wpDB()->update(wpTable('feeds') , $udpateDate , ['id' => $feedId]);
+		if( !get_option('fs_keep_logs', '1') )
+		{
+			wpDB()->delete(wpTable('feeds') , ['id' => $feedId]);
+		}
+		else
+		{
+			wpDB()->update(wpTable('feeds') , $udpateDate , ['id' => $feedId]);
+		}
 
 		if( isset($res['id']) )
 		{

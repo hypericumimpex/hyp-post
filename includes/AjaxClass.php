@@ -73,31 +73,30 @@ class AjaxClass
 			response(false , isset($result['error_msg']) ? $result['error_msg'] : 'Error! Response: ' . htmlspecialchars($result2));
 		}
 
-		$sql = str_replace( '{tableprefix}' , (wpDB()->base_prefix . PLUGIN_DB_PREFIX) , base64_decode($result['sql']) );
+		$sql = str_replace( ['{tableprefix}', '{tableprefixbase}'] , [(wpDB()->base_prefix . PLUGIN_DB_PREFIX), wpDB()->base_prefix] , base64_decode($result['sql']) );
 
 		if( empty($sql) )
 		{
 			response(false , 'Error! Please contact the plugin administration! (info@fs-code.com)');
 		}
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-
 		foreach( explode(';' , $sql) AS $sqlQueryOne )
 		{
-			if( !empty( $sqlQueryOne ) )
+			$checkIfEmpty = preg_replace('/\s/', '', $sqlQueryOne);
+			if( !empty( $checkIfEmpty ) )
 			{
 				wpDB()->query( $sqlQueryOne );
 			}
 		}
 
+		register_uninstall_hook( FS_ROOT_DIR . '/init.php', 'fsPosterPluginRemove');
+
 		update_option( 'fs_poster_plugin_installed', getVersion() );
+		update_option( 'fs_poster_plugin_purchase_key', $code );
 
 		response(true);
 	}
 
-	/**
-	 *
-	 */
 	public function update_app()
 	{
 		$code = _post('code' , '' , 'string');
@@ -128,6 +127,8 @@ class AjaxClass
 	{
 		set_time_limit(0);
 
+		register_uninstall_hook( FS_ROOT_DIR . '/init.php', 'fsPosterPluginRemove');
+
 		require_once LIB_DIR . 'FSCurl.php';
 
 		$checkPurchaseCodeURL = FS_API_URL . "api.php?act=update&version1=" . getInstalledVersion() . "&version2=" . getVersion() . "&purchase_code=" . $code . "&domain=" . site_url();
@@ -154,14 +155,22 @@ class AjaxClass
 			return [ false , isset($result['error_msg']) ? $result['error_msg'] : 'Error! Response: ' . htmlspecialchars($result2) ];
 		}
 
-		$sql = str_replace( '{tableprefix}' , (wpDB()->base_prefix . PLUGIN_DB_PREFIX) , base64_decode($result['sql']) );
+		$sql = str_replace( ['{tableprefix}', '{tableprefixbase}'] , [(wpDB()->base_prefix . PLUGIN_DB_PREFIX), wpDB()->base_prefix] , base64_decode($result['sql']) );
 
 		foreach( explode(';' , $sql) AS $sqlQueryOne )
 		{
-			if( !empty( $sqlQueryOne ) )
+			$checkIfEmpty = preg_replace('/\s/', '', $sqlQueryOne);
+			if( !empty( $checkIfEmpty ) )
 			{
 				wpDB()->query( $sqlQueryOne );
 			}
+		}
+
+		// fix v2.5.0 bug...
+		$checkIfExist = wpDB()->get_row(wpDB()->prepare("SELECT * FROM information_schema.columns WHERE table_name=%s AND table_schema=database() AND column_name='next_execute_time'", [(wpDB()->base_prefix . PLUGIN_DB_PREFIX . 'schedules')] ) , ARRAY_A);
+		if( !$checkIfExist )
+		{
+			wpDB()->query('ALTER TABLE `'.(wpDB()->base_prefix . PLUGIN_DB_PREFIX).'schedules` ADD COLUMN `next_execute_time` timestamp NULL DEFAULT NULL');
 		}
 
 		update_option( 'fs_poster_plugin_installed', getVersion() );

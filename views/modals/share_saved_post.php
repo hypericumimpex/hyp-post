@@ -61,7 +61,7 @@
 			var custom_messages = {};
 			$("#custom_messages textarea[name]").each(function()
 			{
-				custom_messages[$(this).attr('name').replace('post_text_message_' , '')] = $(this).val();
+				custom_messages[$(this).attr('name').replace('fs_post_text_message_' , '')] = $(this).val();
 			});
 
 			fsCode.ajax('share_saved_post' , {

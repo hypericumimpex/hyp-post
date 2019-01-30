@@ -85,7 +85,6 @@ class AdminMenuClass
 					return;
 				}
 
-
 			}
 
 			add_action( 'admin_menu', function()

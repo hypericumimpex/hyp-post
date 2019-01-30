@@ -397,7 +397,7 @@ class GooglePlus
 			'headers'		=> [ 'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8' ]
 		])->getBody();
 
-		preg_match('/\"([0-9]+\/posts\/([^\"]+))/' , $post , $postUrl);
+		preg_match('/\"([^\/\"]+\/posts\/([^\"]+))/' , $post , $postUrl);
 
 		if( !(isset($postUrl[1]) && isset($postUrl[2])) )
 		{

@@ -8,71 +8,64 @@ class PostMetaBox
 	{
 		// when post status changed ( saved, updated, scheduled and etc... )
 		add_action( 'transition_post_status', [$this , 'onSave'], 10, 3 );
+		//add_action( 'save_post', [$this , 'onSave2'], 10, 3 );
 
 		// if is wp admin panel
 		if( is_admin() )
 		{
 			// add meta boxes , columns, buttons ...
+			$allowedPostTypes = explode( '|' , get_option('fs_allowed_post_types' , 'post|page|attachment|product') );
 
-			add_action( 'add_meta_boxes', function()
+			add_action( 'add_meta_boxes', function() use( $allowedPostTypes )
 			{
-				add_meta_box( 'share_on_fb', 'FS Poster', [$this , 'publishMetaBox'], ['post','product','page'] , 'side' , 'high'  );
+				add_meta_box( 'share_on_fb', 'FS Poster', [$this , 'publishMetaBox'], $allowedPostTypes , 'side' , 'high'  );
 			});
 
-			add_action( 'manage_posts_custom_column', function ( $column_name, $post_id )
-			{
-				if ( $column_name == 'share_btn' && get_post_status($post_id) == 'publish' )
-				{
-					printf( '<button type="button" class="button" data-load-modal="share_saved_post" data-parameter-post_id="%d">'.esc_html__('Share', 'fs-poster').'</button> ' , $post_id );
-					printf( '<button type="button" class="button" data-load-modal="plan_saved_post" data-parameter-post_id="%d">'.esc_html__('Schedule', 'fs-poster').'</button>' , $post_id );
-				}
-			}, 10, 2 );
-			add_filter('manage_posts_columns', function ( $columns )
-			{
-				if( is_array( $columns ) && ! isset( $columns['share_btn'] ) )
-				{
-					$columns['share_btn'] = esc_html__('FS Poster' , 'fs-poster');
-				}
 
-				return $columns;
-			} );
-
-			add_action( 'manage_pages_custom_column', function ( $column_name, $post_id )
+			if( get_option('fs_show_fs_poster_column', '1') )
 			{
-				if ( $column_name == 'share_btn' && get_post_status($post_id) == 'publish')
-				{
-					printf( '<button type="button" class="button" data-load-modal="share_saved_post" data-parameter-post_id="%d">'.esc_html__('Share', 'fs-poster').'</button> ' , $post_id );
-					printf( '<button type="button" class="button" data-load-modal="plan_saved_post" data-parameter-post_id="%d">'.esc_html__('Schedule', 'fs-poster').'</button>' , $post_id );
-				}
-			}, 10, 2 );
-			add_filter('manage_pages_columns', function ( $columns )
-			{
-				if( is_array( $columns ) && ! isset( $columns['share_btn'] ) )
-				{
-					$columns['share_btn'] = esc_html__('FS Poster' , 'fs-poster');
-				}
+				$usedColumnsSave = [];
 
-				return $columns;
-			} );
-
-			add_action( 'manage_media_custom_column', function ( $column_name, $post_id )
-			{
-				if ( $column_name == 'share_btn' && get_post_status($post_id) == 'publish')
+				foreach( $allowedPostTypes AS $postType )
 				{
-					printf( '<button type="button" class="button" data-load-modal="share_saved_post" data-parameter-post_id="%d">'.esc_html__('Share', 'fs-poster').'</button> ' , $post_id );
-					printf( '<button type="button" class="button" data-load-modal="plan_saved_post" data-parameter-post_id="%d">'.esc_html__('Schedule', 'fs-poster').'</button>' , $post_id );
-				}
-			}, 10, 2 );
+					$postType = preg_replace('/[^a-zA-Z0-9\-\_]/' , '' , $postType);
 
-			add_filter('manage_media_columns', function ( $columns )
-			{
-				if( is_array( $columns ) && ! isset( $columns['share_btn'] ) )
-				{
-					$columns['share_btn'] = esc_html__('FS Poster' , 'fs-poster');
-				}
+					switch($postType)
+					{
+						case 'post':
+							$typeName = 'posts';
+							break;
+						case 'poge':
+							$typeName = 'pages';
+							break;
+						case 'attachment':
+							$typeName = 'media';
+							break;
+						default:
+							$typeName = $postType . '_posts';
+					}
 
-				return $columns;
-			} );
+					add_action( 'manage_'.$typeName.'_custom_column', function ( $column_name, $post_id ) use( &$usedColumnsSave )
+					{
+						if ( $column_name == 'share_btn' && get_post_status($post_id) == 'publish' && !isset($usedColumnsSave[$post_id]) )
+						{
+							printf( '<button type="button" class="button" data-load-modal="share_saved_post" data-parameter-post_id="%d">'.esc_html__('Share', 'fs-poster').'</button> ' , $post_id );
+							printf( '<button type="button" class="button" data-load-modal="plan_saved_post" data-parameter-post_id="%d">'.esc_html__('Schedule', 'fs-poster').'</button>' , $post_id );
+
+							$usedColumnsSave[$post_id] = true;
+						}
+					}, 10, 2 );
+					add_filter('manage_'.$typeName.'_columns', function ( $columns )
+					{
+						if( is_array( $columns ) && ! isset( $columns['share_btn'] ) )
+						{
+							$columns['share_btn'] = esc_html__('FS Poster' , 'fs-poster');
+						}
+
+						return $columns;
+					} );
+				}
+			}
 
 			add_filter( 'bulk_actions-edit-post', function ($bulk_actions)
 			{
@@ -131,7 +124,14 @@ class PostMetaBox
 
 	function onSave( $new_status, $old_status, $post )
 	{
-		if( !( ($new_status == 'publish' || $new_status == 'future' || $new_status == 'draft') && $old_status != 'publish' ) )
+		// For WordPress 5 (Gutenberg)...
+		$metaBoxLoader = (int)_get('meta-box-loader', 0, 'num', ['1']);
+		if( $metaBoxLoader === 1 && _post('original_post_status', '', 'string') == 'publish' )
+		{
+			$metaBoxLoader = 0;
+		}
+
+		if( !( ($new_status == 'publish' || $new_status == 'future') && ( $old_status != 'publish' || $metaBoxLoader === 1 ) ) )
 		{
 			return;
 		}
@@ -144,6 +144,20 @@ class PostMetaBox
 
 		$post_id	= $post->ID;
 		$userId		= $post->post_author;
+
+		// if not checked the 'Share' checkbox exit the function
+		$share_checked_inpt = _post('share_checked' , ( get_option('fs_auto_share_new_posts', '1') ? 'on' : 'off' ) , 'string' , ['on' , 'off']);
+		$share_checked = $share_checked_inpt === 'on' ? 1 : 0;
+
+		if( !$share_checked )
+		{
+			wpDB()->delete(wpTable('feeds') , [
+				'post_id'       =>  $post_id,
+				'is_sended'     =>  '0'
+			]);
+
+			return;
+		}
 
 		// if scheduled post, publish it using cron and exit the function
 		if( $new_status == 'publish' && $old_status == 'future' )
@@ -161,15 +175,8 @@ class PostMetaBox
 			return;
 		}
 
-		// if not checked the 'Shear' checkbox exit the function
-		$share_checked = _post('share_checked' , 'on' , 'string' , ['on' , 'off']) === 'on' ? 1 : 0;
-		if( !$share_checked )
-		{
-			return;
-		}
-
 		// interval for each publication
-		$postInterval = (int)get_option('post_interval' , '1');
+		$postInterval = (int)get_option('fs_post_interval' , '1');
 
 		// run share process on background
 		$backgroundShare = (int)get_option('fs_share_on_background' , '1');
@@ -178,7 +185,7 @@ class PostMetaBox
 		$nodesList = _post('share_on_nodes' , false , 'array' );
 
 		// if false, may be from xmlrpc, external application or etc... then load ol active nodes
-		if( $nodesList === false )
+		if( $nodesList === false && !isset($_POST['share_checked']) )
 		{
 			$nodesList = [];
 
@@ -206,7 +213,7 @@ class PostMetaBox
 			}
 		}
 
-		if( !empty( $nodesList ) )
+		if( !empty( $nodesList ) || $metaBoxLoader === 1 )
 		{
 			wpDB()->delete(wpTable('feeds') , [
 				'post_id'       =>  $post_id,
@@ -216,15 +223,17 @@ class PostMetaBox
 
 		$post_text_message = [];
 
-		$post_text_message['fb']        = _post('post_text_message_fb' , '' , 'string');
-		$post_text_message['twitter']   = _post('post_text_message_twitter' , '' , 'string');
-		$post_text_message['instagram'] = _post('post_text_message_instagram' , '' , 'string');
-		$post_text_message['linkedin']  = _post('post_text_message_linkedin' , '' , 'string');
-		$post_text_message['vk']        = _post('post_text_message_vk' , '' , 'string');
-		$post_text_message['pinterest'] = _post('post_text_message_pinterest' , '' , 'string');
-		$post_text_message['reddit']    = _post('post_text_message_reddit' , '' , 'string');
-		$post_text_message['thumblr']   = _post('post_text_message_thumblr' , '' , 'string');
-		$post_text_message['google']  	= _post('post_text_message_google' , '' , 'string');
+		$post_text_message['fb']        = _post('fs_post_text_message_fb' , '' , 'string');
+		$post_text_message['twitter']   = _post('fs_post_text_message_twitter' , '' , 'string');
+		$post_text_message['instagram'] = _post('fs_post_text_message_instagram' , '' , 'string');
+		$post_text_message['linkedin']  = _post('fs_post_text_message_linkedin' , '' , 'string');
+		$post_text_message['vk']        = _post('fs_post_text_message_vk' , '' , 'string');
+		$post_text_message['pinterest'] = _post('fs_post_text_message_pinterest' , '' , 'string');
+		$post_text_message['reddit']    = _post('fs_post_text_message_reddit' , '' , 'string');
+		$post_text_message['thumblr']   = _post('fs_post_text_message_thumblr' , '' , 'string');
+		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
+		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
+		$post_text_message['ok'] 		= _post('fs_post_text_message_ok' , '' , 'string');
 
 		$postCats = getPostCatsArr( $post_id );
 
@@ -303,12 +312,12 @@ class PostMetaBox
 
 				$customMessage = isset($post_text_message[$driver]) ? $post_text_message[$driver] : null;
 
-				if( $customMessage == get_option( 'post_text_message_' . $driver , "{title}" ) )
+				if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
 				{
 					$customMessage = null;
 				}
 
-				if( !($driver == 'instagram' && get_option('instagram_post_in_type', '1') == '2') )
+				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
 					wpDB()->insert( wpTable('feeds'), [
 						'driver'                =>  $driver,
@@ -316,11 +325,12 @@ class PostMetaBox
 						'node_type'             =>  $nodeType,
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
-						'custom_post_message'   =>  $customMessage
+						'custom_post_message'   =>  $customMessage,
+						'send_time'				=>	sendTime()
 					]);
 				}
 
-				if( $driver == 'instagram' && (get_option('instagram_post_in_type', '1') == '2' || get_option('instagram_post_in_type', '1') == '3') )
+				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
 					wpDB()->insert( wpTable('feeds'), [
 						'driver'                =>  $driver,
@@ -329,7 +339,8 @@ class PostMetaBox
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
 						'feed_type'             =>  'story',
-						'custom_post_message'   =>  $customMessage
+						'custom_post_message'   =>  $customMessage,
+						'send_time'				=>	sendTime()
 					]);
 				}
 			}
@@ -354,5 +365,4 @@ class PostMetaBox
 
 }
 
-// trigger class
 new PostMetaBox();

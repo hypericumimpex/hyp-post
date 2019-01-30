@@ -132,7 +132,10 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 <div class="reports_group">
 	<div style="width: 100%;">
 		<div class="report_title">
-			<div class="title1"><i class="fa fa-copy"></i> <?=esc_html__('Last posts' , 'fs-poster');?></div>
+			<div class="title1">
+				<i class="fa fa-copy"></i> <?=esc_html__('Last posts' , 'fs-poster');?>
+			</div>
+			<button class="ws_btn ws_bg_danger ws_btn_small clearLogBtn" type="button"><i class="fa fa-trash"></i> Clear logs</button>
 		</div>
 		<div class="report_chart_box" style="min-height: 405px; background: #F7F7F7; border-top: 1px solid #DDD; border-bottom: 1px solid #DDD; margin-left: -20px; margin-right: -20px; padding: 0 20px;">
 			<table class="ws_table2">
@@ -206,6 +209,10 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 								statusBtn = '<button class="ws_btn ws_bg_warning ws_btn_small" type="button"><i class="fa fa-check"></i> '+"<?=esc_html__('not sent' , 'fs-poster');?>"+'</button>';
 							}
 
+							var driverIcon = result['data'][i]['driver'];
+							if( driverIcon == 'ok' )
+								driverIcon = 'odnoklassniki';
+
 							$("#report3_table").append(
 							'<tr>' +
 								'<td class="td_post_inf">' +
@@ -229,11 +236,11 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 											'</a>' +
 										'</div>'
 									) : ' --- ') +
-									'<div><i class="fab fa-'+result['data'][i]['driver']+'"></i> ' + result['data'][i]['driver'] + ' > ' + result['data'][i]['node_type'] + ( result['data'][i]['feed_type'] != '' ? ' > ' + result['data'][i]['feed_type'] : '' ) + '</div>'+
+									'<div><i class="fab fa-'+driverIcon+'"></i> ' + (result['data'][i]['driver'][0].toUpperCase() + result['data'][i]['driver'].substring(1)) + ' > ' + result['data'][i]['node_type'] + ( result['data'][i]['feed_type'] != '' ? ' > ' + result['data'][i]['feed_type'] : '' ) + '</div>'+
 								'</td>' +
 								'<td class="status_lnk">'+statusBtn+'</td>' +
 								'<td>' +
-									( result['data'][i]['driver'] == 'linkedin' || result['data'][i]['driver'] == 'reddit' || result['data'][i]['driver'] == 'tumblr' ? '---' :
+									( result['data'][i]['driver'] == 'linkedin' || result['data'][i]['driver'] == 'reddit' || result['data'][i]['driver'] == 'tumblr' || result['data'][i]['driver'] == 'google' ? '---' :
 									'<div><i class="far fa-eye"></i> Hits: <span class="stat_span1">' + result['data'][i]['hits'] + '</span></div>' +
 									'<div><i class="far fa-thumbs-up"></i> Likes: <span class="stat_span2">' + result['data'][i]['insights']['like'] + '</span> ' + ( result['data'][i]['insights']['details'] != '' ? '<span class="ws_tooltip" data-title="'+result['data'][i]['insights']['details']+'"><i class="fa fa-info-circle"></i></span></div>' : '') +
 									'<div><i class="far fa-comment-dots"></i> Comments: <span class="stat_span3">' + (typeof result['data'][i]['insights']['comments'] != 'undefined' ? result['data'][i]['insights']['comments'] : 0) + '</span></div>' +
@@ -244,6 +251,17 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 					});
 				});
 				$("#r3_page_next").click();
+
+				$(".clearLogBtn").click(function()
+				{
+					fsCode.confirm('Are you sure you want to clear logs?', 'danger' , function()
+					{
+						fsCode.ajax('fs_clear_logs' , {} , function()
+						{
+							location.reload();
+						});
+					});
+				});
 			});
 		</script>
 	</div>

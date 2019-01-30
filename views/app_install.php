@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div style="display: flex; align-items: center;">
 		<div style="font-weight: 600; font-size: 14px; color: #777;"><?=__('Purchase key' , 'fs-poster')?>:</div>
-		<div style=" margin-left: 15px; width: 350px;"><input type="text" class="ws_form_element2" id="purchaseKey" placeholder="enter anything here"></div>
+		<div style=" margin-left: 15px; width: 350px;"><input type="text" class="ws_form_element2" id="purchaseKey" placeholder="<?=__('Purchase key' , 'fs-poster')?>..."></div>
 		<div style="margin-left: 10px;"><button type="button" class="ws_btn ws_bg_danger" id="activateBtn"><?=__('ACTIVATE' , 'fs-poster')?></button></div>
 	</div>
 </div>

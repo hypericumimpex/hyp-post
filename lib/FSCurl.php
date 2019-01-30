@@ -54,7 +54,7 @@ class FSCurl
 		return $result;
 	}
 
-    public static function getContents($url , $method = 'GET' ,  $data = [] , $headers = [] , $proxy = '')
+    public static function getContents($url , $method = 'GET' ,  $data = [] , $headers = [] , $proxy = '', $postDataHBQ = false)
 	{
 		$method = strtoupper($method);
 
@@ -88,7 +88,7 @@ class FSCurl
 		if($method == 'POST')
 		{
 			$opts[CURLOPT_POST]			= true;
-			$opts[CURLOPT_POSTFIELDS]	= $data;//json)encode
+			$opts[CURLOPT_POSTFIELDS]	= $postDataHBQ ? http_build_query( $data ) : $data;
 		}
 		else if( $method == 'DELETE' )
 		{

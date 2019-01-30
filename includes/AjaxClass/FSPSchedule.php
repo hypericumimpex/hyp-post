@@ -17,6 +17,45 @@ trait FSPSchedule
 		$post_sort = _post('post_sort' , 'random' , 'string' , ['random' , 'old_first' , 'new_first']);
 		$post_date_filter = _post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year']);
 
+		$custom_messages = _post('custom_messages' , '' , 'string');
+		$accounts_list = _post('accounts_list' , '' , 'string');
+
+		$_custom_messages = [];
+		if( !empty( $custom_messages ) )
+		{
+			$custom_messages = json_decode($custom_messages, true);
+			$custom_messages = is_array($custom_messages) ? $custom_messages : [];
+
+			foreach ($custom_messages AS $socialNetwork => $message1 )
+			{
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'google', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				{
+					$_custom_messages[$socialNetwork] = $message1;
+				}
+			}
+		}
+		$_custom_messages = empty($_custom_messages) ? null : json_encode($_custom_messages);
+
+		$_accounts_list = [];
+		if( !empty( $accounts_list ) )
+		{
+			$accounts_list = json_decode($accounts_list, true);
+			$accounts_list = is_array($accounts_list) ? $accounts_list : [];
+
+			foreach ($accounts_list AS $socialAccount )
+			{
+				if( is_string( $socialAccount ) )
+				{
+					$socialAccount = explode(':' , $socialAccount);
+					if( !(count($socialAccount) == 2 && is_numeric($socialAccount[1])) )
+						continue;
+
+					$_accounts_list[] = ($socialAccount[0] == 'account' ? 'account' : 'node') . ':' . $socialAccount[1] ;
+				}
+			}
+		}
+		$_accounts_list = empty($_accounts_list) ? null : implode(',' , $_accounts_list);
+
 		// sanitize categories array...
 		$category_filterNew = [];
 		foreach( $category_filter AS $categId )
@@ -56,6 +95,28 @@ trait FSPSchedule
 			response(false , ['error_msg' => esc_html__('Start date is wrong!' , 'fs-poster')]);
 		}
 
+		if( strtotime( $start_date ) < strtotime(date('Y-m-d')) )
+		{
+			$cronStartTime = date('Y-m-d');
+			$cronStartTime2 = current_time('Y-m-d');
+		}
+		else
+		{
+			$cronStartTime = $start_date;
+			$cronStartTime2 = $start_date;
+		}
+
+		if( $interval % 24 == 0 )
+		{
+			$cronStartTime .= ' ' . date('H:i' , strtotime($share_time));
+			$cronStartTime2 .= ' ' . date('H:i' , strtotime($share_time));
+		}
+		else
+		{
+			$cronStartTime .= ' ' . date('H:i' );
+			$cronStartTime2 .= ' ' . current_time('H:i' );
+		}
+
 		wpDB()->insert(wpTable('schedules') , [
 			'title'					=>	$title,
 			'start_date'			=>	$start_date,
@@ -69,26 +130,12 @@ trait FSPSchedule
 			'post_type_filter'		=>	$post_type_filter,
 			'category_filter'		=>	$category_filter,
 			'post_sort'				=>	$post_sort,
-			'post_date_filter'		=>	$post_date_filter
+			'post_date_filter'		=>	$post_date_filter,
+			'next_execute_time'		=>	$cronStartTime2,
+
+			'custom_post_message'	=>	$_custom_messages,
+			'share_on_accounts'		=>	$_accounts_list
 		]);
-
-		if( strtotime( $start_date ) < strtotime(date('Y-m-d')) )
-		{
-			$cronStartTime = date('Y-m-d');
-		}
-		else
-		{
-			$cronStartTime = $start_date;
-		}
-
-		if( $interval % 24 == 0 )
-		{
-			$cronStartTime .= ' ' . date('H:i' , strtotime($share_time));
-		}
-		else
-		{
-			$cronStartTime .= ' ' . date('H:i' );
-		}
 
 		CronJob::setScheduleTask( wpDB()->insert_id , $interval , $cronStartTime );
 
@@ -110,7 +157,7 @@ trait FSPSchedule
 		{
 			response(false , 'Schedule date is empty!');
 		}
-		else if( strtotime($plan_date) - (3600 * 24 * 30 * 3) > time() )
+		else if( strtotime($plan_date) - (3600 * 24 * 30 * 24) > time() )
 		{
 			response(false , 'Plan date or time is not valid!');
 		}
@@ -139,6 +186,45 @@ trait FSPSchedule
 		{
 			response(false , 'Too many post selected! You can select maximum 75 posts!');
 		}
+
+		$custom_messages = _post('custom_messages' , '' , 'string');
+		$accounts_list = _post('accounts_list' , '' , 'string');
+
+		$_custom_messages = [];
+		if( !empty( $custom_messages ) )
+		{
+			$custom_messages = json_decode($custom_messages, true);
+			$custom_messages = is_array($custom_messages) ? $custom_messages : [];
+
+			foreach ($custom_messages AS $socialNetwork => $message1 )
+			{
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'google', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				{
+					$_custom_messages[$socialNetwork] = $message1;
+				}
+			}
+		}
+		$_custom_messages = empty($_custom_messages) ? null : json_encode($_custom_messages);
+
+		$_accounts_list = [];
+		if( !empty( $accounts_list ) )
+		{
+			$accounts_list = json_decode($accounts_list, true);
+			$accounts_list = is_array($accounts_list) ? $accounts_list : [];
+
+			foreach ($accounts_list AS $socialAccount )
+			{
+				if( is_string( $socialAccount ) )
+				{
+					$socialAccount = explode(':' , $socialAccount);
+					if( !(count($socialAccount) == 2 && is_numeric($socialAccount[1])) )
+						continue;
+
+					$_accounts_list[] = ($socialAccount[0] == 'account' ? 'account' : 'node') . ':' . $socialAccount[1] ;
+				}
+			}
+		}
+		$_accounts_list = empty($_accounts_list) ? null : implode(',' , $_accounts_list);
 
 		$postsCount = count($post_ids);
 
@@ -169,7 +255,11 @@ trait FSPSchedule
 			'post_sort'				=>	$post_sort,
 			'post_date_filter'		=>	$post_date_filter,
 
-			'post_ids'				=>	$post_ids
+			'post_ids'				=>	$post_ids,
+			'next_execute_time'		=>	$plan_date,
+
+			'custom_post_message'	=>	$_custom_messages,
+			'share_on_accounts'		=>	$_accounts_list
 		]);
 
 		CronJob::setScheduleTask( wpDB()->insert_id , $interval , $plan_date );
@@ -198,6 +288,38 @@ trait FSPSchedule
 		wpDB()->delete(wpTable('schedules') , ['id' => $id]);
 
 		CronJob::clearSchedule($id);
+
+		response(true);
+	}
+
+	public function delete_schedules()
+	{
+		$ids = _post('ids' , [] , 'array');
+		if( count($ids) == 0 )
+		{
+			response(false , 'No schedule selected!');
+		}
+
+		foreach ($ids AS $id)
+		{
+			if( is_numeric($id) && $id > 0 )
+			{
+				$checkSchedule = wpFetch('schedules' , $id);
+				if( !$checkSchedule )
+				{
+					response(false , esc_html__('Schedule not found!' , 'fs-poster'));
+				}
+
+				else if( $checkSchedule['user_id'] != get_current_user_id() )
+				{
+					response(false , esc_html__('You do not have a permission to delete this schedule!' , 'fs-poster'));
+				}
+
+				wpDB()->delete(wpTable('schedules') , ['id' => $id]);
+
+				CronJob::clearSchedule($id);
+			}
+		}
 
 		response(true);
 	}
@@ -278,6 +400,9 @@ trait FSPSchedule
 			{
 				$filterQuery = scheduleNextPostFilters( $planInf );
 				$calcLimit = 1+(int)(( $planEnd - $planStart ) / 60 / 60 / $interval);
+
+				$calcLimit = $calcLimit > 0 ? $calcLimit : 1;
+
 				$getRandomPost = wpDB()->get_results("SELECT * FROM ".wpDB()->base_prefix."posts WHERE post_status='publish' {$filterQuery} LIMIT " . $calcLimit , ARRAY_A);
 			}
 
@@ -305,6 +430,7 @@ trait FSPSchedule
 				if( $planInf['post_sort'] == 'random' )
 				{
 					$postDetails = 'Will select randomly';
+					$postId = null;
 				}
 				else
 				{

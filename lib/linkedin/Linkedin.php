@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../FSCurl.php';
+require_once LIB_DIR . 'FSCurl.php';
 
 class Linkedin
 {
@@ -39,7 +39,7 @@ class Linkedin
 			'profile_id'		=>	$meId,
 			'profile_pic'		=>	$me['pictureUrl'],
 			'friends_count'		=>	$me['numConnections'],
-			'username'			=>	str_replace('https://www.linkedin.com/in/' , '' , $me['publicProfileUrl']),
+			'username'			=>	str_replace(['https://www.linkedin.com/in/', 'http://www.linkedin.com/in/'] , '' , $me['publicProfileUrl']),
 			'proxy'             =>  $proxy
 		];
 
@@ -69,28 +69,25 @@ class Linkedin
 		]);
 
 		// my pages load
-		if( get_option('linkedin_load_own_companies' , 1) == 1 )
+		$companiesList = self::cmd('companies:(id,company-type,name,logo-url,num-followers)', 'GET' , $accessToken , ['is-company-admin' => 'true'] , $proxy );
+		if( isset($companiesList['values']) && is_array($companiesList['values']) )
 		{
-			$companiesList = self::cmd('companies:(id,company-type,name,logo-url,num-followers)', 'GET' , $accessToken , ['is-company-admin' => 'true'] , $proxy );
-
-			if( isset($companiesList['values']) && is_array($companiesList['values']) )
+			foreach($companiesList['values'] AS $companyInf)
 			{
-				foreach($companiesList['values'] AS $companyInf)
-				{
-					wpDB()->insert(wpTable('account_nodes') , [
-						'user_id'			=>	get_current_user_id(),
-						'driver'			=>	'linkedin',
-						'account_id'		=>	$accId,
-						'node_type'			=>	'company',
-						'node_id'			=>	$companyInf['id'],
-						'name'				=>	$companyInf['name'],
-						'category'			=>	isset($companyInf['companyType']['name']) ? $companyInf['companyType']['name'] : '',
-						'fan_count'			=>	$companyInf['numFollowers'],
-						'cover'				=>	isset($companyInf['logoUrl']) ? $companyInf['logoUrl'] : '',
-					]);
-				}
+				wpDB()->insert(wpTable('account_nodes') , [
+					'user_id'			=>	get_current_user_id(),
+					'driver'			=>	'linkedin',
+					'account_id'		=>	$accId,
+					'node_type'			=>	'company',
+					'node_id'			=>	$companyInf['id'],
+					'name'				=>	$companyInf['name'],
+					'category'			=>	isset($companyInf['companyType']['name']) ? $companyInf['companyType']['name'] : '',
+					'fan_count'			=>	$companyInf['numFollowers'],
+					'cover'				=>	isset($companyInf['logoUrl']) ? $companyInf['logoUrl'] : '',
+				]);
 			}
 		}
+
 	}
 
 	/**
@@ -148,7 +145,7 @@ class Linkedin
 			'visibility'    =>  ['code' =>  'anyone']
 		];
 
-		if( $type == 'link' )
+		if( $type == 'link' && !empty($link) )
 		{
 			$sendData['content'] = [];
 			$sendData['content']['title'] = $title;

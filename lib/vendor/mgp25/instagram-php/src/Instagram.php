@@ -960,9 +960,10 @@ class Instagram implements ExperimentsInterface
             // Act like a real logged in app client refreshing its news timeline.
             // This also lets us detect if we're still logged in with a valid session.
             try {
-                $this->timeline->getTimelineFeed(null, [
+            	$this->people->getSelfInfo();
+                /*$this->timeline->getTimelineFeed(null, [
                     'is_pull_to_refresh' => $isSessionExpired ? null : mt_rand(1, 3) < 3,
-                ]);
+                ]);*/
             } catch (\InstagramAPI\Exception\LoginRequiredException $e) {
                 // If our session cookies are expired, we were now told to login,
                 // so handle that by running a forced relogin in that case!

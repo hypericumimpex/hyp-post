@@ -12,7 +12,8 @@ $accountsCount = [
 	'pinterest' =>  0,
 	'reddit'    =>  0,
 	'tumblr'    =>  0,
-	'google'    =>  0
+	'google'    =>  0,
+	'ok'	    =>  0
 ];
 foreach( $accountsList AS $aInf )
 {
@@ -197,6 +198,10 @@ foreach( $accountsList AS $aInf )
 		<div class="social_network_div" data-setting="google">
 			<div><i class="fab fa-google"></i> Google+</div>
 			<div class="snd_badge"><?=$accountsCount['google']?></div>
+		</div>
+		<div class="social_network_div" data-setting="ok">
+			<div><i class="fab fa-odnoklassniki"></i> OK.ru</div>
+			<div class="snd_badge"><?=$accountsCount['ok']?></div>
 		</div>
 	</div>
 	<div style="width: 100%;" id="account_content">

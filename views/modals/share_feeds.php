@@ -96,7 +96,10 @@
 				$nodeIdKey = $feedInf['node_type'] == 'account' ? 'profile_id' : 'node_id';
 				$nodeInf = wpFetch($nodeInfTable , $feedInf['node_id']);
 
-				$username = isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : $nodeInf['username'];
+				if( !$nodeInf )
+					continue;
+
+				$username = isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username']) ? $nodeInf['username'] : ' - ');
 				?>
 				<tr data-id="<?=(int)$feedInf['id']?>" data-interval="<?=(int)$feedInf['interval']?>" data-status="<?=(int)$feedInf['is_sended']?>">
 					<td class="node_name">
@@ -191,7 +194,7 @@
 				}
 				else
 				{
-					$(".process_text").html('<span class="ws_color_success">'+"<?=esc_html__('Process Finished!' , 'fs-poster')?>"+'</span><span><button type="button" data-modal-close="true" onclick="location.reload();" class="ws_btn ws_color_danger">'+"<?=esc_html__('Close window' , 'fs-poster')?>"+'</button></span>');
+					$(".process_text").html('<span class="ws_color_success">'+"<?=esc_html__('Process Finished!' , 'fs-poster')?>"+'</span><span><button type="button" data-modal-close="true" onclick="<?=isset($parameters['dont_reload'])?'':'location.reload();'?>" class="ws_btn ws_color_danger">'+"<?=esc_html__('Close window' , 'fs-poster')?>"+'</button></span>');
 				}
 
 				reloadStats();

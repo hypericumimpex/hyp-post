@@ -30,10 +30,11 @@ class SiteController
 		$this->tumblrRedirect();
 		$this->tumblrCallback();
 
+		$this->okRedirect();
+		$this->okCallback();
+
 		$this->standartFSApp();
 	}
-
-
 
 	public function postCounter()
 	{
@@ -103,7 +104,8 @@ class SiteController
 				unset($_SESSION['fs_proxy_save']);
 			}
 
-			require_once __DIR__ . '/../lib/twitter/autoload.php';
+			require_once LIB_DIR . 'twitter/autoload.php';
+			require_once LIB_DIR . 'twitter/TwitterLib.php';
 
 			$connection = new Abraham\TwitterOAuth\TwitterOAuth($appInf['app_key'], $appInf['app_secret'], $_SESSION['oauth_token'], $_SESSION['oauth_token_secret'] , $proxy);
 			$access_token = $connection->oauth("oauth/access_token", array("oauth_verifier" => $_GET['oauth_verifier']));
@@ -118,7 +120,7 @@ class SiteController
 				exit();
 			}
 
-			TwitterLib::authorizeUser($appInf , $access_token['oauth_token'] , $access_token['oauth_token_secret']);
+			TwitterLib::authorizeUser($appInf , $access_token['oauth_token'] , $access_token['oauth_token_secret'] , $proxy);
 
 			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
 			exit();
@@ -145,7 +147,7 @@ class SiteController
 			require_once __DIR__ . '/../lib/twitter/autoload.php';
 
 			$connection = new Abraham\TwitterOAuth\TwitterOAuth($appInf['app_key'], $appInf['app_secret'] , null ,null , $_SESSION['fs_proxy_save']);
-			$request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => site_url() . '/index.php?twitter_callback=1'));
+			$request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => site_url() . '/?twitter_callback=1'));
 			$_SESSION['oauth_token'] = $request_token['oauth_token'];
 			$_SESSION['oauth_token_secret'] = $request_token['oauth_token_secret'];
 			$url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
@@ -246,9 +248,32 @@ class SiteController
 		}
 	}
 
+	public function okCallback()
+	{
+		if( isset($_GET['ok_callback']) && $_GET['ok_callback'] == '1' )
+		{
+			require_once plugin_dir_path(__FILE__ ) . "../lib/ok/Odnoklassniki.php";
+
+			Odnoklassniki::getAccessToken();
+		}
+	}
+
+	public function okRedirect()
+	{
+		if( isset($_GET['ok_app_redirect']) && is_numeric($_GET['ok_app_redirect']) && $_GET['ok_app_redirect'] > 0 )
+		{
+			$appId = (int)$_GET['ok_app_redirect'];
+			require_once plugin_dir_path(__FILE__ ) . "../lib/ok/Odnoklassniki.php";
+
+			$link = Odnoklassniki::getLoginURL($appId);
+			header('Location: ' . $link);
+			exit();
+		}
+	}
+
 	public function standartFSApp()
 	{
-		$supportedFSApps = ['twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr'];
+		$supportedFSApps = ['twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr' , 'ok'];
 
 		$sn                 = _get('sn' , '' , 'string' , $supportedFSApps);
 		$callback           = _get('fs_app_redirect' , '0' , 'num' , ['1']);
@@ -331,6 +356,22 @@ class SiteController
 			require_once LIB_DIR . 'tumblr/Tumblr.php';
 
 			Tumblr::authorizeTumblrUser( $appInf['id'] , $appInf['app_key'] , $appInf['app_secret'] , $access_token , $access_token_secret , $proxy );
+
+			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
+			exit();
+		}
+		else if( $sn == 'ok' )
+		{
+			$access_token = _get('access_token' , '' , 'string');
+			$refreshToken = _get('refresh_token' , '' , 'string');
+			$expiresIn = _get('expires_in' , '' , 'string');
+
+			if( empty($access_token) || empty($refreshToken) || empty($expiresIn) )
+				return;
+
+			require_once LIB_DIR . 'ok/OdnoKlassniki.php';
+
+			OdnoKlassniki::authorizeOkUser( $appInf['id'] , $appInf['app_key'] , $appInf['app_secret'] , $access_token , $refreshToken , $expiresIn , $proxy );
 
 			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
 			exit();

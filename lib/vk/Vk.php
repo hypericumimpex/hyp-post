@@ -45,8 +45,8 @@ class Vk
 			'gender'			=>	$me['sex'],
 			'birthday'			=>	date('Y-m-d' , strtotime($me['bdate'])),
 			'profile_pic'		=>	$me['photo'],
-			'followers_count'	=>	$me['followers_count'],
-			'friends_count'		=>	$me['common_count'],
+			'followers_count'	=>	isset($me['followers_count']) && is_numeric($me['followers_count']) ? $me['followers_count'] : 0,
+			'friends_count'		=>	isset($me['common_count']) && is_numeric($me['common_count']) ? $me['common_count'] : 0,
 			'username'			=>	$me['screen_name'],
 			'proxy'             =>  $proxy
 		];
@@ -79,7 +79,7 @@ class Vk
 
 		$loadedOwnPages = [];
 		// admins comunications
-		if( get_option('vk_load_admin_communities' , 1) == 1 )
+		if( get_option('fs_vk_load_admin_communities' , 1) == 1 )
 		{
 			$accountsList = self::cmd('groups.get', 'GET' , $accessToken , [
 				'filter'    =>  'admin' ,
@@ -110,7 +110,7 @@ class Vk
 		}
 
 		// members comunications
-		if( get_option('vk_load_members_communities' , 1) == 1 )
+		if( get_option('fs_vk_load_members_communities' , 1) == 1 )
 		{
 			$limit = get_option('vk_max_communities_limit' , 100);
 			$limit = $limit >= 0 ? $limit : 0;
@@ -237,16 +237,19 @@ class Vk
 
 				//$uploadFile['user_id'] = $nodeFbId;
 
-				$uploadPhoto = self::cmd('photos.saveWallPhoto' , 'GET' , $accessToken , $uploadFile , $proxy);
-
-				if( is_array($uploadPhoto) && !isset($uploadPhoto['error']) )
+				if( is_array($uploadFile) && !empty($uploadFile) )
 				{
-					foreach($uploadPhoto AS $photoInf)
+					$uploadPhoto = self::cmd('photos.saveWallPhoto' , 'GET' , $accessToken , $uploadFile , $proxy);
+
+					if( is_array($uploadPhoto) && !isset($uploadPhoto['error']) )
 					{
-						$sendData['attachments'][] = 'photo' . $photoInf['owner_id'] . '_' . $photoInf['id'];
+						foreach($uploadPhoto AS $photoInf)
+						{
+							$sendData['attachments'][] = 'photo' . $photoInf['owner_id'] . '_' . $photoInf['id'];
+						}
 					}
+					$sendData['attachments'] = implode(',' , $sendData['attachments']);
 				}
-				$sendData['attachments'] = implode(',' , $sendData['attachments']);
 			}
 		}
 		else if( $type == 'video' )

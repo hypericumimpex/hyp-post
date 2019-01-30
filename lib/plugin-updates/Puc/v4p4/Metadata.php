@@ -30,7 +30,7 @@ if ( !class_exists('Puc_v4p4_Metadata', false) ):
 			/** @var StdClass $apiResponse */
 			$apiResponse = json_decode($json);
 			if ( empty($apiResponse) || !is_object($apiResponse) ){
-				$errorMessage = "Failed to parse update metadata. Try validating your .json file with http://jsonlint.com/";
+				$errorMessage = "Failed to parse update metadata. Try validating your .json file with http://jsonlint.com/" . $json;
 				do_action('puc_api_error', new WP_Error('puc-invalid-json', $errorMessage));
 				trigger_error($errorMessage, E_USER_NOTICE);
 				return false;

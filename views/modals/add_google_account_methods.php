@@ -1,11 +1,5 @@
 <?php defined('MODAL') or exit();?>
 
-<?php
-$authURL = wpDB()->get_row("SELECT * FROM " . wpTable('apps') . " WHERE is_standart=3 AND driver='fb' LIMIT 1" , ARRAY_A);
-$authURL = esc_html($authURL['app_authenticate_link']);
-$applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','user_id' => get_current_user_id()]);
-?>
-
 <style>
 	.ws_method_box
 	{

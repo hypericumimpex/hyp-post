@@ -176,6 +176,11 @@ function getAccessToken( $nodeType , $nodeId )
 			require_once LIB_DIR . 'reddit/Reddit.php';
 			$accessToken = Reddit::refreshToken($accessTokenGet);
 		}
+		else if( $driver == 'ok' && (time()+30) > strtotime($accessTokenGet['expires_on']) )
+		{
+			require_once LIB_DIR . 'ok/OdnoKlassniki.php';
+			$accessToken = OdnoKlassniki::refreshToken($accessTokenGet);
+		}
 	}
 	else
 	{
@@ -183,7 +188,10 @@ function getAccessToken( $nodeType , $nodeId )
 
 		// get proxy
 		$accountInf = wpFetch('accounts' , $nodeInf['account_id']);
-		$nodeInf['proxy'] = $accountInf['proxy'];
+
+		if( $nodeInf )
+			$nodeInf['proxy'] = $accountInf['proxy'];
+
 		$username = $accountInf['username'];
 		$password = $accountInf['password'];
 		$proxy = $accountInf['proxy'];
@@ -330,6 +338,14 @@ function checkPermission( $p )
 
 function profilePic($info , $w = 40 , $h = 40)
 {
+	if( !isset( $info['driver'] ) )
+		return '';
+
+	if( empty($info) )
+	{
+		return plugin_dir_url(__FILE__) . '../images/no-photo.png';
+	}
+
 	if( is_array($info) && key_exists('cover' , $info) ) // nodes
 	{
 		if( !empty($info['cover']) )
@@ -391,6 +407,10 @@ function profilePic($info , $w = 40 , $h = 40)
 	{
 		return "https://api.tumblr.com/v2/blog/".esc_html($info['username'])."/avatar/" . ($w > $h ? $w : $h);
 	}
+	else if( $info['driver'] == 'ok' )
+	{
+		return $info['profile_pic'];
+	}
 	else
 	{
 
@@ -399,6 +419,9 @@ function profilePic($info , $w = 40 , $h = 40)
 
 function profileLink($info)
 {
+	if( !isset( $info['driver'] ) )
+		return '';
+
 	// IF NODE
 	if( is_array($info) && key_exists('cover' , $info) ) // nodes
 	{
@@ -422,6 +445,10 @@ function profileLink($info)
 		{
 			return "https://plus.google.com/communities/" . esc_html($info['node_id']);
 		}
+		else if( $info['driver'] == 'ok' )
+		{
+			return "https://ok.ru/group/" . esc_html($info['node_id']);
+		}
 
 		return '';
 	}
@@ -440,7 +467,7 @@ function profileLink($info)
 	}
 	else if( $info['driver'] == 'linkedin' )
 	{
-		return "https://www.linkedin.com/in/".esc_html($info['username']);
+		return "https://www.linkedin.com/in/".esc_html(str_replace(['https://www.linkedin.com/in/', 'http://www.linkedin.com/in/'] , '' , $info['username']));
 	}
 	else if( $info['driver'] == 'vk' )
 	{
@@ -461,6 +488,10 @@ function profileLink($info)
 	else if( $info['driver'] == 'google' )
 	{
 		return 'https://plus.google.com/'.urlencode($info['profile_id']);
+	}
+	else if( $info['driver'] == 'ok' )
+	{
+		return 'https://ok.ru/profile/'.urlencode($info['profile_id']);
 	}
 	else
 	{
@@ -507,6 +538,17 @@ function postLink( $postId , $driver , $username = '' )
 		$postId = explode(':' , $postId);
 		return 'https://plus.google.com/' . urlencode($postId[0]) . '/posts/' . urlencode(isset($postId[1]) ? $postId[1] : '-');
 	}
+	else if( $driver == 'ok' )
+	{
+		if( strpos( $postId , 'topic' ) !== false )
+		{
+			return 'https://ok.ru/group/' . $postId;
+		}
+		else
+		{
+			return 'https://ok.ru/profile/' . $postId;
+		}
+	}
 }
 
 function cutText( $text , $n = 35 )
@@ -530,10 +572,11 @@ function gerProductPrice( $productInf )
 {
 	$productRegularPrice = '';
 	$productSalePrice = '';
+	$productId = $productInf['post_type'] == 'product_variation' ? $productInf['post_parent'] : $productInf['ID'];
 
-	if( $productInf['post_type'] == 'product' && function_exists('wc_get_product') )
+	if( ($productInf['post_type'] == 'product' || $productInf['post_type'] == 'product_variation') && function_exists('wc_get_product') )
 	{
-		$product = wc_get_product( $productInf['ID'] );
+		$product = wc_get_product( $productId );
 
 		if ( $product->is_type( 'simple' ) )
 		{
@@ -548,6 +591,11 @@ function gerProductPrice( $productInf )
 			$productRegularPrice	=	$variable_product->get_regular_price();
 			$productSalePrice		=	$variable_product->get_sale_price();
 		}
+	}
+
+	if( empty($productRegularPrice) && $productSalePrice > $productRegularPrice )
+	{
+		$productRegularPrice = $productSalePrice;
 	}
 
 	return [
@@ -588,7 +636,8 @@ function replaceTags($message , $postInf , $link , $shortLink)
 		'{uniq_id}',
 		'{tags}',
 		'{categories}',
-		'{excerpt}'
+		'{excerpt}',
+		'{author}'
 	] , [
 		$postInf['ID'] ,
 		strip_tags( $postInf['post_title'] ) ,
@@ -598,9 +647,10 @@ function replaceTags($message , $postInf , $link , $shortLink)
 		$productRegularPrice ,
 		$productSalePrice ,
 		uniqid(),
-		getPostTags( $postInf['ID'] ),
-		getPostCats( $postInf['ID'] ),
-		$postInf['post_excerpt']
+		getPostTags( $postInf ),
+		getPostCats( $postInf ),
+		$postInf['post_excerpt'],
+		get_the_author_meta( 'display_name', $postInf['post_author'] )
 	] , $message);
 }
 
@@ -609,15 +659,19 @@ function standartFSAppRedirectURL($sn)
 	return FS_API_URL . '?sn=' . $sn . '&r_url=' .urlencode(site_url() . '/?fs_app_redirect=1&sn=' . $sn);
 }
 
-function getPostTags( $postId )
+function getPostTags( $postInf )
 {
-	if( get_post_type( $postId ) == 'product' )
+	if( get_post_type( $postInf['ID'] ) == 'product' )
 	{
-		$tags = wp_get_post_terms( $postId ,'product_tag' );
+		$tags = wp_get_post_terms( $postInf['ID'] ,'product_tag' );
+	}
+	else if( get_post_type( $postInf['ID'] ) == 'product_variation' )
+	{
+		$tags = wp_get_post_terms( $postInf['post_parent'] ,'product_tag' );
 	}
 	else
 	{
-		$tags = wp_get_post_tags( $postId );
+		$tags = wp_get_post_tags( $postInf['ID'] );
 	}
 
 
@@ -643,15 +697,19 @@ function getPostCatsArr( $postId )
 	}
 }
 
-function getPostCats( $postId )
+function getPostCats( $postInf )
 {
-	if( get_post_type($postId) == 'product' )
+	if( get_post_type($postInf['ID']) == 'product' )
 	{
-		$cats = wp_get_post_terms( $postId ,'product_cat' );
+		$cats = wp_get_post_terms( $postInf['ID'] ,'product_cat' );
+	}
+	else if( get_post_type($postInf['ID']) == 'product_variation' )
+	{
+		$cats = wp_get_post_terms( $postInf['post_parent'] ,'product_cat' );
 	}
 	else
 	{
-		$cats = get_the_category( $postId );
+		$cats = get_the_category( $postInf['ID'] );
 	}
 
 	$catsString = [];
@@ -667,16 +725,16 @@ function getPostCats( $postId )
 
 function shortenerURL( $url )
 {
-	if( !get_option('url_shortener', '0') )
+	if( !get_option('fs_url_shortener', '0') )
 	{
 		return $url;
 	}
 
-	if( get_option('shortener_service') == 'tinyurl' )
+	if( get_option('fs_shortener_service') == 'tinyurl' )
 	{
 		return shortURLtinyurl( $url );
 	}
-	else if( get_option('shortener_service') == 'bitly' )
+	else if( get_option('fs_shortener_service') == 'bitly' )
 	{
 		return shortURLbitly( $url );
 	}
@@ -702,7 +760,7 @@ function shortURLbitly( $url )
 {
 	$params = array();
 
-	$params['access_token'] = get_option('url_short_access_token_bitly');
+	$params['access_token'] = get_option('fs_url_short_access_token_bitly');
 
 	if( empty($params['access_token']) )
 	{
@@ -742,7 +800,7 @@ function getInstalledVersion()
 function scheduleNextPostFilters( $scheduleInf )
 {
 	$scheduleId = $scheduleInf['id'];
-	$interval = $scheduleInf['intarvel'];
+	$interval = $scheduleInf['interval'];
 	$endDate = strtotime($scheduleInf['end_date']);
 
 	if( strtotime(date('Y-m-d' , ( time() + $interval * 3600 ))) > $endDate )
@@ -800,7 +858,7 @@ function scheduleNextPostFilters( $scheduleInf )
 	}
 	else
 	{
-		$categoriesFilter .= " AND id IN (SELECT object_id FROM `".wpDB()->base_prefix."term_relationships` WHERE term_taxonomy_id IN ('" . implode("' , '" , $categoriesArr ) . "') ) ";
+		$categoriesFilter = " AND id IN (SELECT object_id FROM `".wpDB()->base_prefix."term_relationships` WHERE term_taxonomy_id IN ('" . implode("' , '" , $categoriesArr ) . "') ) ";
 	}
 	/* / End of Categories filter */
 
@@ -836,6 +894,8 @@ function scheduleNextPostFilters( $scheduleInf )
 			$endDateFilter = date('Y-12-31 23:59');
 			break;
 	}
+
+	$dateFilter = "";
 
 	if( isset($startDateFilter) && isset($endDateFilter) )
 	{
@@ -891,4 +951,86 @@ function fsDebug()
 {
 	error_reporting(E_ALL);
 	ini_set('display_errors' , 'on');
+}
+
+function sendTime()
+{
+	$sendTime = current_time('timestamp');
+
+	if( (int)get_option('fs_share_timer', '0') > 0 )
+	{
+		$sendTime += (int)get_option('fs_share_timer', '0') * 60;
+	}
+
+	return date('Y-m-d H:i:s' , $sendTime);
+}
+
+function fsPosterPluginRemove()
+{
+	$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
+
+	$checkPurchaseCodeURL = FS_API_URL . "api.php?act=delete&purchase_code=" . urlencode($fsPurchaseKey) . "&domain=" . site_url();
+
+	$result2 = file_get_contents($checkPurchaseCodeURL);
+
+	$fsTables = [
+		'account_access_tokens',
+		'account_node_status',
+		'account_nodes',
+		'account_sessions',
+		'account_status',
+		'accounts',
+		'apps',
+		'feeds',
+		'schedules'
+	];
+
+	foreach( $fsTables AS $tableName )
+	{
+		wpDB()->query("DROP TABLE IF EXISTS `" . wpTable($tableName) . "`");
+	}
+
+	$fsOptions = [
+		'fs_allowed_post_types',
+		'fs_facebook_posting_type',
+		'fs_hide_menu_for',
+		'fs_keep_logs',
+		'fs_ok_posting_type',
+		'fs_poster_plugin_installed',
+		'fs_poster_plugin_purchase_key',
+		'fs_share_on_background',
+		'fs_share_timer',
+		'fs_twitter_auto_cut_tweets',
+		'fs_twitter_posting_type',
+		'fs_use_wp_cron_jobs',
+		'fs_vk_upload_image',
+		'fs_instagram_post_in_type',
+		'fs_load_groups',
+		'fs_load_liked_pages',
+		'fs_load_own_pages',
+		'fs_max_groups_limit',
+		'fs_max_liked_pages_limit',
+		'fs_post_interval',
+		'fs_post_text_message_fb',
+		'fs_post_text_message_google',
+		'fs_post_text_message_instagram',
+		'fs_post_text_message_linkedin',
+		'fs_post_text_message_ok',
+		'fs_post_text_message_pinterest',
+		'fs_post_text_message_reddit',
+		'fs_post_text_message_tumblr',
+		'fs_post_text_message_twitter',
+		'fs_post_text_message_vk',
+		'fs_shortener_service',
+		'fs_unique_link',
+		'fs_url_shortener',
+		'fs_url_short_access_token_bitly',
+		'fs_vk_load_admin_communities',
+		'fs_vk_load_members_communities'
+	];
+
+	foreach( $fsOptions AS $optionName )
+	{
+		delete_option($optionName);
+	}
 }

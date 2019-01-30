@@ -10,17 +10,65 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 	{
 		color: #ffb700;
 	}
+
+	.ws_table .selected_tr > td
+	{
+		background: #E9F8FF;
+	}
+
+	.select_all_bulk
+	{
+		cursor: pointer;
+		display: flex;
+		width: 35px;
+		height: 35px;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #ffb700;
+		margin-right: 10px;
+		-webkit-border-radius: 20px;
+		-moz-border-radius: 20px;
+		border-radius: 20px;
+	}
+
+	.remove_all_bulk
+	{
+		cursor: pointer;
+		display: flex;
+		width: 35px;
+		height: 35px;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #DDD;
+		-webkit-border-radius: 20px;
+		-moz-border-radius: 20px;
+		border-radius: 20px;
+	}
+
+	#selected_count
+	{
+		padding: 9px 20px;
+		font-size: 14px;
+		font-weight: 600;
+		color: #888;
+		display: none;
+	}
 </style>
 <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
-
 <div style="margin: 40px 80px;">
-	<span style="color: #888; font-size: 17px; font-weight: 600; line-height: 36px;"><span id="schedules_count"><?php print count($schedules);?></span> <?=esc_html__('schedule added' , 'fs-poster');?></span>
+	<span style="color: #888; font-size: 17px; font-weight: 600; line-height: 36px;"><span id="schedules_count"><?php print count($schedules);?></span> <?=esc_html__('schedule(s) added' , 'fs-poster');?></span>
 	<div style="float: right;">
 		<a href="?page=fs-poster-schedule&view=calendar" class="ws_btn ws_bg_info" style="margin-right: 10px;"><i class="fa fa-calendar-check"></i> <?=esc_html__('CALENDAR' , 'fs-poster');?></a>
 		<button type="button" class="ws_btn ws_bg_dark" data-load-modal="add_schedule" id="createNeScheduleBtn"><i class="fa fa-plus"></i> <?=esc_html__('SCHEDULE' , 'fs-poster');?></button>
 	</div>
+</div>
+
+<div style="margin-left: 80px; margin-bottom: 10px; display: flex;">
+	<span class="ws_tooltip select_all_bulk" data-title="Select all"><i class="fa fa-check"></i> </span>
+	<span class="ws_tooltip remove_all_bulk" data-title="Remove selected schedules"><i style="color: #CCC;" class="fa fa-trash"></i></span>
+	<span id="selected_count"><span></span> schedule(s) selected</span>
 </div>
 
 <div class="ws_table_wraper">
@@ -95,6 +143,7 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 			?>
 			<tr data-id="<?=$scheduleInf['id']?>">
 				<td>
+					<span><input type="checkbox" class="tr_checkbox"></span>
 					<i class="fa fa-rocket ws_color_danger" style="padding-right: 8px; padding-left: 8px;"></i>
 					<?=cutText(esc_html($scheduleInf['title']))?>
 					<span style="padding: 5px;" class="ws_tooltip" data-title="Category filter: <?=$categoryFiltersTxt?> ; Post types: <?=$postTypesTxt?> ; <?=$addTxt?>"><i class="fa fa-info-circle"></i></span>
@@ -189,7 +238,85 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 				fsCode.loading(1);
 				location.reload();
 			});
+		}).on('click' , '.tr_checkbox', function()
+		{
+			var checked = $(this).is(':checked');
+
+			if( checked )
+			{
+				$(this).closest('tr').addClass('selected_tr');
+			}
+			else
+			{
+				$(this).closest('tr').removeClass('selected_tr');
+			}
+
+			var selectedCount = $(".tr_checkbox:checked").length;
+			$("#selected_count > span").text( selectedCount );
+			if( selectedCount )
+			{
+				$(".remove_all_bulk>i").css('color' , '#ff7675');
+				$("#selected_count").fadeIn(200);
+			}
+			else
+			{
+				$(".remove_all_bulk>i").css('color' , '#CCC');
+				$("#selected_count").fadeOut(200);
+			}
 		});
+
+		$(".select_all_bulk").click(function()
+		{
+			if( $(".tr_checkbox:not(:checked)").length )
+			{
+				$(".tr_checkbox:not(:checked)").click();
+			}
+			else
+			{
+				$(".tr_checkbox").click();
+			}
+		});
+
+		$(".remove_all_bulk").click(function()
+		{
+			var selectedCount = $(".tr_checkbox:checked").length;
+
+			if( selectedCount )
+			{
+				fsCode.confirm('Are you sure you want to delete all selected schedules?', 'danger', function()
+				{
+					var selectedIds = [];
+
+					$(".tr_checkbox:checked").each(function()
+					{
+						selectedIds.push( $(this).closest('tr').data('id') );
+					});
+
+					fsCode.ajax('delete_schedules' , {'ids': selectedIds} , function(result)
+					{
+						$("#app_list_table tr.selected_tr").fadeOut(300 , function()
+						{
+							$(this).remove();
+						});
+
+						if( $("#app_list_table tbody tr").length - selectedCount <= 0 )
+						{
+							setTimeout(function()
+							{
+								$(".ws_table>tbody").append('<tr><td colspan="100%" style="color: #999;">No schedules found</td></tr>').children('tr').hide().fadeIn(200);
+							}, 301);
+						}
+
+						$("#schedules_count").text(parseInt($("#schedules_count").text()) - selectedCount);
+
+						$(".remove_all_bulk>i").css('color' , '#CCC');
+						$("#selected_count").fadeOut(200);
+					});
+				});
+			}
+		});
+
+		$(".tr_checkbox:checked").trigger('click');
 
 		<?php
 		if( isset($_GET['add']) )

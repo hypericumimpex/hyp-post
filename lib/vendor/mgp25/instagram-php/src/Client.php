@@ -115,7 +115,7 @@ class Client
         $this->_parent = $parent;
 
         // Defaults.
-        $this->_verifySSL = true;
+        $this->_verifySSL = false;
         $this->_proxy = null;
 
         // Create a default handler stack with Guzzle's auto-selected "best

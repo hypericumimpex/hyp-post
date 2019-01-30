@@ -10,9 +10,9 @@ var fsCode = {
 				return '<div style="position: absolute; width: 100%; height: 100%; background: rgba( 0, 0, 0, 0.2 ); z-index: 999;"></div>';
 			},
 
-			'modal': '<div class="modal"><div class="modal-content" style="{width}">{body}</div></div>',
+			'modal': '<div class="modal fsCodeModal"><div class="modal-content" style="{width}">{body}</div></div>',
 
-			'alert': '<div id="confirmModal" class="modal"><div class="modal-content" style="width: 450px; height: 250px;"><div class="ws_color_{type}" style="padding-top: 45px; text-align: center; font-size: 50px;"><i class="fa fa-exclamation-triangle"></i></div><div style="text-align: center; font-size: 18px; padding: 30px; font-weight: 600; color: #999; line-height: 28px; overflow: auto; max-height: 155px;">{text}</div><button class="ws_btn ws_bg_{type}" type="button" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;" data-modal-close="true">CLOSE</button></div></div>',
+			'alert': '<div id="confirmModal" class="modal fsCodeModal"><div class="modal-content" style="width: 450px; height: 250px;"><div class="ws_color_{type}" style="padding-top: 45px; text-align: center; font-size: 50px;"><i class="fa fa-exclamation-triangle"></i></div><div style="text-align: center; font-size: 18px; padding: 30px; font-weight: 600; color: #999; line-height: 28px; overflow: auto; max-height: 155px;">{text}</div><button class="ws_btn ws_bg_{type}" type="button" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;" data-modal-close="true">CLOSE</button></div></div>',
 			'toast': '<div id="pro_toaster">Some text some message..</div>'
 		}
 	},

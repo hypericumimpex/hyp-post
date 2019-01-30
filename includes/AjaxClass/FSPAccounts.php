@@ -74,7 +74,7 @@ trait FSPAccounts
 	{
 		$name = _post('name' , '' , 'string');
 
-		$supported = ['fb' , 'twitter' , 'instagram' , 'linkedin', 'google', 'vk', 'pinterest' , 'reddit' , 'tumblr'];
+		$supported = ['fb' , 'twitter' , 'instagram' , 'linkedin', 'google', 'vk', 'pinterest' , 'reddit' , 'tumblr' , 'ok'];
 		if( empty($name) || !in_array( $name , $supported ) )
 		{
 			response(false);
@@ -216,9 +216,9 @@ trait FSPAccounts
 			wpDB()->delete(wpTable('account_sessions') , ['driver'=>'instagram' , 'username' => $username]);
 		}
 
-		require_once LIB_DIR . "instagram/Instagram.php";
+		require_once LIB_DIR . "instagram/FSInstagram.php";
 
-		$ig = Instagram::login($username , $password , $proxy , $forceLogin);
+		$ig = FSInstagram::login($username , $password , $proxy , $forceLogin);
 		if( isset($ig['do']) && $ig['do'] == 'challenge' )
 		{
 			response(true , [
@@ -276,6 +276,90 @@ trait FSPAccounts
 		response(true);
 	}
 
+	public function add_instagram_account_cookie_method()
+	{
+		$username			= _post('username' , '' , 'string');
+		$cookie_csrftoken	= _post('cookie_csrftoken', '' , 'string');
+		$cookie_sessionid	= _post('cookie_sessionid', '' , 'string');
+		$cookie_ds_user_id	= _post('cookie_ds_user_id', '' , 'string');
+		$cookie_mcd			= _post('cookie_mcd', '' , 'string');
+		$proxy				= _post('proxy' , '' , 'string');
+
+		$password			= '*****';
+
+		if( empty($username) || empty($cookie_csrftoken) || empty($cookie_sessionid) || empty($cookie_mcd) || empty($cookie_ds_user_id) )
+		{
+			response(false, ['error_msg' => esc_html__('Please enter the instagram username and password!' , 'fs-poster')]);
+		}
+
+		require_once LIB_DIR . "instagram/FSInstagram.php";
+
+		$cookiesArr = [
+			["Name" => "sessionid", "Value" => $cookie_sessionid, "Domain" => ".instagram.com", "Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => true,"Discard" => false,"HttpOnly" =>	true],
+			["Name" => "csrftoken", "Value" => $cookie_csrftoken, "Domain" => ".instagram.com", "Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => true,"Discard" => false,"HttpOnly" => false],
+			["Name" => "mcd", "Value" => $cookie_mcd, "Domain" => ".instagram.com", "Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => true,"Discard" => false,"HttpOnly" => false]
+		];
+
+		$settingsArr = [
+			"devicestring"		=> InstagramAPI\Devices\GoodDevices::getRandomGoodDevice(),
+			"device_id"			=> InstagramAPI\Signatures::generateDeviceId(),
+			"phone_id"			=> InstagramAPI\Signatures::generateUUID(true),
+			"uuid"				=> InstagramAPI\Signatures::generateUUID(true),
+			"advertising_id"	=> InstagramAPI\Signatures::generateUUID(true),
+			"session_id"		=> InstagramAPI\Signatures::generateUUID(true),
+			"last_login"		=> time(),
+			"last_experiments"	=> time(),
+			"account_id"		=> $cookie_ds_user_id
+		];
+
+		wpDB()->delete(wpTable('account_sessions') , ['driver'=>'instagram' , 'username' => $username]);
+		wpDB()->insert(wpTable('account_sessions') , [
+			'driver'	=>	'instagram',
+			'username'	=>	$username,
+			'settings'	=>	json_encode($settingsArr),
+			'cookies'	=>	json_encode($cookiesArr)
+		]);
+
+		$insertedId = wpDB()->insert_id;
+
+		$ig = FSInstagram::login($username , $password , $proxy , false);
+		if( !isset($ig['ig']) )
+		{
+			wpDB()->delete(wpTable('account_sessions') , ['id' => $insertedId]);
+			response(false);
+		}
+
+		$ig = $ig['ig'];
+
+		$data = $ig->people->getSelfInfo()->asArray();
+		$data = $data['user'];
+
+		$sqlData = [
+			'user_id'           =>  get_current_user_id(),
+			'profile_id'        =>  $ig->account_id,
+			'username'          =>  $username,
+			'password'          =>  $password,
+			'proxy'             =>  $proxy,
+			'driver'            =>  'instagram',
+			'name'              =>  isset($data['full_name']) ? $data['full_name'] : '',
+			'followers_count'   =>  isset($data['follower_count']) ? $data['follower_count'] : '0',
+			'friends_count'     =>  isset($data['following_count']) ? $data['following_count'] : '0',
+			'profile_pic'       =>  isset($data['profile_pic_url']) ? $data['profile_pic_url'] : ''
+		];
+
+		$checkIfExists = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'profile_id' => $ig->account_id]);
+		if( $checkIfExists )
+		{
+			wpDB()->update(wpTable('accounts') , $sqlData , ['id' => $checkIfExists['id']]);
+		}
+		else
+		{
+			wpDB()->insert(wpTable('accounts') , $sqlData);
+		}
+
+		response(true);
+	}
+
 	public function confirm_instagram_challenge()
 	{
 		$username    = _post('username' , '' , 'string');
@@ -290,9 +374,9 @@ trait FSPAccounts
 			response(false, ['error_msg' => esc_html__('Please enter the code!' , 'fs-poster')]);
 		}
 
-		require_once LIB_DIR . "instagram/Instagram.php";
+		require_once LIB_DIR . "instagram/FSInstagram.php";
 
-		$ig = Instagram::challenge($username , $password , $proxy , $user_id , $nonce_code , $code);
+		$ig = FSInstagram::challenge($username , $password , $proxy , $user_id , $nonce_code , $code);
 
 		if( $ig['status'] == 'error' )
 		{
@@ -315,9 +399,9 @@ trait FSPAccounts
 			response(false, ['error_msg' => esc_html__('Please enter the code!' , 'fs-poster')]);
 		}
 
-		require_once LIB_DIR . "instagram/Instagram.php";
+		require_once LIB_DIR . "instagram/FSInstagram.php";
 
-		$ig = Instagram::verifyTwoFactor($username , $password , $proxy , $two_factor_identifier , $code);
+		$ig = FSInstagram::verifyTwoFactor($username , $password , $proxy , $two_factor_identifier , $code);
 
 		if( $ig['status'] == 'error' )
 		{

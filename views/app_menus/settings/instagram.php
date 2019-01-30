@@ -8,10 +8,10 @@
 				<div class="s_help"><?=esc_html__('Instagram posts together with the profile will be shared in the story.' , 'fs-poster');?></div>
 			</div>
 			<div style="width: 200px;">
-				<select name="instagram_post_in_type" class="ws_form_element" style="width: 150px;">
-					<option value="1"<?=get_option('instagram_post_in_type', '1')=='1'?' selected':''?>>Profile only</option>
-					<option value="2"<?=get_option('instagram_post_in_type', '1')=='2'?' selected':''?>>Story ony</option>
-					<option value="3"<?=get_option('instagram_post_in_type', '1')=='3'?' selected':''?>>Profile and Story</option>
+				<select name="fs_instagram_post_in_type" class="ws_form_element" style="width: 150px;">
+					<option value="1"<?=get_option('fs_instagram_post_in_type', '1')=='1'?' selected':''?>>Profile only</option>
+					<option value="2"<?=get_option('fs_instagram_post_in_type', '1')=='2'?' selected':''?>>Story ony</option>
+					<option value="3"<?=get_option('fs_instagram_post_in_type', '1')=='3'?' selected':''?>>Profile and Story</option>
 				</select>
 			</div>
 		</div>
@@ -27,7 +27,7 @@
 			</div>
 			<div class="s_input">
 				<div class="onoffswitch">
-					<input type="checkbox" name="instagram_story_link" class="onoffswitch-checkbox" id="instagram_story_link"<?=get_option('instagram_story_link', '1')?' checked':''?>>
+					<input type="checkbox" name="instagram_story_link" class="onoffswitch-checkbox" id="instagram_story_link"<?=get_option('fs_instagram_story_link', '1')?' checked':''?>>
 					<label class="onoffswitch-label" for="instagram_story_link"></label>
 				</div>
 			</div>
@@ -53,6 +53,10 @@
 				<div class="text_codes">
 					<div><?=esc_html__('Post excerpt' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
+				</div>
+				<div class="text_codes">
+					<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
 				</div>
 				<div class="text_codes">
 					<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
@@ -94,7 +98,7 @@
 		</div>
 	</div>
 	<div class="s_input" style="width: 45%;">
-		<textarea class="ws_form_element2" name="post_text_message_instagram" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('post_text_message_instagram', "{title}"))?></textarea>
+		<textarea class="ws_form_element2" name="fs_post_text_message_instagram" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
 	</div>
 </div>
 
@@ -109,7 +113,7 @@
 			</div>
 			<div class="s_input">
 				<div class="onoffswitch">
-					<input type="checkbox" name="instagram_story_hashtag" class="onoffswitch-checkbox" id="instagram_story_hashtag"<?/*=get_option('instagram_story_hashtag', '0')?' checked':''*/?> onchange="if($(this).is(':checked')){$('#hashtag_details').show(fadeSpeed);}else{$('#hashtag_details').hide(fadeSpeed);}">
+					<input type="checkbox" name="instagram_story_hashtag" class="onoffswitch-checkbox" id="instagram_story_hashtag"<?/*=get_option('fs_instagram_story_hashtag', '0')?' checked':''*/?> onchange="if($(this).is(':checked')){$('#hashtag_details').show(fadeSpeed);}else{$('#hashtag_details').hide(fadeSpeed);}">
 					<label class="onoffswitch-label" for="instagram_story_hashtag"></label>
 				</div>
 			</div>
@@ -125,7 +129,7 @@
 				<div>Hashtag:</div>
 				<div class="s_help">Hashtagi buraya daxil edin</div>
 			</div>
-			<input type="text" name="instagram_story_hashtag_name" value="<?/*=esc_html(get_option('instagram_story_hashtag_name'))*/?>" class="ws_form_element" placeholder="#example" style="max-width: 150px;">
+			<input type="text" name="instagram_story_hashtag_name" value="<?/*=esc_html(get_option('fs_instagram_story_hashtag_name'))*/?>" class="ws_form_element" placeholder="#example" style="max-width: 150px;">
 		</div>
 	</div>
 	<div style="width: 100px;"></div>
@@ -137,7 +141,7 @@
 			</div>
 			<select class="ws_form_element" name="instagram_story_hashtag_position" style="max-width: 120px;">
 				<option value="top">Top</option>
-				<option value="bottom"<?/*=get_option('instagram_story_hashtag_position') == 'bottom'?' selected':''*/?>>Bottom</option>
+				<option value="bottom"<?/*=get_option('fs_instagram_story_hashtag_position') == 'bottom'?' selected':''*/?>>Bottom</option>
 			</select>
 		</div>
 	</div>

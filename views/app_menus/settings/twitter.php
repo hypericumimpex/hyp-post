@@ -23,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
 				</div>
 				<div class="text_codes">
+					<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
+				</div>
+				<div class="text_codes">
 					<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_short_40}</div>
 				</div>
@@ -62,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 	<div class="s_input" style="width: 45%;">
-		<textarea class="ws_form_element2" name="post_text_message_twitter" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('post_text_message_twitter', "{title}"))?></textarea>
+		<textarea class="ws_form_element2" name="fs_post_text_message_twitter" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_twitter', "{title}"))?></textarea>
 	</div>
 </div>
 
@@ -84,17 +88,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <div style="display: flex;">
-	<div style="width: 50%;">
+	<div style="">
 		<div class="setting_item">
-			<div class="setting_item_label">
+			<div class="setting_item_label" style="width: 55%;">
 				<div><?=esc_html__('Posting type:' , 'fs-poster')?></div>
 				<div class="s_help"><?=esc_html__('Which method you want to post your tweets. With uploading featured image or uploading all contains images in post or only attach post link on tweet.' , 'fs-poster')?></div>
 			</div>
-			<select class="ws_form_element" name="fs_twitter_posting_type">
-				<option value="1"<?=(get_option('fs_twitter_posting_type', '1')=='1' ? ' selected' : '') ?>>Link card method</option>
-				<option value="2"<?=(get_option('fs_twitter_posting_type', '1')=='2' ? ' selected' : '') ?>>Upload featured image only</option>
-				<option value="3"<?=(get_option('fs_twitter_posting_type', '1')=='3' ? ' selected' : '') ?>>Upload all post images</option>
-			</select>
+			<input type="hidden" name="fs_twitter_posting_type" id="fs_twitter_posting_type" value="<?=get_option('fs_twitter_posting_type', '1')?>">
+			<div class="fs_image_buttons1">
+				<div<?=(get_option('fs_twitter_posting_type', '1')=='1' ? ' class="selected_btn"' : '') ?> data-id="1">
+					<img src="<?=plugin_dir_url(__FILE__).'../../../images/post_link_type.png'?>">
+					<span>Link card view</span>
+				</div>
+				<div<?=(get_option('fs_twitter_posting_type', '1')=='2' ? ' class="selected_btn"' : '') ?> data-id="2">
+					<img src="<?=plugin_dir_url(__FILE__).'../../../images/post_image_type.png'?>">
+					<span>Upload featured image only</span>
+				</div>
+				<div<?=(get_option('fs_twitter_posting_type', '1')=='3' ? ' class="selected_btn"' : '') ?> data-id="3">
+					<img src="<?=plugin_dir_url(__FILE__).'../../../images/post_multi_image_type.png'?>">
+					<span>Upload all post images</span>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -114,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			});
 		});
 
-		$("#vk_load_members_communities").trigger('change');
+		$("#fs_vk_load_members_communities").trigger('change');
 
 		fadeSpeed = 200;
 	});

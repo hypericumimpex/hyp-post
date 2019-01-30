@@ -39,4 +39,15 @@ trait FSPSharePanel
 		response(true , ['id'		=>	$id]);
 	}
 
+	public function check_post_is_published()
+	{
+		$id			= _post('id' , '0' , 'num');
+
+		$postStatus = get_post_status( $id );
+
+		response(true, [
+			'post_status' => $postStatus=='publish' ? true : false
+		]);
+	}
+
 }

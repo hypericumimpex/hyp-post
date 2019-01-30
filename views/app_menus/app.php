@@ -10,7 +10,8 @@ $appCounts = [
 	'vk'        =>  [0 , ['app_id' , 'app_secret']],
 	'pinterest' =>  [0 , ['app_id' , 'app_secret']],
 	'reddit'    =>  [0 , ['app_id' , 'app_secret']],
-	'tumblr'    =>  [0 , ['app_key' , 'app_secret']]
+	'tumblr'    =>  [0 , ['app_key' , 'app_secret']],
+	'ok'	    =>  [0 , ['app_id' , 'app_key' , 'app_secret']]
 ];
 foreach( $appsCount AS $aInf )
 {
@@ -141,6 +142,10 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 		<a href="?page=fs-poster-app&tab=tumblr" class="social_network_div<?=$tab=='tumblr'?' snd_active':''?>" data-setting="tumblr">
 			<div><i class="fab fa-tumblr-square"></i> Tumblr</div>
 			<div class="snd_badge"><?=$appCounts['tumblr'][0]?></div>
+		</a>
+		<a href="?page=fs-poster-app&tab=ok" class="social_network_div<?=$tab=='ok'?' snd_active':''?>" data-setting="ok">
+			<div><i class="fab fa-odnoklassniki"></i> OK.ru</div>
+			<div class="snd_badge"><?=$appCounts['ok'][0]?></div>
 		</a>
 	</div>
 	<div style="width: 90%; margin: 40px;" id="app_content">

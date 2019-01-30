@@ -281,13 +281,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$(".plan_posts_list").append(
 					'<div class="plan_box" data-schedule-id="'+tInfo['id']+'" data-date="'+tInfo['date']+'">' +
 					'<div style="display: flex;">' +
-					'<div class="plan_post_title"><i class="fa fa-thumbtack"></i> ' + tInfo['title'] + ' </div>' +
-					'<a '+(tInfo['post_id'] > 0 ? 'href="<?=site_url()?>/?p=' + tInfo['post_id'] + '" target="_blank"' : '')+' class="ws_tooltip2" title="' + tInfo['post_data'] + '" style="margin-left: 10px;"><i class="fa fa-external-link-square-alt "></i></a>' +
+					'<div class="plan_post_title"><i class="fa fa-thumbtack fa-thumb-tack"></i> ' + tInfo['title'] + ' </div>' +
+					'<a '+(tInfo['post_id'] > 0 ? 'href="<?=site_url()?>/?p=' + tInfo['post_id'] + '" target="_blank"' : '')+' class="ws_tooltip2" title="' + tInfo['post_data'] + '" style="margin-left: 10px;"><i class="fa fa-external-link-square-alt fa-external-link-square"></i></a>' +
 					'</div>' +
 					'<div style="font-weight: 600; font-size: 13px;">' +
 					'<i class="far fa-calendar-plus"></i> '+tInfo['date']+' , <i class="fa fa-clock"></i> ' + tInfo['time'] +
 					'</div>' +
-					'<span class="remove_plan ws_tooltip" data-title="Remove plan" data-float="left"><i class="far fa-trash-alt fa-trash-o"></i></span>' +
+					'<span class="remove_plan ws_tooltip" data-title="Remove plan" data-float="left"><i class="far fa-trash fa-trash-o"></i></span>' +
 					'</div>');
 			}
 			$(".plan_posts_list > .plan_box").hide();
@@ -363,59 +363,62 @@ if ( ! defined( 'ABSPATH' ) ) {
 		});
 	}
 
-	var now = new Date(),
-		currentMonth = now.getMonth(),
-		currentYear = now.getFullYear();
-
-	displayCalendar(currentYear, currentMonth);
-
-	$("#prev_month").click(function()
+	jQuery(document).ready(function()
 	{
-		currentMonth--;
-		if( currentMonth == -1 )
-		{
-			currentMonth = 11;
-			currentYear--;
-		}
+		var now = new Date(),
+			currentMonth = now.getMonth(),
+			currentYear = now.getFullYear();
 
 		displayCalendar(currentYear, currentMonth);
-	});
 
-	$("#next_month").click(function()
-	{
-		currentMonth++;
-		if( currentMonth == 12 )
+		$("#prev_month").click(function()
 		{
-			currentMonth = 0;
-			currentYear++;
-		}
-
-		displayCalendar(currentYear, currentMonth);
-	});
-
-	$(".plan_posts_list").on('click' , '.remove_plan' , function()
-	{
-		var scheduleId = $(this).closest('.plan_box').data('schedule-id');
-
-		fsCode.confirm('Do you want to remove this schedule?<br>Note: if you remove this shceudle then all planned posts also will be stopped automatically.', 'warning', function()
-		{
-			fsCode.ajax('delete_schedule' , {'id': scheduleId}, function()
+			currentMonth--;
+			if( currentMonth == -1 )
 			{
-				displayCalendar(currentYear, currentMonth);
-			});
+				currentMonth = 11;
+				currentYear--;
+			}
+
+			displayCalendar(currentYear, currentMonth);
 		});
 
-	});
+		$("#next_month").click(function()
+		{
+			currentMonth++;
+			if( currentMonth == 12 )
+			{
+				currentMonth = 0;
+				currentYear++;
+			}
 
-	$("#calendar_area").on('click', '.days[data-count]', function( )
-	{
-		var date = $(this).attr('data-date');
+			displayCalendar(currentYear, currentMonth);
+		});
 
-		$(".plan_posts_list > .plan_box:not([data-date=\"" + date + "\"])").slideUp(200);
-		$(".plan_posts_list > .plan_box[data-date=\"" + date + "\"]").slideDown(200);
+		$(".plan_posts_list").on('click' , '.remove_plan' , function()
+		{
+			var scheduleId = $(this).closest('.plan_box').data('schedule-id');
 
-		$("#calendar_area .dayNow").removeClass('dayNow');
-		$(this).addClass('dayNow');
+			fsCode.confirm('Do you want to remove this schedule?<br>Note: if you remove this shceudle then all planned posts also will be stopped automatically.', 'warning', function()
+			{
+				fsCode.ajax('delete_schedule' , {'id': scheduleId}, function()
+				{
+					displayCalendar(currentYear, currentMonth);
+				});
+			});
+
+		});
+
+		$("#calendar_area").on('click', '.days[data-count]', function( )
+		{
+			var date = $(this).attr('data-date');
+
+			$(".plan_posts_list > .plan_box:not([data-date=\"" + date + "\"])").slideUp(200);
+			$(".plan_posts_list > .plan_box[data-date=\"" + date + "\"]").slideDown(200);
+
+			$("#calendar_area .dayNow").removeClass('dayNow');
+			$(this).addClass('dayNow');
+		});
 	});
 
 </script>

@@ -107,7 +107,7 @@ trait FSPReports
 			$nodeInfTable = $feedInf['node_type'] == 'account' ? 'accounts' : 'account_nodes';
 
 			$nodeInf = wpFetch($nodeInfTable , $feedInf['node_id']);
-			if( $feedInf['node_type'] == 'account' )
+			if( $nodeInf && $feedInf['node_type'] == 'account' )
 			{
 				$nodeInf['node_type'] = 'account';
 			}
@@ -125,6 +125,10 @@ trait FSPReports
 
 				$proxy          = $nInf['info']['proxy'];
 				$accessToken    = $nInf['access_token'];
+				$appId			= $nInf['app_id'];
+
+				$appInf			= wpFetch('apps' , $appId);
+
 				if( $feedInf['driver'] == 'fb' )
 				{
 					require_once LIB_DIR . "fb/FacebookLib.php";
@@ -138,12 +142,12 @@ trait FSPReports
 				else if( $feedInf['driver'] == 'twitter' )
 				{
 					require_once LIB_DIR . "twitter/TwitterLib.php";
-					$insights = TwitterLib::getStats($feedInf['driver_post_id'] , $accessToken , $nInf['access_token_secret'] , $nInf['app_id'] , $proxy);
+					$insights = TwitterLib::getStats($feedInf['driver_post_id'] , $accessToken , $nInf['access_token_secret'] , $appId , $proxy);
 				}
 				else if( $feedInf['driver'] == 'instagram' )
 				{
-					require_once LIB_DIR . "instagram/Instagram.php";
-					$insights = Instagram::getStats($feedInf['driver_post_id2'] , $nInf['info'] , $proxy);
+					require_once LIB_DIR . "instagram/FSInstagram.php";
+					$insights = FSInstagram::getStats($feedInf['driver_post_id2'], $feedInf['driver_post_id'] , $nInf['info'] , $proxy);
 				}
 				else if( $feedInf['driver'] == 'linkedin' )
 				{
@@ -160,17 +164,24 @@ trait FSPReports
 					require_once LIB_DIR . "reddit/Reddit.php";
 					$insights = Reddit::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
 				}
+				else if( $feedInf['driver'] == 'ok' )
+				{
+					require_once LIB_DIR . "ok/OdnoKlassniki.php";
+					$postId2 = explode('/' , $feedInf['driver_post_id']);
+					$postId2 = end($postId2);
+					$insights = OdnoKlassniki::getStats($postId2 , $accessToken , $appInf['app_key'] , $appInf['app_secret'] , $proxy);
+				}
 			}
 
 			$resultData[] = [
 				'id'            =>  $feedInf['id'],
-				'name'          =>  htmlspecialchars($nodeInf['name']),
+				'name'          =>  $nodeInf ? htmlspecialchars($nodeInf['name']) : ' - deleted',
 				'post_id'       =>  htmlspecialchars($feedInf['driver_post_id']),
 				'post_title'    =>  htmlspecialchars($postInf->post_title),
 				'cover'         =>  profilePic($nodeInf),
 				'profile_link'  =>  profileLink($nodeInf),
 				'is_sended'     =>  $feedInf['is_sended'],
-				'post_link'     =>  postLink($feedInf['driver_post_id'] , $feedInf['driver'] , isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : $nodeInf['username']),
+				'post_link'     =>  postLink($feedInf['driver_post_id'] , $feedInf['driver'] , isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username'])?$nodeInf['username']:'-')),
 				'status'        =>  $feedInf['status'],
 				'error_msg'     =>  $feedInf['error_msg'],
 				'hits'          =>  $feedInf['visit_count'],
@@ -186,5 +197,12 @@ trait FSPReports
 
 		response(true , ['data' => $resultData , 'disable_btn' => $nextBtnDisable]);
 
+	}
+
+	public function fs_clear_logs()
+	{
+		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE is_sended=1 OR (send_time+INTERVAL 2 DAY)<NOW()');
+
+		response(true);
 	}
 }

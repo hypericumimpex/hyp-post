@@ -2,7 +2,7 @@
 /*
  * Plugin Name: HYP Poster
  * Description: Facebook, Twitter , Instagram, Google+, Linkedin, Reddit, Tumblr, VK, Pinterest Auto Poster Plugin. Post WooCommerce products. Schedule your posts i.e
- * Version: 2.2.1
+ * Version: 2.6.2
  * Author: HYP
  * Author URI: https://github.com/hypericumimpex/hyp-post
  * License: GNU General Public License v3 or later
@@ -10,10 +10,12 @@
  * Text Domain: fs-poster
  */
 
-if ( ! defined( 'ABSPATH' ) )
+if ( !defined( 'ABSPATH' ) )
 {
 	exit;
 }
+
+define('FS_ROOT_DIR', __DIR__);
 
 require_once "includes/Config.php";
 require_once INCLUDES_DIR . 'CronJob.php';
@@ -33,14 +35,14 @@ if( is_admin() )
 
 	add_action('admin_enqueue_scripts' , function()
 	{
-		wp_register_script('fs-code.js', plugins_url( 'js/fs-code.js', __FILE__ ) , array( 'jquery' ) , '2.1.4');
+		wp_register_script('fs-code.js', plugins_url( 'js/fs-code.js', __FILE__ ) , array( 'jquery' ) , '2.6.2');
 		wp_enqueue_script( 'fs-code.js' );
 
-		wp_enqueue_style( 'fs-code.css', plugins_url('css/fs-code.css', __FILE__) , [] , '2.1.4' );
+		wp_enqueue_style( 'fs-code.css', plugins_url('css/fs-code.css', __FILE__) , [] , '2.6.2' );
 		wp_enqueue_style( 'font_aweasome', '//use.fontawesome.com/releases/v5.0.13/css/all.css' );
 	});
 
-	$activationKey = get_option('fs_poster_plugin_purchase_key' , 'a');
+	$activationKey = get_option('fs_poster_plugin_purchase_key' , '');
 
 	if( !empty($activationKey) )
 	{
@@ -82,7 +84,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 add_action( 'init', function ()
 {
 	register_post_type( 'fs_post', [
-		'labels'	=> [
+		'labels'		=> [
 			'name'			=> __( 'FS Posts' ),
 			'singular_name'	=> __( 'FS Post' )
 		],
@@ -90,4 +92,3 @@ add_action( 'init', function ()
 		'has_archive'	=> true
 	]);
 });
-

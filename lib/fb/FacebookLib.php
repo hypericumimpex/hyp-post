@@ -199,8 +199,8 @@ class FacebookLib
 			'driver'			=>	'fb',
 			'profile_id'		=>	$meId,
 			'email'				=>	$me['email'],
-			'gender'			=>	$me['gender'] == 'male' ? '1' : '2',
-			'birthday'			=>	date('Y-m-d' , strtotime($me['birthday'])),
+			'gender'			=>	isset($me['gender']) && $me['gender'] == 'male' ? '1' : '2',
+			'birthday'			=>	date('Y-m-d' , strtotime(isset($me['birthday']) ? $me['birthday'] : '')),
 			'proxy'             =>  $proxy
 		];
 
@@ -239,7 +239,7 @@ class FacebookLib
 
 		// my pages load
 		$loadedOwnPages = [];
-		if( get_option('load_own_pages' , 1) == 1 )
+		if( get_option('fs_load_own_pages' , 1) == 1 )
 		{
 			$accountsList = self::cmd('/me/accounts', 'GET' , $accessToken , ['fields' => 'access_token,category,name,id,likes'] , $proxy );
 
@@ -259,7 +259,7 @@ class FacebookLib
 						'name'				=>	$accountInfo['name'],
 						'access_token'		=>	$accountInfo['access_token'],
 						'category'			=>	$accountInfo['category'],
-						'fan_count'			=>	$accountInfo['likes']
+						'fan_count'			=>	isset($accountInfo['likes']) ? $accountInfo['likes'] : 0
 					]);
 					$loadedOwnPages[ $accountInfo['id'] ] = true;
 				}
@@ -267,9 +267,9 @@ class FacebookLib
 		}
 
 		// pages load
-		if( get_option('load_liked_pages' , 0) == 1 )
+		if( get_option('fs_load_liked_pages' , 0) == 1 )
 		{
-			$limit = get_option('max_liked_pages_limit' , 100);
+			$limit = get_option('fs_max_liked_pages_limit' , 100);
 			$limit = $limit >= 0 ? $limit : 0;
 
 			$accountsList = self::cmd('/me/likes', 'GET' , $accessToken , [
@@ -304,9 +304,9 @@ class FacebookLib
 		}
 
 		// groups load
-		if( get_option('load_groups' , 1) == 1 )
+		if( get_option('fs_load_groups' , 1) == 1 )
 		{
-			$limit = get_option('max_groups_limit' , 100);
+			$limit = get_option('fs_max_groups_limit' , 100);
 			$limit = $limit >= 0 ? $limit : 0;
 
 			$accountsList = self::cmd('/me/groups' , 'GET' , $accessToken , [
@@ -366,17 +366,17 @@ class FacebookLib
 	{
 		$data['access_token'] = $accessToken;
 
-		$url = 'https://graph.facebook.com/' . $cmd . '?' . http_build_query( $data );
+		$url = 'https://graph.facebook.com/' . $cmd; //. '?' . http_build_query( $data );
 
 		$method = $method == 'POST' ? 'POST' : ( $method == 'DELETE' ? 'DELETE' : 'GET' );
 
-		$data1 = FSCurl::getContents( $url , $method , [] , [] , $proxy );
+		$data1 = FSCurl::getContents( $url , $method , $data , [] , $proxy , true );
 		$data = json_decode( $data1 , true );
 
 		if( !is_array($data) )
 		{
 			$data = [
-				'error' =>  ['message' => 'Error data!']
+				'error' =>  ['message' => 'Error data! (' . $data1 . ')']
 			];
 		}
 
@@ -434,6 +434,7 @@ class FacebookLib
 			}
 
 		}
+
 		if( $type == 'video' )
 		{
 			$endPoint = 'videos';

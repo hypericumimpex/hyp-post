@@ -38,6 +38,11 @@ class ModalClass
 		modalView('add_linkedin_account');
 	}
 
+	public function modal_add_ok_account()
+	{
+		modalView('add_ok_account');
+	}
+
 	public function modal_add_google_account_methods()
 	{
 		modalView('add_google_account_methods');
@@ -91,6 +96,16 @@ class ModalClass
 	public function modal_add_instagram_account()
 	{
 		modalView('add_instagram_account');
+	}
+
+	public function modal_add_instagram_account_case()
+	{
+		modalView('add_instagram_account_case');
+	}
+
+	public function modal_add_instagram_account_cookies_method()
+	{
+		modalView('add_instagram_account_cookies_method');
 	}
 
 	public function modal_add_app()

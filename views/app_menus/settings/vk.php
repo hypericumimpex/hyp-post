@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<div class="s_input">
 				<div class="onoffswitch">
-					<input type="checkbox" name="vk_load_admin_communities" class="onoffswitch-checkbox" id="vk_load_admin_communities"<?=get_option('vk_load_admin_communities', '1')?' checked':''?>>
-					<label class="onoffswitch-label" for="vk_load_admin_communities"></label>
+					<input type="checkbox" name="fs_vk_load_admin_communities" class="onoffswitch-checkbox" id="fs_vk_load_admin_communities"<?=get_option('fs_vk_load_admin_communities', '1')?' checked':''?>>
+					<label class="onoffswitch-label" for="fs_vk_load_admin_communities"></label>
 				</div>
 			</div>
 		</div>
@@ -30,8 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<div class="s_input">
 				<div class="onoffswitch">
-					<input type="checkbox" name="vk_load_members_communities" class="onoffswitch-checkbox" id="vk_load_members_communities"<?=get_option('vk_load_members_communities', '1')?' checked':''?> onchange="if($(this).is(':checked')){ $('#hide2').fadeIn(fadeSpeed); }else{ $('#hide2').fadeOut(fadeSpeed); }">
-					<label class="onoffswitch-label" for="vk_load_members_communities"></label>
+					<input type="checkbox" name="fs_vk_load_members_communities" class="onoffswitch-checkbox" id="fs_vk_load_members_communities"<?=get_option('fs_vk_load_members_communities', '1')?' checked':''?> onchange="if($(this).is(':checked')){ $('#hide2').fadeIn(fadeSpeed); }else{ $('#hide2').fadeOut(fadeSpeed); }">
+					<label class="onoffswitch-label" for="fs_vk_load_members_communities"></label>
 				</div>
 			</div>
 		</div>
@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="s_help"><?=esc_html__('Within the added account, communities will have a limit in regards to amount of loads (you will have a MAX of 1000 communities to load).' , 'fs-poster');?></div>
 			</div>
 			<div class="s_input">
-				<input type="text" name="vk_max_communities_limit" class="ws_form_element" style="text-align: center; width: 50px;" value="<?=esc_html(get_option('vk_max_communities_limit', '100'))?>">
+				<input type="text" name="vk_max_communities_limit" class="ws_form_element" style="text-align: center; width: 50px;" value="<?=esc_html(get_option('fs_vk_max_communities_limit', '100'))?>">
 			</div>
 		</div>
 	</div>
@@ -85,6 +85,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
 				</div>
 				<div class="text_codes">
+					<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
+				</div>
+				<div class="text_codes">
 					<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_short_40}</div>
 				</div>
@@ -124,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 	<div class="s_input" style="width: 45%;">
-		<textarea class="ws_form_element2" name="post_text_message_vk" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('post_text_message_vk', "{title}"))?></textarea>
+		<textarea class="ws_form_element2" name="fs_post_text_message_vk" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_vk', "{title}"))?></textarea>
 	</div>
 </div>
 
@@ -142,7 +146,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			});
 		});
 
-		$("#vk_load_members_communities").trigger('change');
+		$("#fs_vk_load_members_communities").trigger('change');
 
 		fadeSpeed = 200;
 	});

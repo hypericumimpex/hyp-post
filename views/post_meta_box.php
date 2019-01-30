@@ -251,7 +251,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 				<div>
 					<div class="onoffswitch">
 						<input type="hidden" name="share_checked" value="off">
-						<input type="checkbox" name="share_checked" class="onoffswitch-checkbox" id="shareCheckbox" checked>
+						<input type="checkbox" name="share_checked" class="onoffswitch-checkbox" id="shareCheckbox"<?=get_option('fs_auto_share_new_posts', '1')?' checked':''?>>
 						<label class="onoffswitch-label" for="shareCheckbox"></label>
 					</div>
 				</div>
@@ -267,8 +267,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 			<div data-tab-id="reddit" class="sb_tab"><i class="fab fa-reddit "></i></div>
 			<div data-tab-id="tumblr" class="sb_tab"><i class="fab fa-tumblr "></i></div>
 			<div data-tab-id="google" class="sb_tab"><i class="fab fa-google "></i></div>
-
-			<div class="add_to_list_btn"><i class="fa fa-plus"></i></div>
+			<div data-tab-id="ok" class="sb_tab"><i class="fab fa-odnoklassniki"></i></div>
 		</div>
 		<div class="share_box_items share_box_sh" id="share_box1">
 			<?php
@@ -302,42 +301,50 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 			}
 			?>
 		</div>
-		<div id="custom_messages">
+		<div style="display: flex; justify-content: space-between; margin-top: 5px;" class="share_box_sh">
+			<div class="ws_bg_default ws_btn add_to_list_btn" style="padding: 4px 10px; border-radius: 3px; height: 18px !important;"><i class="fa fa-plus"></i> add account</div>
+			<div class="ws_bg_warning ws_btn remove_all_from_list" style="padding: 4px 10px; border-radius: 3px; height: 18px !important;"><i class="fa fa-times"></i> empty list</div>
+		</div>
+		<div id="custom_messages" class="share_box_sh">
 			<div data-tab="fb">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize FB post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_fb"><?=htmlspecialchars(get_option('post_text_message_fb'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_fb"><?=htmlspecialchars(get_option('fs_post_text_message_fb'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="twitter">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Twitter post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_twitter"><?=htmlspecialchars(get_option('post_text_message_twitter'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_twitter"><?=htmlspecialchars(get_option('fs_post_text_message_twitter'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="instagram">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Instagram post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_instagram"><?=htmlspecialchars(get_option('post_text_message_instagram'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram"><?=htmlspecialchars(get_option('fs_post_text_message_instagram'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="linkedin">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Linkedin post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_linkedin"><?=htmlspecialchars(get_option('post_text_message_linkedin'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_linkedin"><?=htmlspecialchars(get_option('fs_post_text_message_linkedin'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="vk">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize VK post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_vk"><?=htmlspecialchars(get_option('post_text_message_vk'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_vk"><?=htmlspecialchars(get_option('fs_post_text_message_vk'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="pinterest">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Pinterest post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_pinterest"><?=htmlspecialchars(get_option('post_text_message_pinterest'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_pinterest"><?=htmlspecialchars(get_option('fs_post_text_message_pinterest'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="reddit">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Reddit post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_reddit"><?=htmlspecialchars(get_option('post_text_message_reddit'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_reddit"><?=htmlspecialchars(get_option('fs_post_text_message_reddit'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="tumblr">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Thumblr post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_thumblr"><?=htmlspecialchars(get_option('post_text_message_thumblr'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_thumblr"><?=htmlspecialchars(get_option('fs_post_text_message_thumblr'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="google">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Google+ post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="post_text_message_google"><?=htmlspecialchars(get_option('post_text_message_google'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_google"><?=htmlspecialchars(get_option('fs_post_text_message_google'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+			</div>
+			<div data-tab="ok">
+				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize OK.ru post message' , 'fs-poster')?></label></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_ok"><?=htmlspecialchars(get_option('fs_post_text_message_ok'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 		</div>
 	</div>
@@ -367,8 +374,8 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 
 			var tab = $(this).attr('data-tab-id');
 
-			$("#share_box1 > :not([data-tab='\"+tab+\"'])").hide(200);
-			$("#share_box1 > [data-tab='"+tab+"']").show(200);
+			$("#share_box1 > :not([data-tab='\"+tab+\"'])").slideUp(200);
+			$("#share_box1 > [data-tab='"+tab+"']").slideDown(200);
 
 			$("#custom_messages > [data-tab]").hide();
 
@@ -390,7 +397,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 		$("#share_box1").on('click' , '.node_remove_btn', function()
 		{
 			var box = $(this).closest('.share_box_node');
-			fsCode.confirm("<?=esc_html__('Do you want to remove the \'community\'?' , 'fs-poster')?>" , 'danger', function()
+			fsCode.confirm("<?=esc_html__('Do you want to remove this from share list?' , 'fs-poster')?>" , 'danger', function()
 			{
 				box.hide(500 , function()
 				{
@@ -408,11 +415,50 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 			});
 			fsCode.loadModal('add_node_to_list' , {'dont_show': excepts});
 		});
+		$(".remove_all_from_list").click(function()
+		{
+			fsCode.confirm("<?=esc_html__('Do you want to empty share list?' , 'fs-poster')?>" , 'danger', function()
+			{
+				$("#share_box1 > .share_box_node").remove();
+			} , true);
+		});
 		<?php
 		if(!defined('NOT_CHECK_SP') && isset($chechNotSendedFeeds) && $chechNotSendedFeeds['cc'] > 0)
 		{
 			?>
 			fsCode.loadModal('share_feeds' , {'post_id': '<?=(int)$postId?>'})
+			<?php
+		}
+
+		if( (int)get_option('fs_share_on_background' , '1') == 0 && get_post_status() != 'publish' )
+		{
+			?>
+			if( $('.block-editor__container').length )
+			{
+				var publishHook = setInterval(function()
+				{
+					var newUrl = location.href,
+						check = newUrl.match(/post\.php\?post\=([0-9]+)/);
+
+					if( check )
+					{
+						var postId = check[1];
+
+						setTimeout(function()
+						{
+							fsCode.ajax('check_post_is_published', {'id': postId}, function(result)
+							{
+								if( result['post_status'] )
+								{
+									fsCode.loadModal('share_feeds' , {'post_id': postId, 'dont_reload':'1'});
+								}
+							});
+						}, 1500);
+
+						clearInterval(publishHook);
+					}
+				}, 1000);
+			}
 			<?php
 		}
 		?>
@@ -421,7 +467,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 	function addNodeToList( dataId, cover, name)
 	{
 		dataId = dataId.split(':');
-		var tab         =   dataId[0]
+		var tab         =   dataId[0],
 			nodeType    =   dataId[1],
 			id          =   dataId[2];
 
@@ -438,4 +484,5 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 
 		$(".sn_tabs > .active_tab").click();
 	}
+
 </script>

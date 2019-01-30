@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'google']);
+$settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'google' , 'ok']);
 ?>
 
 <style>
@@ -28,7 +28,7 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 		width: 100%;
 		background: #FFF;
 		border: 1px solid #DDD;
-		min-height: 400px;
+		min-height: 430px;
 		-webkit-border-radius: 5px;
 		-moz-border-radius: 5px;
 		border-radius: 5px;
@@ -159,8 +159,6 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 		background-color: #2196F3;
 		box-shadow: 3px 6px 18px 0px rgba(0, 0, 0, 0.2);
 	}
-</style>
-<style>
 	.text_codes
 	{
 		display: flex;
@@ -174,6 +172,42 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 	{
 		font-weight: 700;
 		cursor: pointer;
+	}
+	.fs_image_buttons1
+	{
+		display: flex;
+		width: 615px;
+	}
+	.fs_image_buttons1 > div
+	{
+		width: 170px;
+		display: flex;
+		flex-direction: column;
+		margin-right: 10px;
+		align-items: center;
+		cursor: pointer;
+	}
+	.fs_image_buttons1 > div > img
+	{
+		height: 200px;
+		width: 145px;
+		border: 1px solid #DDD;
+
+	}
+	.fs_image_buttons1 > div.selected_btn > img
+	{
+		border: 1px solid #4DB3A2;
+		-webkit-box-shadow: 0px 0px 4px 1px #4DB3A2;
+		-moz-box-shadow: 0px 0px 4px 1px #4DB3A2;
+		box-shadow: 0px 0px 4px 1px #4DB3A2;
+	}
+	.fs_image_buttons1 > div > span
+	{
+		font-size: 15px !important;
+		font-weight: 600;
+		padding: 10px;
+		color: #555;
+		text-align: center;
 	}
 </style>
 
@@ -192,6 +226,7 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 		<a href="?page=fs-poster-settings&setting=tumblr" class="settings_menu<?=$settingTab=='tumblr'?' active_menu':''?>"><i class="fab fa-tumblr"></i> <?=esc_html__('Tumblr settings' , 'fs-poster');?></a>
 		<a href="?page=fs-poster-settings&setting=reddit" class="settings_menu<?=$settingTab=='reddit'?' active_menu':''?>"><i class="fab fa-reddit"></i> <?=esc_html__('Reddit settings' , 'fs-poster');?></a>
 		<a href="?page=fs-poster-settings&setting=google" class="settings_menu<?=$settingTab=='google'?' active_menu':''?>"><i class="fab fa-google"></i> <?=esc_html__('Google settings' , 'fs-poster');?></a>
+		<a href="?page=fs-poster-settings&setting=ok" class="settings_menu<?=$settingTab=='ok'?' active_menu':''?>"><i class="fab fa-odnoklassniki"></i> <?=esc_html__('OK settings' , 'fs-poster');?></a>
 	</div>
 	<div class="settings_panel_r">
 		<?php
@@ -211,6 +246,14 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 		$('.append_to_text').click(function()
 		{
 			$("#custom_text_area").val($("#custom_text_area").val() + $(this).text().trim());
+		});
+
+		$(".fs_image_buttons1 > div").click(function()
+		{
+			$(".fs_image_buttons1 > div.selected_btn").removeClass('selected_btn');
+			$(this).addClass('selected_btn');
+
+			$(".fs_image_buttons1").prev('input').val($(this).data('id'));
 		});
 	});
 </script>

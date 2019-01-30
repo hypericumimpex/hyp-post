@@ -24,7 +24,7 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 
 <div style="margin: 40px 80px;">
 	<span style="color: #888; font-size: 17px; font-weight: 600; line-height: 36px;"><span id="accounts_count"><?php print count($accountsList);?></span> <?=__('instagram account added', 'fs-poster')?></span>
-	<button type="button" class="ws_btn ws_bg_dark" style="float: right;" data-load-modal="add_instagram_account"><i class="fa fa-plus"></i> <?=esc_html__('ADD ACCOUNT', 'fs-poster')?></button>
+	<button type="button" class="ws_btn ws_bg_dark" style="float: right;" data-load-modal="add_instagram_account_case"><i class="fa fa-plus"></i> <?=esc_html__('ADD ACCOUNT', 'fs-poster')?></button>
 </div>
 <div class="ws_table_wraper">
 	<table class="ws_table">

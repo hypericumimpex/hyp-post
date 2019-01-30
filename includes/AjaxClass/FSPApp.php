@@ -40,20 +40,12 @@ trait FSPApp
 		$appSupports = [
 			'fb'        =>  ['app_id' , 'app_key'],
 			'twitter'   =>  ['app_key' , 'app_secret'],
-			'linkedin'  =>  ['app_id' , 'app_key'],
-			'vk'        =>  ['app_id' , 'app_key'],
-			'pinterest' =>  ['app_id' , 'app_key'],
-			'reddit'    =>  ['app_id' , 'app_key'],
-			'tumblr'    =>  ['app_key' , 'app_secret']
-		];
-		$appSupports = [
-			'fb'        =>  ['app_id' , 'app_key'],
-			'twitter'   =>  ['app_key' , 'app_secret'],
 			'linkedin'  =>  ['app_id' , 'app_secret'],
 			'vk'        =>  ['app_id' , 'app_secret'],
 			'pinterest' =>  ['app_id' , 'app_secret'],
 			'reddit'    =>  ['app_id' , 'app_secret'],
-			'tumblr'    =>  ['app_key' , 'app_secret']
+			'tumblr'    =>  ['app_key' , 'app_secret'],
+			'ok'    	=>  ['app_id' , 'app_key' , 'app_secret']
 		];
 
 		if( !isset($appSupports[$driver]) )

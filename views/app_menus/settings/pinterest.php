@@ -23,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
 				</div>
 				<div class="text_codes">
+					<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
+				</div>
+				<div class="text_codes">
 					<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_short_40}</div>
 				</div>
@@ -62,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 	<div class="s_input" style="width: 45%;">
-		<textarea class="ws_form_element2" name="post_text_message_pinterest" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('post_text_message_pinterest', "{title}"))?></textarea>
+		<textarea class="ws_form_element2" name="fs_post_text_message_pinterest" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_pinterest', "{title}"))?></textarea>
 	</div>
 </div>
 
@@ -80,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			});
 		});
 
-		$("#vk_load_members_communities").trigger('change');
+		$("#fs_vk_load_members_communities").trigger('change');
 
 		fadeSpeed = 200;
 	});
