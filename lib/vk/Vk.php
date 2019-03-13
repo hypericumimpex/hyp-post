@@ -140,8 +140,8 @@ class Vk
 						'name'				=>	$accountInfo['name'],
 						'access_token'		=>	null,
 						'category'			=>	'',
-						'fan_count'			=>	$accountInfo['members_count'],
-						'cover'				=>	$accountInfo['photo_50']
+						'fan_count'			=>	isset($accountInfo['members_count']) ? $accountInfo['members_count'] : 0,
+						'cover'				=>	isset($accountInfo['photo_50']) ? $accountInfo['photo_50'] : ''
 					]);
 				}
 			}
@@ -211,7 +211,13 @@ class Vk
 				$sendData['attachments'] = [ ];
 			}
 
-			$uplServer = self::cmd('photos.getWallUploadServer' , 'GET' , $accessToken /* , [group_id]*/ , [] , $proxy);
+			$uplData = [ ];
+			if( $nodeFbId < 0 )
+			{
+				$uplData['group_id'] = abs( $nodeFbId );
+			}
+
+			$uplServer = self::cmd('photos.getWallUploadServer' , 'GET' , $accessToken , $uplData , $proxy);
 
 			if( isset( $uplServer['upload_url'] ) )
 			{
@@ -235,7 +241,15 @@ class Vk
 				$uploadFile = FSCurl::getContents( $uplServer , 'POST' , $images2 , [] , $proxy );
 				$uploadFile = json_decode($uploadFile , true);
 
-				//$uploadFile['user_id'] = $nodeFbId;
+				if( $nodeFbId < 0 )
+				{
+					$uploadFile['group_id'] = abs( $nodeFbId );
+
+				}
+				else
+				{
+					$uploadFile['user_id'] = $nodeFbId;
+				}
 
 				if( is_array($uploadFile) && !empty($uploadFile) )
 				{

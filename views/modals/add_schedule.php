@@ -193,6 +193,11 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		font-size: 11px;
 		color: #888;
 	}
+
+	.ui-datepicker
+	{
+		z-index: 9999999999999 !important;
+	}
 </style>
 
 <span class="close" data-modal-close="true" style="color: #FFF;">&times;</span>
@@ -275,15 +280,15 @@ $activeNodes = array_merge($accounts , $activeNodes);
 				</div>
 
 				<div style="width: 100%; display: flex; margin-top: 5px;">
-					<div style="width: 45%; display: flex; align-items: center;">
+					<div style="width: 50%; display: flex; align-items: center;">
 						<select class="ws_form_element post_sort">
+							<option value="random2">Random (no duplicates)</option>
 							<option value="random">Random</option>
 							<option value="old_first">Old posts first</option>
 							<option value="new_first">New posts first</option>
 						</select>
 						<span class="ws_tooltip" data-title="Method for selecting posts." style="padding: 10px;"><i class="fa fa-info-circle"></i></span>
 					</div>
-					<div style="width: 5%;"></div>
 					<div style="width: 50%; display: flex; align-items: center;">
 						<select class="ws_form_element post_date_filter">
 							<option value="all">All posts</option>
@@ -558,6 +563,21 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					accounts_list.push( $(this).find('input[name="share_on_nodes[]"]').val() );
 				});
 			}
+
+			<?php
+			if( !get_option('fs_keep_logs', 1) )
+			{
+				?>
+
+				if( post_sort == 'random2' )
+				{
+					fsCode.alert('You can not select "Random (no duplicates)" option. Because in your General settings "Keep shared posts log" is disabled. Please activate it firstly.');
+					return false;
+				}
+
+				<?php
+			}
+			?>
 
 			fsCode.ajax('schedule_save' , {
 				'title':				title,

@@ -76,13 +76,13 @@ class Reddit
 	 * @param string $proxy
 	 * @return mixed
 	 */
-	public static function cmd( $cmd , $method , $accessToken , array $data = [] , $proxy = '' )
+	public static function cmd( $cmd , $method , $accessToken ,  $data = [] , $proxy = '' )
 	{
 		$url = $cmd;
 
 		$method = $method == 'POST' ? 'POST' : ( $method == 'DELETE' ? 'DELETE' : 'GET' );
 
-		$data1 = FSCurl::getContents( $url , $method , $data, ['Authorization' => 'bearer ' . $accessToken] , $proxy );
+		$data1 = FSCurl::getContents( $url , $method , $data, ['Authorization' => 'bearer ' . $accessToken] , $proxy, true );
 		$data = json_decode( $data1 , true );
 
 		if( !is_array($data) )
@@ -109,17 +109,27 @@ class Reddit
 	 */
 	public static function sendPost( $accountInfo , $type , $title , $message , $link , $images , $video , $accessToken , $proxy )
 	{
-		$options = json_decode($accountInfo['options'] , true);
-
-		$subReddit = !empty($options['subreddit']) ? $options['subreddit'] : 'u_' . $accountInfo['username'];
-
 		$sendData = [
-			'sr'            =>  $subReddit,
-			'title'         =>  $title,
+			'title'         =>  empty($title) ? $message : $title,
 			'resubmit'      =>  'true',
 			'send_replies'  =>  'true',
-			'api_type'      =>  'json'
+			'api_type'      =>  'json',
 		];
+
+		if( isset($accountInfo['screen_name']) )
+		{
+			$sendData['sr'] = $accountInfo['screen_name'];
+
+			if( !empty($accountInfo['access_token']) )
+			{
+				$sendData['flair_text']	= $accountInfo['category'];
+				$sendData['flair_id']	= $accountInfo['access_token'];
+			}
+		}
+		else
+		{
+			$sendData['sr'] = 'u_' . $accountInfo['username'];
+		}
 
 		if( $type == 'image' )
 		{
@@ -159,6 +169,13 @@ class Reddit
 				'error_msg'	=>	$error[1]
 			];
 		}
+		else if( !isset($result['json']) )
+		{
+			$result2 = [
+				'status'	=>	'error',
+				'error_msg'	=>	'Error result!' . json_encode( $result )
+			];
+		}
 		else
 		{
 			$result2 = [
@@ -191,7 +208,7 @@ class Reddit
 
 		$callbackUrl = urlencode(self::callbackUrl());
 
-		return "https://www.reddit.com/api/v1/authorize?client_id={$appId}&response_type=code&redirect_uri={$callbackUrl}&duration=permanent&scope=identity,submit&state=" . $_SESSION['_state'];
+		return "https://www.reddit.com/api/v1/authorize?client_id={$appId}&response_type=code&redirect_uri={$callbackUrl}&duration=permanent&scope=identity,submit,flair,read&state=" . $_SESSION['_state'];
 	}
 
 	/**

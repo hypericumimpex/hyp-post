@@ -513,7 +513,7 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 
 			$("#sub_menu2")
 				.show()
-				.css('top' , $(this).offset().top + 35)
+				.css('top' , $(this).offset().top + 35 - $(window).scrollTop())
 				.css('left' , $(this).offset().left - ($("#sub_menu2").width()/2) + 10)
 				.data('id' , dataId);
 		});

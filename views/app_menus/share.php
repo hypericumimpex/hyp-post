@@ -4,10 +4,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 wp_enqueue_media();
 
+wpDB()->query("DELETE FROM " . wpDB()->base_prefix . "posts WHERE post_type='fs_post_tmp' AND CAST(post_date AS DATE)<CAST(NOW() AS DATE)");
+
+
 $postId = _get('post_id' , '0' , 'num');
 
 $postInf = get_post($postId , ARRAY_A);
-if( $postInf['post_type'] != 'fs_post' || $postInf['post_author'] != get_current_user_id() )
+if( !in_array( $postInf['post_type'] , ['fs_post', 'fs_post_tmp'] ) || $postInf['post_author'] != get_current_user_id() )
 {
 	$postId = 0;
 	$link = '';
@@ -73,11 +76,6 @@ else
 		color: #ff7675 !important;
 	}
 
-	.add_to_list_btn
-	{
-		color: #FFF !important;
-	}
-
 	#share_box1
 	{
 		max-height: 300px !important;
@@ -85,13 +83,14 @@ else
 		-webkit-box-shadow: none !important;
 		-moz-box-shadow: none !important;
 		box-shadow: none !important;
+		min-height: 45px;
 	}
 
 
 	.accounts_list_panel
 	{
 		background: #fdcb6e;
-		width: 400px;
+		width: 45%;
 		border: 5px solid #FFF;
 		border-top-right-radius: 10px;
 		border-bottom-right-radius: 10px;
@@ -116,9 +115,10 @@ else
 		border-radius: 10px;
 	}
 </style>
-<div style="display: flex; justify-content: center; margin-top: 50px;">
-	<div style="background: #FFF; display: flex; width: 900px; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; border: 1px solid #DDD;">
-		<div style="width: 500px; padding: 30px;">
+
+<div style="width: 100%; margin-top: 50px; overflow: auto;">
+	<div style="margin: auto; background: #FFF; display: flex; width: 95%; max-width: 900px; min-width: 650px; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; border: 1px solid #DDD;">
+		<div style="width: 55%; padding: 30px;">
 
 			<div style="margin-bottom: 20px; text-align: center; font-size: 20px; font-weight: 600; color: #AAA;">Share posts</div>
 
@@ -143,7 +143,7 @@ else
 				<button type="button" class="ws_btn ws_bg_danger scheduleBtn" typeof="button" style="width: 32.5%;">Schedule</button>
 				<button type="button" class="ws_btn ws_bg_default saveBtn" typeof="button" style="width: 32.5%;">Save</button>
 			</div>
-			
+
 		</div>
 
 		<div class="accounts_list_panel">
@@ -153,6 +153,45 @@ else
 				?>
 			</div>
 		</div>
+
+	</div>
+</div>
+
+<div style="display: flex; justify-content: center; margin-top: 30px;">
+	<div style="width: 95%; max-width: 900px;">
+
+			<div style="margin-bottom: 20px; text-align: center; font-size: 20px; font-weight: 600; color: #AAA;">Saved posts</div>
+
+			<div>
+				<table class="ws_table">
+					<thead>
+						<tr>
+							<th style="width: 50px;">ID</th>
+							<th>Content</th>
+							<th style="width: 150px;">Date</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$currentUserId = (int)get_current_user_id();
+
+						$posts = wpDB()->get_results('SELECT * FROM ' . wpDB()->base_prefix . "posts WHERE post_type='fs_post' AND post_author='" . $currentUserId ."' ORDER BY ID DESC", ARRAY_A);
+
+						foreach( $posts AS $post )
+						{
+							print '<tr data-id="' . (int)$post['ID'] . '">';
+							print '<td>' . (int)$post['ID'] . '</td>';
+							print '<td><a href="?page=fs-poster-share&post_id=' . (int)$post['ID'] . '" style="text-decoration: none;">[ ' . htmlspecialchars(cutText($post['post_content'])) . ' ]</a></td>';
+							print '<td>
+								' . date('Y-m-d H:i', strtotime($post['post_date'])) . '
+								<button class="delete_post_btn delete_btn_desing ws_tooltip" data-title="Delete saved post" data-float="left"><i class="fa fa-trash"></i></button>
+							</td>';
+							print '</tr>';
+						}
+						?>
+					</tbody>
+				</table>
+			</div>
 
 	</div>
 </div>
@@ -195,10 +234,9 @@ else
 			$("#wpMediaBtn , .link_url").slideDown(500);
 		});
 
-
 		$(".saveBtn").click(function()
 		{
-			savePost(function()
+			savePost(false, function()
 			{
 				fsCode.toast('Saved successfully!');
 			});
@@ -206,7 +244,7 @@ else
 
 		$(".shareNowBtn").click(function()
 		{
-			savePost(function()
+			savePost(true, function()
 			{
 				var nodes = [];
 				$(".accounts_list_panel input[name='share_on_nodes[]']").each(function()
@@ -233,19 +271,36 @@ else
 
 		$(".scheduleBtn").click(function()
 		{
-			savePost(function()
+			savePost(false, function()
 			{
 				fsCode.loadModal('plan_saved_post' , {'post_id': saveId});
 			});
 		});
 
-		function savePost( callback )
+		$(".delete_post_btn").click(function()
+		{
+			var tr = $(this).closest('tr'),
+				postId = tr.data('id');
+
+			fsCode.confirm('Are you sure you want to delete?', 'danger', function()
+			{
+				fsCode.ajax('manual_share_delete', {'id': postId}, function()
+				{
+					tr.fadeOut(500, function()
+					{
+						$(this).remove();
+					});
+				});
+			});
+		});
+
+		function savePost( tmp, callback )
 		{
 			var link		=	$(".link_url").val(),
 				message		=	$(".message_box").val(),
 				image		=	$("#imageShow").data('id');
 
-			fsCode.ajax('manual_share_save' , {'id': saveId , 'link': link, 'message': message, 'image': image}, function (result)
+			fsCode.ajax('manual_share_save' , {'id': saveId , 'link': link, 'message': message, 'image': image, 'tmp': tmp?1:0}, function (result)
 			{
 				saveId = result['id'];
 

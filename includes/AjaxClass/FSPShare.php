@@ -105,7 +105,7 @@ trait FSPShare
 					continue;
 				}
 
-				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company' , 'community'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
+				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company' , 'community', 'subreddit'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
 				{
 					continue;
 				}

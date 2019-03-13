@@ -81,12 +81,14 @@ trait FSPReports
 		$page = _post('page' , '0' , 'num');
 		$schedule_id = _post('schedule_id' , '0' , 'num');
 
+		$rows_count2 = _post('rows_count' , '4' , 'int', ['4', '8', '15']);
+
 		if( !($page > 0) )
 		{
 			response(false);
 		}
 
-		$limit = 4;
+		$limit = $rows_count2;
 		$offset = ($page - 1) * $limit;
 
 		$queryAdd = '';
@@ -177,7 +179,7 @@ trait FSPReports
 				'id'            =>  $feedInf['id'],
 				'name'          =>  $nodeInf ? htmlspecialchars($nodeInf['name']) : ' - deleted',
 				'post_id'       =>  htmlspecialchars($feedInf['driver_post_id']),
-				'post_title'    =>  htmlspecialchars($postInf->post_title),
+				'post_title'    =>  htmlspecialchars(isset($postInf->post_title) ? $postInf->post_title : 'Deleted'),
 				'cover'         =>  profilePic($nodeInf),
 				'profile_link'  =>  profileLink($nodeInf),
 				'is_sended'     =>  $feedInf['is_sended'],
@@ -201,7 +203,7 @@ trait FSPReports
 
 	public function fs_clear_logs()
 	{
-		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE is_sended=1 OR (send_time+INTERVAL 2 DAY)<NOW()');
+		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE is_sended=1 OR (send_time+INTERVAL 1 DAY)<NOW()');
 
 		response(true);
 	}

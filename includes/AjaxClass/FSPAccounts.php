@@ -326,7 +326,7 @@ trait FSPAccounts
 		if( !isset($ig['ig']) )
 		{
 			wpDB()->delete(wpTable('account_sessions') , ['id' => $insertedId]);
-			response(false);
+			response(false, ( isset($ig['message']) && is_string($ig['message']) ? htmlspecialchars($ig['message']) : '' ) );
 		}
 
 		$ig = $ig['ig'];
@@ -885,5 +885,154 @@ trait FSPAccounts
 
 		response(true , ['id' => $nodeId]);
 	}
+
+	public function search_subreddits()
+	{
+		$accountId	= _post('account_id' , '0' , 'num');
+		$search		= _post('search', '', 'string');
+
+		$userId = get_current_user_id();
+
+		$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." tb1 WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+
+		if( !$accountInf )
+		{
+			response(false, 'You have not a permission for adding subreddit in this account!');
+		}
+
+		$accessTokenGet = wpFetch('account_access_tokens', ['account_id' => $accountId]);
+
+		require_once LIB_DIR . 'reddit/Reddit.php';
+
+		$accessToken = $accessTokenGet['access_token'];
+		if( (time()+30) > strtotime($accessTokenGet['expires_on']) )
+		{
+			$accessToken = Reddit::refreshToken($accessTokenGet);
+		}
+
+		$searchSubreddits = Reddit::cmd('https://oauth.reddit.com/api/search_subreddits', 'POST', $accessToken, [
+			'query' => $search,
+			'include_over_18'			=>	true,
+			'exact'						=>	false,
+			'include_unadvertisable'	=>	true
+		]);
+
+		$newArr = [];
+
+		foreach( $searchSubreddits['subreddits'] AS $subreddit )
+		{
+			$newArr[] = [
+				'text'	=> htmlspecialchars($subreddit['name'] . ' ( ' . $subreddit['subscriber_count'] . ' subscribers )'),
+				'id'	=> htmlspecialchars($subreddit['name'])
+			];
+		}
+
+		response(true, ['subreddits' => $newArr]);
+	}
+
+	public function reddit_get_subreddt_flairs()
+	{
+		$accountId	= _post('account_id' , '0' , 'num');
+		$subreddit	= _post('subreddit', '', 'string');
+
+		$subreddit = basename($subreddit);
+
+		$userId = get_current_user_id();
+
+		$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." tb1 WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+
+		if( !$accountInf )
+		{
+			response(false, 'You have not a permission for adding subreddit in this account!');
+		}
+
+		$accessTokenGet = wpFetch('account_access_tokens', ['account_id' => $accountId]);
+
+		require_once LIB_DIR . 'reddit/Reddit.php';
+
+		$accessToken = $accessTokenGet['access_token'];
+		if( (time()+30) > strtotime($accessTokenGet['expires_on']) )
+		{
+			$accessToken = Reddit::refreshToken($accessTokenGet);
+		}
+
+		$flairs = Reddit::cmd('https://oauth.reddit.com/r/'.$subreddit.'/api/link_flair', 'GET', $accessToken);
+
+		$newArr = [];
+		if( !isset($flairs['error']) )
+		{
+			foreach( $flairs AS $flair )
+			{
+				$newArr[] = [
+					'text'	=> htmlspecialchars($flair['text']),
+					'id'	=> htmlspecialchars($flair['id'])
+				];
+			}
+		}
+
+		response(true, ['flairs' => $newArr]);
+	}
+
+	public function reddit_subreddit_save()
+	{
+		$accountId		= _post('account_id' , '0' , 'num');
+		$subreddit		= _post('subreddit' , '' , 'string');
+		$flairId		= _post('flair' , '' , 'string');
+		$flairName		= _post('flair_name' , '' , 'string');
+
+		$filter_type = _post('filter_type' , '' , 'string' , ['in' , 'ex']);
+		$categories = _post('categories' , [], 'array');
+
+		$categoriesArr = [];
+		foreach($categories AS $categId)
+		{
+			if(is_numeric($categId) && $categId > 0)
+			{
+				$categoriesArr[] = (int)$categId;
+			}
+		}
+		$categoriesArr = implode(',' , $categoriesArr);
+
+		$categoriesArr = empty($categoriesArr) ? null : $categoriesArr;
+		$filter_type = empty($filter_type) || empty($categoriesArr) ? 'no' : $filter_type;
+
+		if( !(!empty($subreddit) && $accountId > 0) )
+		{
+			response(false);
+		}
+
+		$userId = (int)get_current_user_id();
+
+		$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+
+		if( !$accountInf )
+		{
+			response(false, 'You have not a permission for adding subreddit in this account!');
+		}
+
+		wpDB()->insert(wpTable('account_nodes') , [
+			'user_id'			=>	$userId,
+			'driver'			=>	'reddit',
+			'account_id'		=>	$accountId,
+			'node_type'			=>	'subreddit',
+			'screen_name'		=>	$subreddit,
+			'name'				=>	$subreddit,
+			'access_token'		=>	$flairId,
+			'category'			=>	$flairName
+		]);
+
+		$nodeId = wpDB()->insert_id;
+
+		// actiavte...
+		wpDB()->insert(wpTable('account_node_status') , [
+			'node_id'		=>	$nodeId,
+			'user_id'		=>	$userId,
+			'filter_type'	=>	$filter_type,
+			'categories'	=>	$categoriesArr
+		]);
+
+		response(true , ['id' => $nodeId]);
+	}
+
 
 }

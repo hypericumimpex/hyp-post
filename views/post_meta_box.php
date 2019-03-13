@@ -4,29 +4,120 @@ if( !defined('ABSPATH') )
 	exit;
 }
 
-$accounts = wpDB()->get_results(
-	wpDB()->prepare("
+if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) && $_GET['share'] == '1' )
+{
+	$chechNotSendedFeeds = wpDB()->get_row(wpDB()->prepare("SELECT count(0) AS cc FROM ".wpTable('feeds')." WHERE post_id=%d AND is_sended=0" , [(int)$postId]) , ARRAY_A);
+}
+
+
+if( isset($postId) && $postId > 0 && get_post_status() == 'draft' )
+{
+	$shareCheckbox						= get_post_meta($postId, '_fs_poster_share', true);
+
+	$cm_fs_post_text_message_fb			= get_post_meta($postId, '_fs_poster_cm_fb', true);
+	$cm_fs_post_text_message_twitter	= get_post_meta($postId, '_fs_poster_cm_twitter', true);
+	$cm_fs_post_text_message_instagram	= get_post_meta($postId, '_fs_poster_cm_instagram', true);
+	$cm_fs_post_text_message_linkedin	= get_post_meta($postId, '_fs_poster_cm_linkedin', true);
+	$cm_fs_post_text_message_vk			= get_post_meta($postId, '_fs_poster_cm_vk', true);
+	$cm_fs_post_text_message_pinterest	= get_post_meta($postId, '_fs_poster_cm_pinterest', true);
+	$cm_fs_post_text_message_reddit		= get_post_meta($postId, '_fs_poster_cm_reddit', true);
+	$cm_fs_post_text_message_thumblr	= get_post_meta($postId, '_fs_poster_cm_thumblr', true);
+	$cm_fs_post_text_message_google		= get_post_meta($postId, '_fs_poster_cm_google', true);
+	$cm_fs_post_text_message_ok			= get_post_meta($postId, '_fs_poster_cm_ok', true);
+
+	$nodeList = get_post_meta($postId, '_fs_poster_node_list', true);
+	$nodeList = is_array($nodeList) ? $nodeList : [];
+
+	$accountsList = [];
+	$nodesList = [];
+	foreach( $nodeList AS $nodeInf01 )
+	{
+		$nodeInf01 = explode(':', $nodeInf01);
+
+		if( count($nodeInf01) < 3 )
+			continue;
+
+		if( $nodeInf01[1] == 'account' )
+		{
+			$accountsList[] = (int)$nodeInf01[2];
+		}
+		else
+		{
+			$nodesList[] = (int)$nodeInf01[2];
+		}
+	}
+
+	if( empty($accountsList) )
+	{
+		$accounts = [];
+	}
+	else
+	{
+		$accountsList = "'" . implode("','", $accountsList) . "'";
+
+		$accounts = wpDB()->get_results(
+			"SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name,'account' AS node_type FROM ".wpTable('account_status')." tb1
+			LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
+			WHERE tb2.id IN ({$accountsList})
+			ORDER BY name"
+			, ARRAY_A
+		);
+	}
+
+	if( empty($nodesList) )
+	{
+		$activeNodes = [];
+	}
+	else
+	{
+		$nodesList = "'" . implode("','", $nodesList) . "'";
+
+		$activeNodes = wpDB()->get_results(
+			"
+			SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".wpTable('account_node_status')." tb1
+			LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
+			WHERE tb2.id IN ({$nodesList})
+			ORDER BY (CASE node_type WHEN 'ownpage' THEN 1 WHEN 'group' THEN 2 WHEN 'page' THEN 3 END), name"
+			, ARRAY_A
+		);
+	}
+
+	$activeNodes = array_merge($accounts , $activeNodes);
+}
+else
+{
+	$shareCheckbox						= get_option('fs_auto_share_new_posts', '1') || _get('page')=='fs-poster-share' || _post('post_id', null) !== null;
+
+	$cm_fs_post_text_message_fb			= get_option('fs_post_text_message_fb');
+	$cm_fs_post_text_message_twitter	= get_option('fs_post_text_message_twitter');
+	$cm_fs_post_text_message_instagram	= get_option('fs_post_text_message_instagram');
+	$cm_fs_post_text_message_linkedin	= get_option('fs_post_text_message_linkedin');
+	$cm_fs_post_text_message_vk			= get_option('fs_post_text_message_vk');
+	$cm_fs_post_text_message_pinterest	= get_option('fs_post_text_message_pinterest');
+	$cm_fs_post_text_message_reddit		= get_option('fs_post_text_message_reddit');
+	$cm_fs_post_text_message_thumblr	= get_option('fs_post_text_message_thumblr');
+	$cm_fs_post_text_message_google		= get_option('fs_post_text_message_google');
+	$cm_fs_post_text_message_ok			= get_option('fs_post_text_message_ok');
+
+	$accounts = wpDB()->get_results(
+		wpDB()->prepare("
 		SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name,'account' AS node_type FROM ".wpTable('account_status')." tb1
 		LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
 		WHERE tb1.user_id=%d
 		ORDER BY name" , [ get_current_user_id() ])
-	, ARRAY_A
-);
+		, ARRAY_A
+	);
 
-$activeNodes = wpDB()->get_results(
-	wpDB()->prepare("
-	SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".wpTable('account_node_status')." tb1
-	LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
-	WHERE tb1.user_id=%d
-	ORDER BY (CASE node_type WHEN 'ownpage' THEN 1 WHEN 'group' THEN 2 WHEN 'page' THEN 3 END), name" , [ get_current_user_id() ])
-	, ARRAY_A
-);
+	$activeNodes = wpDB()->get_results(
+		wpDB()->prepare("
+		SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".wpTable('account_node_status')." tb1
+		LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
+		WHERE tb1.user_id=%d
+		ORDER BY (CASE node_type WHEN 'ownpage' THEN 1 WHEN 'group' THEN 2 WHEN 'page' THEN 3 END), name" , [ get_current_user_id() ])
+		, ARRAY_A
+	);
 
-$activeNodes = array_merge($accounts , $activeNodes);
-
-if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) && $_GET['share'] == '1' )
-{
-	$chechNotSendedFeeds = wpDB()->get_row(wpDB()->prepare("SELECT count(0) AS cc FROM ".wpTable('feeds')." WHERE post_id=%d AND is_sended=0" , [(int)$postId]) , ARRAY_A);
+	$activeNodes = array_merge($accounts , $activeNodes);
 }
 
 ?>
@@ -145,23 +236,19 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 	}
 	.node_remove>.node_remove_btn
 	{
-		display: none;
 		position: absolute;
 		top: 0;
 		bottom: 0;
 		margin: auto;
 		height: 20px;
-		right: 3px;
-		color: #ff7675;
+		right: 15px;
+		color: #ffb9b7;
 		-webkit-border-radius: 15px;
 		-moz-border-radius: 15px;
 		border-radius: 15px;
 		cursor: pointer;
 	}
-	.share_box_node:hover .node_remove>.node_remove_btn
-	{
-		display: block;
-	}
+
 	.node_label_help
 	{
 		font-size: 11px;
@@ -251,14 +338,15 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 				<div>
 					<div class="onoffswitch">
 						<input type="hidden" name="share_checked" value="off">
-						<input type="checkbox" name="share_checked" class="onoffswitch-checkbox" id="shareCheckbox"<?=get_option('fs_auto_share_new_posts', '1')?' checked':''?>>
+						<input type="checkbox" name="share_checked" class="onoffswitch-checkbox" id="shareCheckbox"<?=$shareCheckbox?' checked':' '?>>
 						<label class="onoffswitch-label" for="shareCheckbox"></label>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="sn_tabs share_box_sh">
-			<div data-tab-id="fb" class="sb_tab active_tab"><i class="fab fa-facebook-square "></i></div>
+			<div data-tab-id="all" class="sb_tab active_tab" style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em;">all</div>
+			<div data-tab-id="fb" class="sb_tab"><i class="fab fa-facebook-square "></i></div>
 			<div data-tab-id="twitter" class="sb_tab"><i class="fab fa-twitter-square "></i></div>
 			<div data-tab-id="instagram" class="sb_tab"><i class="fab fa-instagram "></i></div>
 			<div data-tab-id="linkedin" class="sb_tab"><i class="fab fa-linkedin "></i></div>
@@ -293,7 +381,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 							<?=esc_html($nodeInf['name']);?>
 							<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn" title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 						</div>
-						<div class="node_label_help"><?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter" title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
+						<div class="node_label_help"><i class="<?=socialIcon($nodeInf['driver'])?>"></i> <?=ucfirst($nodeInf['driver'])?> <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> <?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter" title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
 					</div>
 					<div class="node_remove"><div class="node_remove_btn" type="button"><i class="fa fa-times"></i></div></div>
 				</div>
@@ -308,43 +396,43 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 		<div id="custom_messages" class="share_box_sh">
 			<div data-tab="fb">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize FB post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_fb"><?=htmlspecialchars(get_option('fs_post_text_message_fb'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_fb"><?=htmlspecialchars($cm_fs_post_text_message_fb)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="twitter">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Twitter post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_twitter"><?=htmlspecialchars(get_option('fs_post_text_message_twitter'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_twitter"><?=htmlspecialchars($cm_fs_post_text_message_twitter)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="instagram">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Instagram post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram"><?=htmlspecialchars(get_option('fs_post_text_message_instagram'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram"><?=htmlspecialchars($cm_fs_post_text_message_instagram)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="linkedin">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Linkedin post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_linkedin"><?=htmlspecialchars(get_option('fs_post_text_message_linkedin'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_linkedin"><?=htmlspecialchars($cm_fs_post_text_message_linkedin)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="vk">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize VK post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_vk"><?=htmlspecialchars(get_option('fs_post_text_message_vk'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_vk"><?=htmlspecialchars($cm_fs_post_text_message_vk)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="pinterest">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Pinterest post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_pinterest"><?=htmlspecialchars(get_option('fs_post_text_message_pinterest'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_pinterest"><?=htmlspecialchars($cm_fs_post_text_message_pinterest)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="reddit">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Reddit post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_reddit"><?=htmlspecialchars(get_option('fs_post_text_message_reddit'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_reddit"><?=htmlspecialchars($cm_fs_post_text_message_reddit)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="tumblr">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Thumblr post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_thumblr"><?=htmlspecialchars(get_option('fs_post_text_message_thumblr'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_thumblr"><?=htmlspecialchars($cm_fs_post_text_message_thumblr)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="google">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Google+ post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_google"><?=htmlspecialchars(get_option('fs_post_text_message_google'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_google"><?=htmlspecialchars($cm_fs_post_text_message_google)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="ok">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize OK.ru post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_ok"><?=htmlspecialchars(get_option('fs_post_text_message_ok'))?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_ok"><?=htmlspecialchars($cm_fs_post_text_message_ok)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 		</div>
 	</div>
@@ -369,17 +457,30 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 
 		$(".sn_tabs > .sb_tab").click(function()
 		{
+			if( $(this).hasClass('active_tab') )
+				return;
+
 			$(".sn_tabs > .active_tab").removeClass('active_tab');
 			$(this).addClass('active_tab');
 
 			var tab = $(this).attr('data-tab-id');
 
-			$("#share_box1 > :not([data-tab='\"+tab+\"'])").slideUp(200);
-			$("#share_box1 > [data-tab='"+tab+"']").slideDown(200);
+			if( tab == 'all' )
+			{
+				$("#share_box1 > [data-tab]").slideDown(200);
 
-			$("#custom_messages > [data-tab]").hide();
+				$("#custom_messages > [data-tab]").hide();
+			}
+			else
+			{
+				$("#share_box1 > :not([data-tab='\"+tab+\"'])").slideUp(200);
+				$("#share_box1 > [data-tab='"+tab+"']").slideDown(200);
 
-			$("#custom_messages > [data-tab='"+tab+"']").show();
+				$("#custom_messages > [data-tab]").hide();
+
+				$("#custom_messages > [data-tab='"+tab+"']").show();
+			}
+
 		}).eq(0).trigger('click');
 
 		$("#shareCheckbox").change(function()
@@ -433,7 +534,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 		if( (int)get_option('fs_share_on_background' , '1') == 0 && get_post_status() != 'publish' )
 		{
 			?>
-			if( $('.block-editor__container').length )
+			if( $('.block-editor__container').length && !location.href.match(/post\.php\?post\=([0-9]+)/) )
 			{
 				var publishHook = setInterval(function()
 				{
@@ -469,7 +570,32 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 		dataId = dataId.split(':');
 		var tab         =   dataId[0],
 			nodeType    =   dataId[1],
-			id          =   dataId[2];
+			id          =   dataId[2],
+			tabName		=	tab.charAt(0).toUpperCase() + tab.slice(1),
+			dIcon;
+
+		switch( tab )
+		{
+			case 'fb':
+				dIcon = "fab fa-facebook-square";
+				break;
+			case 'twitter':
+			case 'tumblr':
+				dIcon = "fab fa-"+tab+"-square";
+				break;
+
+			case 'instagram':
+			case 'vk':
+			case 'linkedin':
+			case 'pinterest':
+			case 'reddit':
+			case 'google':
+				dIcon = "fab fa-" + tab;
+				break;
+			case 'ok':
+				dIcon = "fab fa-odnoklassniki";
+				break;
+		}
 
 		$(".share_box_items").append(
 				'<div class="share_box_node" data-tab="'+tab+'">'+
@@ -477,7 +603,7 @@ if( !defined('NOT_CHECK_SP') && isset($_GET['share']) && !empty($_GET['share']) 
 					'<div class="node_img"><img src="'+cover+'"></div>'+
 					'<div class="node_label" style="width: 100%;">'+
 						'<div>'+name+'</div>'+
-						'<div class="node_label_help">' + nodeType + '</div>'+
+						'<div class="node_label_help"><i class="'+ dIcon +'"></i> ' + tabName + ' <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> ' + nodeType + '</div>'+
 					'</div>'+
 					'<div class="node_remove"><div class="node_remove_btn" type="button"><i class="fa fa-times"></i></div></div>'+
 				'</div>');

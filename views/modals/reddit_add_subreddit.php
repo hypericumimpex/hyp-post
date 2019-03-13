@@ -4,18 +4,13 @@
 $accountId = (int)_post('account_id' , '0' , 'num');
 $userId = (int)get_current_user_id();
 
-$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='google' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
 
 if( !$accountInf )
 {
-	print 'You have not a permission for adding community in this account!';
+	print 'You have not a permission for adding subreddit in this account!';
 	return;
 }
-
-require_once LIB_DIR . '/google/GooglePlus.php';
-$google = new GooglePlus($accountInf['username'] , $accountInf['password'] , $accountInf['proxy']);
-
-$communities = $google->getCommunities();
 
 ?>
 <style>
@@ -63,12 +58,12 @@ $communities = $google->getCommunities();
 <span class="close" data-modal-close="true" >&times;</span>
 
 <div style="display: flex; flex-direction: column; align-items: center;">
-	<div style="text-align: center; margin-top: 30px; font-size: 18px; color: #999; font-weight: 600;">Communities list</div>
+	<div style="text-align: center; margin-top: 30px; font-size: 18px; color: #999; font-weight: 600;">Add new subreddit</div>
 
 	<div style="width: 350px; margin-top: 20px;">
-		<div style="text-align: center;">Select one of you joined communitie for adding:</div>
+		<div style="text-align: center;">Select subreddit:</div>
 		<div>
-			<select class="ws_form_element community_select select2-init2">
+			<select class="ws_form_element subreddit_select select2-init2">
 				<option></option>
 				<?php
 				foreach( $communities AS $cInfo )
@@ -81,7 +76,7 @@ $communities = $google->getCommunities();
 		<div class="categories_area" style="display: none;">
 			<div style="text-align: center;">Pick a category</div>
 			<div>
-				<select class="ws_form_element community_categ_select">
+				<select class="ws_form_element flairs_select">
 
 				</select>
 			</div>
@@ -119,28 +114,25 @@ $communities = $google->getCommunities();
 </div>
 
 <div style="margin-top: 10px; margin-bottom: 20px; margin-right: 20px; text-align: center;">
-	<button class="ws_btn ws_bg_danger save-btn" type="button"><i class="fa fa-save"></i> Add community</button>
+	<button class="ws_btn ws_bg_danger save-btn" type="button"><i class="fa fa-save"></i> Add subreddit</button>
 	<button class="ws_btn" type="button" data-modal-close="true">Close</button>
 </div>
 
 <script>
-	$("#proModal<?=$mn?> .community_select").change(function()
+	$("#proModal<?=$mn?> .subreddit_select").change(function()
 	{
-		var community = $(this).val();
+		var subreddit = $(this).val();
 
-		$("#proModal<?=$mn?> .community_categ_select").empty();
-		$("#proModal<?=$mn?> .categories_area").slideUp(200);
-		fsCode.ajax('google_community_get_cats' , {'id': community, 'account_id': '<?=$accountId?>'}, function(res)
+		$("#proModal<?=$mn?> .flairs_select").empty();
+		fsCode.ajax('reddit_get_subreddt_flairs' , {'subreddit': subreddit, 'account_id': '<?=$accountId?>'}, function(res)
 		{
-			$("#proModal<?=$mn?> .community_categ_select").empty();
-
-			if( res['cats'].length > 0 )
+			if( res['flairs'].length > 0 )
 			{
-				for( var i in res['cats'] )
+				for( var i in res['flairs'] )
 				{
-					var catInf = res['cats'][i];
+					var flairInf = res['flairs'][i];
 
-					$("#proModal<?=$mn?> .community_categ_select").append('<option value="'+catInf['id']+'">'+catInf['name']+'</option>');
+					$("#proModal<?=$mn?> .flairs_select").append('<option value="'+flairInf['id']+'">'+flairInf['text']+'</option>');
 				}
 
 				$("#proModal<?=$mn?> .categories_area").slideDown(250);
@@ -171,40 +163,52 @@ $communities = $google->getCommunities();
 	});
 
 	$("#proModal<?=$mn?> .select2-init").select2({
-		'placeholder': 'Select categories...'
+		'placeholder': 'Select flairs...'
 	});
 
 	$("#proModal<?=$mn?> .select2-init2").select2({
 		'placeholder': 'Select...',
-		templateResult: function( data )
-		{
-			if (!data.id)
-				return data.text;
+		ajax: {
+			url: ajaxurl,
+			type: "POST",
+			dataType: 'json',
+			data: function (params)
+			{
+				var query = {
+					account_id: '<?=$accountId?>',
+					action: 'search_subreddits',
+					search: params.term
+				}
 
-			return $('<div style="display: flex; align-items: center;"><div style="width: 40px; height: 40px; overflow: hidden; display: flex; align-items: center;"><img src="' + $(data.element).data('image') + '" style="width: 40px;"></div><div style="width: calc(100% - 50px); margin-left: 10px;"><div style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden;">' + data.text + '</div><div>'+$(data.element).data('members')+' members</div></div></div>');
+				return query;
+			},
+			processResults: function (data)
+			{
+				return {
+					results: data.subreddits
+				};
+			}
 		}
 	});
 
 	$("#proModal<?=$mn?> .save-btn").click(function()
 	{
-		var community		=	$("#proModal<?=$mn?> .community_select").val(),
-			community_categ	=	$("#proModal<?=$mn?> .community_categ_select").val(),
+		var subreddit		=	$("#proModal<?=$mn?> .subreddit_select").val(),
+			flair			=	$("#proModal<?=$mn?> .flairs_select").val(),
+			flairName		=	$("#proModal<?=$mn?> .flairs_select > :selected").text(),
 			categ_filter	=	$("#proModal<?=$mn?> .categ_filter").is(':checked') ? 1 : 0,
 			cats			=	categ_filter == 1 ? $("#proModal<?=$mn?> .categories_filter").val() : null,
 			filter_type		=	$("#proModal<?=$mn?> .filter_type > .selected").attr('data-name');
 
-		if( community == '' )
+		if( subreddit == '' )
 		{
-			fsCode.alert('Please select comminuty!');
+			fsCode.alert('Please select subreddit!');
 			return;
 		}
 
-		fsCode.ajax( 'google_community_save' , {'account_id': '<?=$accountId?>', 'community': community, 'community_categ': community_categ , 'categories': cats, 'filter_type': filter_type}, function(result)
+		fsCode.ajax( 'reddit_subreddit_save' , {'account_id': '<?=$accountId?>', 'subreddit': subreddit, 'flair': flair, 'flair_name': flairName , 'categories': cats, 'filter_type': filter_type}, function(result)
 		{
-			var communityName	= $(".community_select :selected").text(),
-				categName		= $("#proModal<?=$mn?> .community_categ_select :selected").text();
-
-			$("#google-communities-list-tbl > tbody").append('<tr data-id="'+result['id']+'"><td><img class="ws_img_style" src="'+$(".community_select :selected").data('image')+'"><span style="vertical-align: middle;">'+communityName+'</span><a href="https://plus.google.com/communities/'+community+'" target="_blank" class="ws_btn ws_tooltip" data-title="Community link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a></td><td>'+categName+'</td><td style="padding-right: 44px;"><div class="node_chckbx ws_tooltip node_checked'+(categ_filter==1?'2':'')+'" data-title="<?=esc_html__('Click to change status' , 'fs-poster');?>" data-float="left" style="float: right;"><i class="fa fa-check"></i></div><button class="delete_btn delete_btn_desing ws_tooltip" data-title="Delete account" data-float="left"><i class="fa fa-trash"></i></button></td></tr>');
+			$("#subreddits-list-tbl > tbody").append('<tr data-id="'+result['id']+'"><td><span style="vertical-align: middle;">'+subreddit+'</span><a href="https://www.reddit.com/r/'+subreddit+'" target="_blank" class="ws_btn ws_tooltip" data-title="Subreddit link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a></td><td>'+flairName+'</td><td style="padding-right: 44px;"><div class="node_chckbx ws_tooltip node_checked'+(categ_filter==1?'2':'')+'" data-title="<?=esc_html__('Click to change status' , 'fs-poster');?>" data-float="left" style="float: right;"><i class="fa fa-check"></i></div><button class="delete_btn delete_btn_desing ws_tooltip" data-title="Delete account" data-float="left"><i class="fa fa-trash"></i></button></td></tr>');
 
 			fsCode.modalHide( $("#proModal<?=$mn?>") );
 		});

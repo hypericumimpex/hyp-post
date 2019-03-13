@@ -131,7 +131,7 @@ class PostMetaBox
 			$metaBoxLoader = 0;
 		}
 
-		if( !( ($new_status == 'publish' || $new_status == 'future') && ( $old_status != 'publish' || $metaBoxLoader === 1 ) ) )
+		if( !( ($new_status == 'publish' || $new_status == 'future' || $new_status == 'draft') && ( $old_status != 'publish' || $metaBoxLoader === 1 ) ) )
 		{
 			return;
 		}
@@ -185,7 +185,7 @@ class PostMetaBox
 		$nodesList = _post('share_on_nodes' , false , 'array' );
 
 		// if false, may be from xmlrpc, external application or etc... then load ol active nodes
-		if( $nodesList === false && !isset($_POST['share_checked']) )
+		if( $nodesList === false && !isset($_POST['share_checked']) && $new_status != 'draft' )
 		{
 			$nodesList = [];
 
@@ -234,6 +234,44 @@ class PostMetaBox
 		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
 		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
 		$post_text_message['ok'] 		= _post('fs_post_text_message_ok' , '' , 'string');
+
+		if( $old_status == 'draft' )
+		{
+			delete_post_meta( $post_id, '_fs_poster_share' );
+			delete_post_meta( $post_id, '_fs_poster_node_list' );
+			delete_post_meta( $post_id, '_fs_poster_cm_fb' );
+			delete_post_meta( $post_id, '_fs_poster_cm_twitter' );
+			delete_post_meta( $post_id, '_fs_poster_cm_instagram' );
+			delete_post_meta( $post_id, '_fs_poster_cm_linkedin' );
+			delete_post_meta( $post_id, '_fs_poster_cm_vk' );
+			delete_post_meta( $post_id, '_fs_poster_cm_pinterest' );
+			delete_post_meta( $post_id, '_fs_poster_cm_reddit' );
+			delete_post_meta( $post_id, '_fs_poster_cm_thumblr' );
+			delete_post_meta( $post_id, '_fs_poster_cm_google' );
+			delete_post_meta( $post_id, '_fs_poster_cm_google' );
+			delete_post_meta( $post_id, '_fs_poster_cm_ok' );
+		}
+
+		if( $new_status == 'draft' )
+		{
+			add_post_meta( $post_id, '_fs_poster_share', $share_checked, true );
+
+			add_post_meta( $post_id, '_fs_poster_node_list', $nodesList, true );
+
+			add_post_meta( $post_id, '_fs_poster_cm_fb', $post_text_message['fb'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_twitter', $post_text_message['twitter'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_instagram', $post_text_message['instagram'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_linkedin', $post_text_message['linkedin'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_vk', $post_text_message['vk'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_pinterest', $post_text_message['pinterest'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_reddit', $post_text_message['reddit'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_thumblr', $post_text_message['thumblr'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_google', $post_text_message['google'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_google', $post_text_message['google'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_ok', $post_text_message['ok'], true );
+
+			return;
+		}
 
 		$postCats = getPostCatsArr( $post_id );
 
@@ -305,7 +343,7 @@ class PostMetaBox
 					continue;
 				}
 
-				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
+				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company', 'subreddit'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
 				{
 					continue;
 				}

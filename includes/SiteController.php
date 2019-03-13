@@ -146,8 +146,17 @@ class SiteController
 
 			require_once __DIR__ . '/../lib/twitter/autoload.php';
 
-			$connection = new Abraham\TwitterOAuth\TwitterOAuth($appInf['app_key'], $appInf['app_secret'] , null ,null , $_SESSION['fs_proxy_save']);
-			$request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => site_url() . '/?twitter_callback=1'));
+			try
+			{
+				$connection = new Abraham\TwitterOAuth\TwitterOAuth($appInf['app_key'], $appInf['app_secret'] , null ,null , $_SESSION['fs_proxy_save']);
+				$request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => site_url() . '/?twitter_callback=1'));
+			}
+			catch (Exception $e)
+			{
+				print $e->getMessage();
+				exit();
+			}
+
 			$_SESSION['oauth_token'] = $request_token['oauth_token'];
 			$_SESSION['oauth_token_secret'] = $request_token['oauth_token_secret'];
 			$url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));

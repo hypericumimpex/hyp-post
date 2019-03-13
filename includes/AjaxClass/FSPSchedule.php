@@ -14,7 +14,7 @@ trait FSPSchedule
 
 		$post_type_filter = _post('post_type_filter' , [] , 'array');
 		$category_filter = _post('category_filter' , [] , 'array');
-		$post_sort = _post('post_sort' , 'random' , 'string' , ['random' , 'old_first' , 'new_first']);
+		$post_sort = _post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
 		$post_date_filter = _post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year']);
 
 		$custom_messages = _post('custom_messages' , '' , 'string');
@@ -396,7 +396,7 @@ trait FSPSchedule
 				$planEnd = strtotime($lastDate);
 			}
 
-			if( $planInf['post_sort'] != 'random' )
+			if( $planInf['post_sort'] != 'random' && $planInf['post_sort'] != 'random2' )
 			{
 				$filterQuery = scheduleNextPostFilters( $planInf );
 				$calcLimit = 1+(int)(( $planEnd - $planStart ) / 60 / 60 / $interval);
@@ -427,7 +427,7 @@ trait FSPSchedule
 					continue;
 				}
 
-				if( $planInf['post_sort'] == 'random' )
+				if( $planInf['post_sort'] == 'random' || $planInf['post_sort'] == 'random2' )
 				{
 					$postDetails = 'Will select randomly';
 					$postId = null;

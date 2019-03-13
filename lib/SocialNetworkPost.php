@@ -10,14 +10,14 @@ class SocialNetworkPost
 		$postId                 = $feedInf['post_id'];
 		$custom_post_message    = $feedInf['custom_post_message'];
 
-		$nInf = getAccessToken($feedInf['node_type'] , $feedInf['node_id']);
+		$nInf					= getAccessToken($feedInf['node_type'] , $feedInf['node_id']);
 
-		$nodeProfileId       = $nInf['node_id'];
-		$appId               = $nInf['app_id'];
-		$driver              = $nInf['driver'];
-		$accessToken         = $nInf['access_token'];
-		$accessTokenSecret   = $nInf['access_token_secret'];
-		$proxy               = $nInf['info']['proxy'];
+		$nodeProfileId       	= $nInf['node_id'];
+		$appId               	= $nInf['app_id'];
+		$driver              	= $nInf['driver'];
+		$accessToken         	= $nInf['access_token'];
+		$accessTokenSecret   	= $nInf['access_token_secret'];
+		$proxy               	= $nInf['info']['proxy'];
 
 		$link           = '';
 		$message        = '';
@@ -57,7 +57,7 @@ class SocialNetworkPost
 		$shortLink = '';
 		$longLink = '';
 
-		if( $postType == 'fs_post' )
+		if( $postType == 'fs_post' || $postType == 'fs_post_tmp' )
 		{
 			$message = $postInf['post_content'];
 
@@ -104,6 +104,9 @@ class SocialNetworkPost
 
 			$link = $shortLink;
 		}
+
+		$message = strip_tags( $message );
+		$message = str_replace('&nbsp;', '', $message);
 
 		if( $driver == 'fb' )
 		{

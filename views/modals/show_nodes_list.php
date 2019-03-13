@@ -255,13 +255,7 @@ else
 		padding-left: 7px;
 		cursor: pointer;
 
-		display: none;
 		vertical-align: top;
-	}
-
-	.node_div[data-public='0']:hover .node_public_icon
-	{
-		display: inline-block !important;
 	}
 
 	.node_div[data-public='1'] .node_public_icon
@@ -373,7 +367,7 @@ else
 
 			$("#sub_menu2")
 				.show()
-				.css('top' , $(this).offset().top + 35)
+				.css('top' , $(this).offset().top + 35 - $(window).scrollTop())
 				.css('left' , $(this).offset().left - ($("#sub_menu2").width()/2) + 10)
 				.data('id' , dataId);
 		});

@@ -256,7 +256,7 @@ foreach( $accountsList AS $aInf )
 
 			$("#sub_menu")
 				.show()
-				.css('top' , $(this).offset().top + 25)
+				.css('top' , $(this).offset().top + 25 - $(window).scrollTop())
 				.css('left' , $(this).offset().left - ($("#sub_menu").width()/2) + 10)
 				.data('id' , dataId);
 		}).on('click' , '.account_checkbox_public' , function()

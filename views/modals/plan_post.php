@@ -277,7 +277,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div>
 							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 130px;" value="<?=date('Y-m-d', strtotime('+1 day' ))?>"></div>
 							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 115px;" value="<?=get_option('fs_use_wp_cron_jobs', '1')?date('H:i'):current_time('H:i')?>"></div>
-							<div style="margin-bottom: 10px;<?=!get_option('fs_use_wp_cron_jobs', '1')?' display: none;':''?>"><i>Server time: <?=date('Y-m-d H:i')?></i></div>
+							<div style="margin-bottom: 10px;"><i>Server time: <?=date('Y-m-d H:i')?></i></div>
 						</div>
 					</div>
 				</div>

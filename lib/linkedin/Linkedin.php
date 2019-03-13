@@ -155,8 +155,8 @@ class Linkedin
 		{
 			$sendData['content'] = [];
 			$sendData['content']['title'] = $title;
-			$sendData['content']['submitted-image-url'] = reset($images);
-			$sendData['content']['submitted-url'] = $link;
+			//$sendData['content']['submitted-image-url'] = reset($images);
+			$sendData['content']['submitted-url'] = reset($images);
 		}
 		if( $type == 'video' )
 		{

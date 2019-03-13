@@ -9,9 +9,10 @@ trait FSPSharePanel
 		$link		= _post('link' , '' , 'string');
 		$message	= _post('message' , '' , 'string');
 		$image		= _post('image' , '0' , 'num');
+		$tmp		= _post('tmp' , '0' , 'num', ['0', '1']);
 
 		$sqlData = [
-			'post_type'			=>	'fs_post',
+			'post_type'			=>	'fs_post' . ( $tmp ? '_tmp' : '' ),
 			'post_content'		=>	$message,
 			'post_status'		=>	'publish',
 			'comment_status'	=>	'closed',
@@ -35,6 +36,27 @@ trait FSPSharePanel
 		{
 			add_post_meta($id, '_thumbnail_id', $image);
 		}
+
+		response(true , ['id'		=>	$id]);
+	}
+
+	public function manual_share_delete()
+	{
+		$id	= _post('id' , '0' , 'num');
+
+		if( !($id > 0) )
+			response(false);
+
+		$currentUserId = (int)get_current_user_id();
+
+		$checkPost = wpDB()->get_row('SELECT * FROM ' . wpDB()->base_prefix . "posts WHERE post_type='fs_post' AND post_author='{$currentUserId}' AND ID='{$id}'", ARRAY_A);
+
+		if( !$checkPost )
+			response(false, 'Post not found!');
+
+		delete_post_meta($id, '_fs_link');
+		delete_post_meta($id, '_thumbnail_id');
+		wp_delete_post($id);
 
 		response(true , ['id'		=>	$id]);
 	}

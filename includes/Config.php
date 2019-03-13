@@ -5,7 +5,7 @@ define('LIB_DIR' , __DIR__ . '/../lib/');
 define('PLUGIN_URL' , plugins_url('/' , __DIR__));
 define('INCLUDES_DIR' , __DIR__ . '/');
 define('VIEWS_DIR' , __DIR__ . '/../views/');
-define('FS_API_URL' , 'https://poster.fs-code.com/api/');
+define('FS_API_URL' , 'https://www.fs-poster.com/api/');
 
 function calcDays( $date )
 {
@@ -256,7 +256,7 @@ function _post( $key , $default = null , $check_type = null , $whiteList = [] )
 		}
 	}
 
-	if( !empty( $whiteList ) && !in_array( $res , $whiteList ) )
+	if( !empty( $whiteList ) && !in_array( (string)$res , $whiteList ) )
 	{
 		$res = $default;
 	}
@@ -288,7 +288,7 @@ function _get( $key , $default = null , $check_type = null , $whiteList = [] )
 		}
 	}
 
-	if( !empty( $whiteList ) && !in_array( $res , $whiteList ) )
+	if( !empty( $whiteList ) && !in_array( (string)$res , $whiteList ) )
 	{
 		$res = $default;
 	}
@@ -359,6 +359,10 @@ function profilePic($info , $w = 40 , $h = 40)
 		else if( $info['driver'] == 'tumblr' )
 		{
 			return "https://api.tumblr.com/v2/blog/".esc_html($info['node_id'])."/avatar/" . ($w > $h ? $w : $h);
+		}
+		else if( $info['driver'] == 'reddit' )
+		{
+			return "https://www.redditstatic.com/avatars/avatar_default_10_25B79F.png";
 		}
 	}
 	else if( $info['driver'] == 'fb' )
@@ -449,6 +453,10 @@ function profileLink($info)
 		{
 			return "https://ok.ru/group/" . esc_html($info['node_id']);
 		}
+		else if( $info['driver'] == 'reddit' )
+		{
+			return "https://www.reddit.com/r/" . esc_html($info['node_id']);
+		}
 
 		return '';
 	}
@@ -515,7 +523,8 @@ function postLink( $postId , $driver , $username = '' )
 	}
 	else if( $driver == 'linkedin' )
 	{
-		return 'https://www.linkedin.com/updates?topic=' . $postId;
+		return 'https://www.linkedin.com/feed/update/urn:li:activity:' . $postId . '/';
+		//return 'https://www.linkedin.com/updates?topic=' . $postId;
 	}
 	else if( $driver == 'vk' )
 	{
@@ -580,7 +589,7 @@ function gerProductPrice( $productInf )
 
 		if ( $product->is_type( 'simple' ) )
 		{
-			$productRegularPrice = $product->get_price();
+			$productRegularPrice = $product->get_regular_price();
 			$productSalePrice = $product->get_sale_price();
 		}
 		else if( $product->is_type( 'variable' ) )
@@ -924,6 +933,9 @@ function scheduleNextPostFilters( $scheduleInf )
 		case "random":
 			$sortQuery = 'ORDER BY RAND()';
 			break;
+		case "random2":
+			$sortQuery = ' AND id NOT IN (SELECT post_id FROM `'.wpTable('feeds')."` WHERE schedule_id='" . (int)$scheduleId . "') ORDER BY RAND()";
+			break;
 		case "old_first":
 			$getLastSharedPostId = wpDB()->get_row("SELECT post_id FROM `".wpTable('feeds')."` WHERE schedule_id='".(int)$scheduleId."' ORDER BY id DESC LIMIT 1" , ARRAY_A);
 			if( $getLastSharedPostId )
@@ -1033,4 +1045,34 @@ function fsPosterPluginRemove()
 	{
 		delete_option($optionName);
 	}
+}
+
+function socialIcon( $driver )
+{
+	switch( $driver )
+	{
+
+		case 'fb':
+			return "fab fa-facebook-square";
+			break;
+		case 'twitter':
+		case 'tumblr':
+			return "fab fa-{$driver}-square";
+			break;
+
+		case 'instagram':
+		case 'vk':
+		case 'linkedin':
+		case 'pinterest':
+		case 'reddit':
+		case 'google':
+			return "fab fa-{$driver}";
+			break;
+
+		case 'ok':
+			return "fab fa-odnoklassniki";
+			break;
+
+	}
+
 }

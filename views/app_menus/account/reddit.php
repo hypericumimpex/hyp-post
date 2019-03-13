@@ -6,7 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 $accountsList = wpDB()->get_results(wpDB()->prepare("
 	SELECT 
 		*,
-		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active
+		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id) subreddits,
+		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active 
 	FROM ".wpTable('accounts')." tb1 
 	WHERE (user_id=%d OR is_public=1) AND driver='reddit'",  [get_current_user_id(), get_current_user_id()]) , ARRAY_A);
 
@@ -21,9 +22,9 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 		<thead>
 		<tr>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
-			<th><?=esc_html__('SUBMIT TO SUBREDDIT', 'fs-poster')?></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?></th>
-			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?></th>
+			<th><?=esc_html__('SUBREDDITS', 'fs-poster')?></th>
+			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -47,7 +48,7 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 					?>
 					<a href="<?=profileLink($accountInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 				</td>
-				<td><i class="ws_icon_style fa fa-clipboard"></i> <?=esc_html(cutText($subReddit));?> <button type="button" class="ws_btn ws_color_info ws_tooltip" data-title="<?=esc_html__('Edit default board', 'fs-poster')?>" data-load-modal="edit_reddit_account_subreddit" data-parameter-account_id="<?=$accountInf['id']?>" style="font-size: 13px;"><i class="fa fa-pencil fa-pencil-alt"></i></button> </td>
+				<td class="ws_tooltip" data-title="<?=esc_html__('Click to see list' , 'fs-poster')?>" data-load-modal="reddit_show_subreddits" data-parameter-account_id="<?=$accountInf['id']?>"><i class="ws_icon_style fa fa-users"></i> <?=$accountInf['subreddits']?> <?=esc_html__('subreddits' , 'fs-poster')?></td>
 				<td>
 					<div class="account_checkbox_public<?=$accountInf['is_public']?' account_checked':''?><?=$accountInf['user_id']==get_current_user_id()?' my_account':''?> ws_tooltip" data-title="<?=esc_html__('Activate for making this profile public/private for other WordPress users' , 'fs-poster')?>" data-float="left">
 						<i class="fa fa-check"></i>

@@ -78,7 +78,7 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 
 	.ws_methods
 	{
-		width: 410px;
+		width: 280px;
 		margin-top: 15px !important;
 		position:absolute; left: 0;
 		right: 0;
@@ -413,7 +413,7 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 			<div class="ws_method_box_img"><i class="fa fa-key"></i></div>
 			<div class="ws_method_box_label ws_tooltip" data-title="Recomended" data-float="left"><?=esc_html__('Login & Pass', 'fs-poster')?></div>
 		</div>
-		<div class="ws_method_box" data-type="2">
+		<div class="ws_method_box" data-type="2" style="display: none;">
 			<div class="ws_method_box_img"><i class="fab fa-android" style="font-size: 38px;"></i></div>
 			<div class="ws_method_box_label"><?=esc_html__('Third-Party App', 'fs-poster')?></div>
 		</div>

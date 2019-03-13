@@ -415,19 +415,20 @@ class FSInstagram
 			{
 				$info = [];
 			}
-
-			$ig = $ig['ig'];
-
-			try
+			else
 			{
-				$info = $ig->media->getInfo( $postId )->asArray();
-			}
-			catch (Exception $e)
-			{
-				$info = [];
+				$ig = $ig['ig'];
+
+				try
+				{
+					$info = $ig->media->getInfo( $postId )->asArray();
+				}
+				catch (Exception $e)
+				{
+					$info = [];
+				}
 			}
 		}
-
 
 		return [
 			'comments'      =>  isset($info['items'][0]['comment_count']) ? (int)$info['items'][0]['comment_count'] : 0,
@@ -480,12 +481,24 @@ class FSInstagram
 
 		$image->draw($imageURL , '50%' , '50%' , $w1 , $h1);
 
+
+		$titleLength = mb_strlen($title, 'UTF-8');
+		$titlePercent = $titleLength - 40;
+		if( $titlePercent < 0 )
+		{
+			$titlePercent = 0;
+		}
+		else if( $titlePercent > 100 )
+		{
+			$titlePercent = 100;
+		}
+
 		// write title
 		$textPadding = 10;
-		$textWidth = 500;
-		$textHeight = 100;
+		$textWidth = 660;
+		$textHeight = 100 + $titlePercent;
 		$iX = floor(($storyW - $textWidth) / 2);
-		$iY = 100;
+		$iY = 125;
 
 		$image->setFont(LIB_DIR . 'PHPImage/font/Exo2-Regular.ttf');
 		$image->rectangle($iX, $iY, $textWidth + $textPadding, $textHeight - $textPadding, array(0, 0, 0), 0.3);

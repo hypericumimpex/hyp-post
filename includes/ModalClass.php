@@ -78,6 +78,17 @@ class ModalClass
 		modalView('edit_reddit_account_subreddit');
 	}
 
+	public function modal_reddit_show_subreddits()
+	{
+		modalView('reddit_show_subreddits');
+	}
+
+	public function modal_reddit_add_subreddit()
+	{
+		modalView('reddit_add_subreddit');
+	}
+
+
 	public function modal_edit_pinterest_account_board()
 	{
 		modalView('edit_pinterest_account_board');

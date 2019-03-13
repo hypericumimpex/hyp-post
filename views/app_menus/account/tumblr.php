@@ -22,7 +22,7 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 		<tr>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
 			<th><?=esc_html__('BLOGS', 'fs-poster')?></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?></th>
+			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
 			<th style="width: 15%;"></th>
 		</tr>
 		</thead>

@@ -177,6 +177,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 				</div>
 				<?php
 			}
+
 			if( empty($feeds) )
 			{
 				print '<div style="margin: 10px; color: #b05858; text-align: center;">This post not shared any social network!</div>';

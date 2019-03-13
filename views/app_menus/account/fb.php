@@ -27,8 +27,8 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 				<th style="width: 15%;"><?=__('GROUPS' , 'fs-poster')?></th>
 				<th style="width: 15%;"><?=__('MY PAGES' , 'fs-poster')?></th>
 				<th style="width: 15%;"><?=__('LIKED PAGES' , 'fs-poster')?></th>
-				<th style="width: 10%;"><?=__('MAKE PUBLIC' , 'fs-poster')?></th>
-				<th style="width: 10%;"><?=__('SHARE ON PROFILE' , 'fs-poster')?></th>
+				<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
+				<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
 			</tr>
 		</thead>
 		<tbody>

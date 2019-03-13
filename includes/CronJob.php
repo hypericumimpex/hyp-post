@@ -38,6 +38,11 @@ class CronJob
 
 	public static function checkBackgroundPosts()
 	{
+		$backgroundShare = (int)get_option('fs_share_on_background' , '1');
+
+		if( !$backgroundShare )
+			return;
+
 		$sendPosts = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('feeds') . " WHERE send_time<=%s AND is_sended=0", [ current_time('Y-m-d H:i:s') ]) , ARRAY_A );
 
 		require_once LIB_DIR . 'SocialNetworkPost.php';

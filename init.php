@@ -2,7 +2,7 @@
 /*
  * Plugin Name: HYP Poster
  * Description: Facebook, Twitter , Instagram, Google+, Linkedin, Reddit, Tumblr, VK, Pinterest Auto Poster Plugin. Post WooCommerce products. Schedule your posts i.e
- * Version: 2.6.2
+ * Version: 2.7.4
  * Author: HYP
  * Author URI: https://github.com/hypericumimpex/hyp-post
  * License: GNU General Public License v3 or later
@@ -75,7 +75,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 {
 	$newLinks = [
 		'<a href="https://support.fs-code.com" target="_blank">' . __('Support', 'fs-poster') . '</a>',
-		'<a href="https://poster.fs-code.com/doc/" target="_blank">' . __('Doc', 'fs-poster') . '</a>'
+		'<a href="https://www.fs-poster.com/doc/" target="_blank">' . __('Doc', 'fs-poster') . '</a>'
 	];
 
 	return array_merge($newLinks, $links);
@@ -84,6 +84,14 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 add_action( 'init', function ()
 {
 	register_post_type( 'fs_post', [
+		'labels'		=> [
+			'name'			=> __( 'FS Posts' ),
+			'singular_name'	=> __( 'FS Post' )
+		],
+		'public'		=> false,
+		'has_archive'	=> true
+	]);
+	register_post_type( 'fs_post_tmp', [
 		'labels'		=> [
 			'name'			=> __( 'FS Posts' ),
 			'singular_name'	=> __( 'FS Post' )

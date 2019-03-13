@@ -10,7 +10,7 @@
 			<div style="width: 200px;">
 				<select name="fs_instagram_post_in_type" class="ws_form_element" style="width: 150px;">
 					<option value="1"<?=get_option('fs_instagram_post_in_type', '1')=='1'?' selected':''?>>Profile only</option>
-					<option value="2"<?=get_option('fs_instagram_post_in_type', '1')=='2'?' selected':''?>>Story ony</option>
+					<option value="2"<?=get_option('fs_instagram_post_in_type', '1')=='2'?' selected':''?>>Story only</option>
 					<option value="3"<?=get_option('fs_instagram_post_in_type', '1')=='3'?' selected':''?>>Profile and Story</option>
 				</select>
 			</div>
@@ -23,12 +23,12 @@
 		<div class="setting_item">
 			<div class="setting_item_label">
 				<div><?=esc_html__('Add link in story:' , 'fs-poster');?></div>
-				<div class="s_help"><?=esc_html__('The post link shared within the story will be automatically added ( ONLY if you have a business account with >= 10k followers ).' , 'fs-poster');?></div>
+				<div class="s_help"><?=__('The post link shared within the story will be automatically added ( ONLY if you have a business account with >= 10k followers. <b style="color: #9e6a6d; font-weight: 700;">Not:</b> Cookie method not allowed this. ).', 'fs-poster');?></div>
 			</div>
 			<div class="s_input">
 				<div class="onoffswitch">
-					<input type="checkbox" name="instagram_story_link" class="onoffswitch-checkbox" id="instagram_story_link"<?=get_option('fs_instagram_story_link', '1')?' checked':''?>>
-					<label class="onoffswitch-label" for="instagram_story_link"></label>
+					<input type="checkbox" name="fs_instagram_story_link" class="onoffswitch-checkbox" id="fs_instagram_story_link"<?=get_option('fs_instagram_story_link', '1')?' checked':''?>>
+					<label class="onoffswitch-label" for="fs_instagram_story_link"></label>
 				</div>
 			</div>
 		</div>
@@ -101,7 +101,6 @@
 		<textarea class="ws_form_element2" name="fs_post_text_message_instagram" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
 	</div>
 </div>
-
 
 <!--
 <div style="display: flex;">
