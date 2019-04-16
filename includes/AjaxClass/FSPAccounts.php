@@ -3,6 +3,25 @@
 trait FSPAccounts
 {
 
+	public function add_new_fb_account_with_cookie()
+	{
+		$cookieCuser	= _post('cookie_c_user' , '' , 'string');
+		$cookieXs		= _post('cookie_xs' , '' , 'string');
+		$proxy			= _post('proxy' , '' , 'string');
+
+		require_once LIB_DIR . "fb/FacebookCookieMethod.php";
+
+		$fb = new FacebookCookieMethod($cookieCuser, $cookieXs, $proxy);
+		$data = $fb->authorizeFbUser();
+
+		if( $data === false )
+		{
+			response(false, 'The entered cookies is wrong!');
+		}
+
+		response(true , ['data' => $data]);
+	}
+
 	public function add_new_fb_account_with_at()
 	{
 		$accessToken = _post('access_token' , '' , 'string');
@@ -278,19 +297,23 @@ trait FSPAccounts
 
 	public function add_instagram_account_cookie_method()
 	{
-		$username			= _post('username' , '' , 'string');
-		$cookie_csrftoken	= _post('cookie_csrftoken', '' , 'string');
 		$cookie_sessionid	= _post('cookie_sessionid', '' , 'string');
-		$cookie_ds_user_id	= _post('cookie_ds_user_id', '' , 'string');
-		$cookie_mcd			= _post('cookie_mcd', '' , 'string');
 		$proxy				= _post('proxy' , '' , 'string');
 
 		$password			= '*****';
 
-		if( empty($username) || empty($cookie_csrftoken) || empty($cookie_sessionid) || empty($cookie_mcd) || empty($cookie_ds_user_id) )
+		if( empty($cookie_sessionid) )
 		{
 			response(false, ['error_msg' => esc_html__('Please enter the instagram username and password!' , 'fs-poster')]);
 		}
+		require_once LIB_DIR . "instagram/FSInstagramApi.php";
+
+		$details			= FSInstagramApi::getDetailsBySessId($cookie_sessionid, $proxy);
+
+		$username			= $details['username'];
+		$cookie_ds_user_id	= $details['id'];
+		$cookie_mcd			= '3';
+		$cookie_csrftoken	= $details['csrf'];
 
 		require_once LIB_DIR . "instagram/FSInstagram.php";
 

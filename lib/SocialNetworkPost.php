@@ -12,12 +12,14 @@ class SocialNetworkPost
 
 		$nInf					= getAccessToken($feedInf['node_type'] , $feedInf['node_id']);
 
-		$nodeProfileId       	= $nInf['node_id'];
-		$appId               	= $nInf['app_id'];
-		$driver              	= $nInf['driver'];
-		$accessToken         	= $nInf['access_token'];
-		$accessTokenSecret   	= $nInf['access_token_secret'];
-		$proxy               	= $nInf['info']['proxy'];
+		$nodeProfileId			= $nInf['node_id'];
+		$appId					= $nInf['app_id'];
+		$driver					= $nInf['driver'];
+		$accessToken			= $nInf['access_token'];
+		$accessTokenSecret		= $nInf['access_token_secret'];
+		$proxy					= $nInf['info']['proxy'];
+		$options				= $nInf['options'];
+		$accoundId				= $nInf['account_id'];
 
 		$link           = '';
 		$message        = '';
@@ -110,6 +112,8 @@ class SocialNetworkPost
 
 		if( $driver == 'fb' )
 		{
+			$getMediaFuncName = empty( $options ) ? 'wp_get_attachment_url' : 'get_attached_file';
+
 			if( $sendType != 'image' && $sendType != 'video' )
 			{
 				$pMethod = get_option('fs_facebook_posting_type', '1');
@@ -124,7 +128,7 @@ class SocialNetworkPost
 						$mediaId = isset($first->ID) ? $first->ID : 0;
 					}
 
-					$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+					$url = $mediaId > 0 ? $getMediaFuncName($mediaId) : '';
 
 					if( !empty($url) )
 					{
@@ -139,7 +143,18 @@ class SocialNetworkPost
 					$mediaId = get_post_thumbnail_id($postId);
 					if( $mediaId > 0 )
 					{
-						$images[] = wp_get_attachment_url( $mediaId );
+						$images[] = $getMediaFuncName( $mediaId );
+					}
+
+					if( $postType == 'product' )
+					{
+						$product = wc_get_product( $postId );
+						$attachment_ids = $product->get_gallery_attachment_ids();
+
+						foreach( $attachment_ids AS $attachmentId )
+						{
+							$images[] = $getMediaFuncName($attachmentId);
+						}
 					}
 
 					$allImgaes = get_attached_media( 'image' , $postId);
@@ -148,7 +163,7 @@ class SocialNetworkPost
 						$mediaId2 = isset($mediaInf->ID) ? $mediaInf->ID : 0;
 						if( $mediaId2 > 0 )
 						{
-							$images[] = wp_get_attachment_url($mediaId2);
+							$images[] = $getMediaFuncName($mediaId2);
 						}
 					}
 
@@ -159,8 +174,19 @@ class SocialNetworkPost
 				}
 			}
 
-			require_once LIB_DIR . "fb/FacebookLib.php";
-			$res = FacebookLib::sendPost($nodeProfileId , $sendType , $message , 0 , $link , $images , $videoURL , $accessToken , $proxy);
+			if( empty( $options ) ) // Login && Password method
+			{
+				require_once LIB_DIR . "fb/FacebookLib.php";
+				$res = FacebookLib::sendPost($nodeProfileId , $sendType , $message , 0 , $link , $images , $videoURL , $accessToken , $proxy);
+			}
+			else // Cookie method
+			{
+				require_once LIB_DIR . "fb/FacebookCookieMethod.php";
+
+				$fbDriver = new FacebookCookieMethod( $accoundId, $options, $proxy );
+				$res = $fbDriver->sendPost($nodeProfileId , $feedInf['node_type'], $sendType , $message , 0 , $link , $images , $videoURL);
+			}
+
 		}
 		else if( $driver == 'instagram' )
 		{
@@ -317,6 +343,17 @@ class SocialNetworkPost
 						$imagesLocale[] = get_attached_file( $mediaId );
 					}
 
+					if( $postType == 'product' )
+					{
+						$product = wc_get_product( $postId );
+						$attachment_ids = $product->get_gallery_attachment_ids();
+
+						foreach( $attachment_ids AS $attachmentId )
+						{
+							$imagesLocale[] = get_attached_file($attachmentId);
+						}
+					}
+
 					$allImgaes = get_attached_media( 'image' , $postId);
 					foreach( $allImgaes AS $mediaInf )
 					{
@@ -389,6 +426,17 @@ class SocialNetworkPost
 					if( $mediaId > 0 )
 					{
 						$imagesLocale[] = get_attached_file( $mediaId );
+					}
+
+					if( $postType == 'product' )
+					{
+						$product = wc_get_product( $postId );
+						$attachment_ids = $product->get_gallery_attachment_ids();
+
+						foreach( $attachment_ids AS $attachmentId )
+						{
+							$imagesLocale[] = get_attached_file($attachmentId);
+						}
 					}
 
 					$allImgaes = get_attached_media( 'image' , $postId);

@@ -31,26 +31,10 @@
 	<div class="instagram_logo"><img src="<?=plugin_dir_url(__FILE__).'../../images/instagram.png'?>"></div>
 	<div style="width: 45%;">
 
-		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888;"><?=esc_html__('Add new instagram account' , 'fs-poster')?> <a href="https://youtu.be/Z_kludxdIHg" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a></div>
+		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888; margin-top: 20px;"><?=esc_html__('Add new instagram account' , 'fs-poster')?> <a href="https://youtu.be/-_JaKvKziBs" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a></div>
 
-		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
-			<input type="text" placeholder="Username" class="ws_form_element username" style="padding-left: 30px">
-			<i class="fa fa-user" style="position: absolute; left: 10px; color: #AAA; top: 10px;"></i>
-		</div>
-		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
-			<input type="text" placeholder="Cookie - csrftoken" class="ws_form_element cookie_csrftoken" style="padding-left: 30px">
-			<i class="far fa-copy" style="position: absolute; left: 10px; color: #AAA; top: 10px;"></i>
-		</div>
-		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
-			<input type="text" placeholder="Cookie - ds_user_id" class="ws_form_element cookie_ds_user_id" style="padding-left: 30px">
-			<i class="far fa-copy" style="position: absolute; left: 10px; color: #AAA; top: 10px;"></i>
-		</div>
-		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
+		<div style="position: relative; margin-bottom: 17px; margin-right: 70px; margin-top: 50px;">
 			<input type="text" placeholder="Cookie - sessionid" class="ws_form_element cookie_sessionid" style="padding-left: 30px">
-			<i class="far fa-copy" style="position: absolute; left: 10px; color: #AAA; top: 10px;"></i>
-		</div>
-		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
-			<input type="text" placeholder="Cookie - mcd" class="ws_form_element cookie_mcd" style="padding-left: 30px">
 			<i class="far fa-copy" style="position: absolute; left: 10px; color: #AAA; top: 10px;"></i>
 		</div>
 
@@ -66,7 +50,7 @@
 			<div style="width: 30px; text-align: right; cursor: help;" class="ws_tooltip" data-float="left" data-title="<?=esc_html__('Optional field. Supported proxy formats: https://127.0.0.1:8888 or https://user:pass@127.0.0.1:8888' , 'fs-poster')?>"><i class="fa fa-info-circle" style="color: #999;"></i></div>
 		</div>
 
-		<div style="margin-bottom: 30px;">
+		<div style="margin-bottom: 30px; margin-top: 50px;">
 			<button type="button" class="ws_btn ws_bg_danger add_account_btn"><?=esc_html__('ADD ACCOUNT' , 'fs-poster')?></button>
 			<button type="button" class="ws_btn" data-modal-close="true"><?=esc_html__('CANCEL' , 'fs-poster')?></button>
 		</div>
@@ -77,19 +61,11 @@
 
 	$("#proModal<?=$mn?> .add_account_btn").click(function()
 	{
-		var username    		= $("#proModal<?=$mn?> .username").val(),
-			cookie_csrftoken    = $("#proModal<?=$mn?> .cookie_csrftoken").val(),
-			cookie_sessionid    = $("#proModal<?=$mn?> .cookie_sessionid").val(),
-			cookie_ds_user_id	= $("#proModal<?=$mn?> .cookie_ds_user_id").val(),
-			cookie_mcd			= $("#proModal<?=$mn?> .cookie_mcd").val(),
+		var cookie_sessionid    = $("#proModal<?=$mn?> .cookie_sessionid").val(),
 			proxy       		= $("#proModal<?=$mn?> .proxy").val();
 
 		fsCode.ajax('add_instagram_account_cookie_method' , {
-			'username':				username ,
-			'cookie_csrftoken':		cookie_csrftoken ,
 			'cookie_sessionid':		cookie_sessionid ,
-			'cookie_ds_user_id':	cookie_ds_user_id ,
-			'cookie_mcd':			cookie_mcd ,
 			'proxy':				proxy
 		}, function(response)
 		{

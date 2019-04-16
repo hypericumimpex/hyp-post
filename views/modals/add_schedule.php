@@ -255,11 +255,18 @@ $activeNodes = array_merge($accounts , $activeNodes);
 
 				<div style="display: flex; margin-left: 1px;">
 					<div style="width: 45%; margin-top: 5px; display: flex; align-items: center;">
-						<select class="ws_form_element select2-init post_type_filter" multiple data-placeholder="<?=esc_html__('Post types' , 'fs-poster')?>">
+						<select class="ws_form_element post_type_filter" data-placeholder="<?=esc_html__('Post types' , 'fs-poster')?>">
 							<?php
+							$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
+
 							foreach( get_post_types() AS $post_type )
 							{
-								print '<option value="' . htmlspecialchars($post_type) . '">' . htmlspecialchars($post_type) . '</option>';
+								if( !in_array( $post_type , $allowedPostTypes ) )
+								{
+									continue;
+								}
+
+								print '<option value="' . htmlspecialchars($post_type) . '">' . htmlspecialchars(ucfirst($post_type)) . '</option>';
 							}
 							?>
 						</select>
@@ -268,12 +275,22 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<div style="width: 5%;"></div>
 					<div style="width: 50%; margin-top: 5px; display: flex; align-items: center;">
 						<select class="ws_form_element select2-init category_filter" data-placeholder="<?=esc_html__('Category filter' , 'fs-poster')?>" multiple>
+							<optgroup label="Post categories">
 							<?php
 							foreach( get_categories() AS $categ )
 							{
 								print '<option value="' . htmlspecialchars($categ->cat_ID) . '">' . htmlspecialchars($categ->cat_name) . '</option>';
 							}
 							?>
+							</optgroup>
+							<optgroup label="Product categories">
+							<?php
+							foreach( get_terms( 'product_cat', $cat_args ) AS $categ )
+							{
+								print '<option value="' . htmlspecialchars($categ->term_id) . '">' . htmlspecialchars($categ->name) . '</option>';
+							}
+							?>
+							</optgroup>
 						</select>
 						<span class="ws_tooltip" data-title="Filter posts by category. If you do not want to add this filter then keep empty." style="padding: 10px;"><i class="fa fa-info-circle"></i></span>
 					</div>
@@ -314,7 +331,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>
+						<!--<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-sn-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-sn-id="vk"><i class="fab fa-vk"></i> VK.com</div>
@@ -405,7 +422,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-tab-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-tab-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-tab-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>
+						<!--<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-tab-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-tab-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-tab-id="vk"><i class="fab fa-vk"></i> VK.com</div>

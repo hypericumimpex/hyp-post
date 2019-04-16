@@ -208,7 +208,7 @@ else
 			multiple: false  // Set to true to allow multiple files to be selected
 		});
 
-		var saveId = 0;
+		var saveId = <?=$postId?>;
 
 		frame.on( 'select', function()
 		{
@@ -288,6 +288,10 @@ else
 				{
 					tr.fadeOut(500, function()
 					{
+						if( postId == saveId )
+						{
+							location.href = '?page=fs-poster-share';
+						}
 						$(this).remove();
 					});
 				});

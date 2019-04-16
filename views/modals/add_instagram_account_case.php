@@ -3,7 +3,7 @@
 	.ws_method_box
 	{
 		position: relative;
-		width: 85px;
+		width: 95px;
 		height: 115px;
 		float: left;
 		margin: 25px 40px;
@@ -57,6 +57,7 @@
 		line-height: 80px;
 		color: #DDD;
 		font-size: 30px;
+		margin-left: 5px;
 	}
 
 	.ws_method_box>.ws_method_box_label

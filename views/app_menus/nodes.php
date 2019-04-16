@@ -409,9 +409,9 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 		<a href="?page=fs-poster-nodes&tab=tumblr" class="social_network_div<?=$tab=='tumblr'?' snd_active':''?>">
 			<div><i class="fab fa-tumblr"></i> Tumblr</div>
 		</a>
-		<a href="?page=fs-poster-nodes&tab=google" class="social_network_div<?=$tab=='google'?' snd_active':''?>">
+		<!--<a href="?page=fs-poster-nodes&tab=google" class="social_network_div<?/*=$tab=='google'?' snd_active':''*/?>">
 			<div><i class="fab fa-google"></i> Google+</div>
-		</a>
+		</a>-->
 	</div>
 </div>
 

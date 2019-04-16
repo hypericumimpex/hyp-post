@@ -51,17 +51,17 @@ trait FSPSettings
 		}
 		$newArrHideForRoles = implode('|' , $newArrHideForRoles);
 
-		update_option('fs_auto_share_new_posts' , $fs_auto_share_new_posts);
-		update_option('fs_use_wp_cron_jobs' , $fs_use_wp_cron_jobs);
-		update_option('fs_show_fs_poster_column' , $fs_show_fs_poster_column);
+		update_option('fs_auto_share_new_posts' , (string)$fs_auto_share_new_posts);
+		update_option('fs_use_wp_cron_jobs' , (string)$fs_use_wp_cron_jobs);
+		update_option('fs_show_fs_poster_column' , (string)$fs_show_fs_poster_column);
 
-		update_option('fs_unique_link' , $fs_unique_link);
-		update_option('fs_share_on_background' , $fs_share_on_background);
+		update_option('fs_unique_link' , (string)$fs_unique_link);
+		update_option('fs_share_on_background' , (string)$fs_share_on_background);
 		update_option('fs_share_timer' , $fs_share_timer);
-		update_option('fs_url_shortener' , $fs_url_shortener);
+		update_option('fs_url_shortener' , (string)$fs_url_shortener);
 		update_option('fs_shortener_service' , $fs_shortener_service);
 		update_option('fs_url_short_access_token_bitly' , $fs_url_short_access_token_bitly);
-		update_option('fs_keep_logs' , $fs_keep_logs);
+		update_option('fs_keep_logs' , (string)$fs_keep_logs);
 
 		update_option('fs_allowed_post_types' , $newArrPostTypes);
 		update_option('fs_hide_menu_for' , $newArrHideForRoles);
@@ -92,9 +92,9 @@ trait FSPSettings
 
 		update_option('fs_post_text_message_fb' , $fs_post_text_message_fb);
 
-		update_option('fs_load_own_pages' , $fs_load_own_pages);
-		update_option('fs_load_groups' , $fs_load_groups);
-		update_option('fs_load_liked_pages' , $fs_load_liked_pages);
+		update_option('fs_load_own_pages' , (string)$fs_load_own_pages);
+		update_option('fs_load_groups' , (string)$fs_load_groups);
+		update_option('fs_load_liked_pages' , (string)$fs_load_liked_pages);
 
 		update_option('fs_max_liked_pages_limit' , $fs_max_liked_pages_limit);
 		update_option('fs_max_groups_limit' , $fs_max_groups_limit);
@@ -125,8 +125,8 @@ trait FSPSettings
 		update_option('fs_post_text_message_instagram' , $fs_post_text_message_instagram);
 
 		update_option('fs_instagram_post_in_type' , $fs_instagram_post_in_type);
-		update_option('fs_instagram_story_link' , $fs_instagram_story_link);
-		update_option('fs_instagram_story_hashtag' , $fs_instagram_story_hashtag);
+		update_option('fs_instagram_story_link' , (string)$fs_instagram_story_link);
+		update_option('fs_instagram_story_hashtag' , (string)$fs_instagram_story_hashtag);
 
 		update_option('fs_instagram_story_hashtag_name' , $fs_instagram_story_hashtag ? $fs_instagram_story_hashtag_name : '');
 		update_option('fs_instagram_story_hashtag_position' , $fs_instagram_story_hashtag ? $fs_instagram_story_hashtag_position : '');
@@ -151,8 +151,8 @@ trait FSPSettings
 
 		update_option('fs_post_text_message_vk' , $fs_post_text_message_vk);
 
-		update_option('fs_vk_load_admin_communities' , $fs_vk_load_admin_communities);
-		update_option('fs_vk_load_members_communities' , $fs_vk_load_members_communities);
+		update_option('fs_vk_load_admin_communities' , (string)$fs_vk_load_admin_communities);
+		update_option('fs_vk_load_members_communities' , (string)$fs_vk_load_members_communities);
 
 		update_option('fs_vk_max_communities_limit' , $fs_vk_max_communities_limit);
 

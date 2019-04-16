@@ -12,7 +12,7 @@ trait FSPSchedule
 		$interval = _post('interval' , '0' , 'num');
 		$share_time = _post('share_time' , '' , 'string');
 
-		$post_type_filter = _post('post_type_filter' , [] , 'array');
+		$post_type_filter = _post('post_type_filter' , '' , 'string');
 		$category_filter = _post('category_filter' , [] , 'array');
 		$post_sort = _post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
 		$post_date_filter = _post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year']);
@@ -69,17 +69,12 @@ trait FSPSchedule
 		unset($category_filterNew);
 
 		// sanitize post types array...
-		$allowedPostTypes = get_post_types();
-		$post_type_filterNew = [];
-		foreach( $post_type_filter AS $postType )
+		$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
+
+		if( !in_array( $post_type_filter , $allowedPostTypes ) )
 		{
-			if( in_array( $postType , $allowedPostTypes ) )
-			{
-				$post_type_filterNew[] = $postType;
-			}
+			$post_type_filter = '';
 		}
-		$post_type_filter = implode('|' , $post_type_filterNew);
-		unset($post_type_filterNew);
 
 		if( empty($title) || empty($start_date) || empty($end_date) || !in_array($interval , [1,2,3,4,5,6,7,8,9,10,1*24,2*24,3*24,4*24,5*24,6*24,7*24,8*24,9*24,10*24]) )
 		{
@@ -406,9 +401,9 @@ trait FSPSchedule
 				$getRandomPost = wpDB()->get_results("SELECT * FROM ".wpDB()->base_prefix."posts WHERE post_status='publish' {$filterQuery} LIMIT " . $calcLimit , ARRAY_A);
 			}
 
-			if( empty($planInf['share_time']) )
+			if( ( $planInf['interval'] % 24 ) != 0 || empty($planInf['share_time']) )
 			{
-				$getLastShareTime = wpDB()->get_row("SELECT MAX(share_time) AS max_share_time FROM ".wpTable('feeds')." WHERE schedule_id='$scheduleId'", ARRAY_A);
+				$getLastShareTime = wpDB()->get_row("SELECT MAX(send_time) AS max_share_time FROM ".wpTable('feeds')." WHERE schedule_id='$scheduleId'", ARRAY_A);
 				$planInf['share_time'] = date('H:i:s' , strtotime($getLastShareTime['max_share_time']));
 			}
 

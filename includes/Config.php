@@ -144,13 +144,16 @@ function spintax( $text )
 
 function customizePostLink( $link , $feedId )
 {
-	if( strpos($link , '?') !== false )
+	if( get_option('fs_keep_logs', '1') )
 	{
-		$link .= '&feed_id=' . $feedId;
-	}
-	else
-	{
-		$link .= '?feed_id=' . $feedId;
+		if( strpos($link , '?') !== false )
+		{
+			$link .= '&feed_id=' . $feedId;
+		}
+		else
+		{
+			$link .= '?feed_id=' . $feedId;
+		}
 	}
 
 	return $link;
@@ -160,16 +163,19 @@ function getAccessToken( $nodeType , $nodeId )
 {
 	if( $nodeType == 'account' )
 	{
-		$nodeInf = wpFetch('accounts' , $nodeId);
-		$nodeProfileId = $nodeInf['profile_id'];
-		$accessTokenGet = wpFetch('account_access_tokens', ['account_id' => $nodeId]);
-		$accessToken = $accessTokenGet['access_token'];
-		$accessTokenSecret = $accessTokenGet['access_token_secret'];
-		$appId = $accessTokenGet['app_id'];
-		$driver = $nodeInf['driver'];
-		$username = $nodeInf['username'];
-		$password = $nodeInf['password'];
-		$proxy = $nodeInf['proxy'];
+		$nodeInf			= wpFetch('accounts' , $nodeId);
+		$nodeProfileId		= $nodeInf['profile_id'];
+		$nAccountId			= $nodeProfileId;
+
+		$accessTokenGet		= wpFetch('account_access_tokens', ['account_id' => $nodeId]);
+		$accessToken		= $accessTokenGet['access_token'];
+		$accessTokenSecret	= $accessTokenGet['access_token_secret'];
+		$appId				= $accessTokenGet['app_id'];
+		$driver				= $nodeInf['driver'];
+		$username			= $nodeInf['username'];
+		$password			= $nodeInf['password'];
+		$proxy				= $nodeInf['proxy'];
+		$options			= $nodeInf['options'];
 
 		if( $driver == 'reddit' && (time()+30) > strtotime($accessTokenGet['expires_on']) )
 		{
@@ -190,11 +196,15 @@ function getAccessToken( $nodeType , $nodeId )
 		$accountInf = wpFetch('accounts' , $nodeInf['account_id']);
 
 		if( $nodeInf )
+		{
 			$nodeInf['proxy'] = $accountInf['proxy'];
+		}
 
-		$username = $accountInf['username'];
-		$password = $accountInf['password'];
-		$proxy = $accountInf['proxy'];
+		$username	= $accountInf['username'];
+		$password	= $accountInf['password'];
+		$proxy		= $accountInf['proxy'];
+		$options	= $accountInf['options'];
+		$nAccountId	= $accountInf['profile_id'];
 
 		$nodeProfileId = $nodeInf['node_id'];
 		$driver = $nodeInf['driver'];
@@ -228,7 +238,9 @@ function getAccessToken( $nodeType , $nodeId )
 		'info'                  =>  $nodeInf,
 		'username'				=>	$username,
 		'password'				=>	$password,
-		'proxy'					=>	$proxy
+		'proxy'					=>	$proxy,
+		'options'				=>	$options,
+		'account_id'			=>	$nAccountId
 	];
 }
 
@@ -577,7 +589,7 @@ function appIcon( $appInfo )
 	}
 }
 
-function gerProductPrice( $productInf )
+function getProductPrice( $productInf )
 {
 	$productRegularPrice = '';
 	$productSalePrice = '';
@@ -587,18 +599,18 @@ function gerProductPrice( $productInf )
 	{
 		$product = wc_get_product( $productId );
 
-		if ( $product->is_type( 'simple' ) )
-		{
-			$productRegularPrice = $product->get_regular_price();
-			$productSalePrice = $product->get_sale_price();
-		}
-		else if( $product->is_type( 'variable' ) )
+		if( $product->is_type( 'variable' ) )
 		{
 			$variation_id			=	$product->get_children();
 			$variable_product		=	new WC_Product_Variation( reset($variation_id) );
 
 			$productRegularPrice	=	$variable_product->get_regular_price();
 			$productSalePrice		=	$variable_product->get_sale_price();
+		}
+		else //else if ( $product->is_type( 'simple' ) )
+		{
+			$productRegularPrice = $product->get_regular_price();
+			$productSalePrice = $product->get_sale_price();
 		}
 	}
 
@@ -629,7 +641,7 @@ function replaceTags($message , $postInf , $link , $shortLink)
 		return cutText(strip_tags( $postInf['post_content'] ) , $cut );
 	} , $message);
 
-	$getPrice = gerProductPrice($postInf);
+	$getPrice = getProductPrice($postInf);
 
 	$productRegularPrice = $getPrice['regular'];
 	$productSalePrice = $getPrice['sale'];
@@ -665,7 +677,9 @@ function replaceTags($message , $postInf , $link , $shortLink)
 
 function standartFSAppRedirectURL($sn)
 {
-	return FS_API_URL . '?sn=' . $sn . '&r_url=' .urlencode(site_url() . '/?fs_app_redirect=1&sn=' . $sn);
+	$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
+
+	return FS_API_URL . '?purchase_code=' . $fsPurchaseKey . '&domain=' . site_url() . '&sn=' . $sn . '&r_url=' .urlencode(site_url() . '/?fs_app_redirect=1&sn=' . $sn);
 }
 
 function getPostTags( $postInf )
@@ -809,14 +823,6 @@ function getInstalledVersion()
 function scheduleNextPostFilters( $scheduleInf )
 {
 	$scheduleId = $scheduleInf['id'];
-	$interval = $scheduleInf['interval'];
-	$endDate = strtotime($scheduleInf['end_date']);
-
-	if( strtotime(date('Y-m-d' , ( time() + $interval * 3600 ))) > $endDate )
-	{
-		wp_clear_scheduled_hook( 'check_scheduled_posts' , [$scheduleId] );
-		wpDB()->update(wpTable('schedules') , ['status' => 'finished'] , ['id' => $scheduleId]);
-	}
 
 	if( $scheduleInf['status'] != 'active' )
 	{
@@ -824,25 +830,23 @@ function scheduleNextPostFilters( $scheduleInf )
 	}
 
 	/* Post type filter */
-	$postTypes = explode('|' , $scheduleInf['post_type_filter']);
-	$postTypesArr = [];
+	$_postTypeFilter = $scheduleInf['post_type_filter'];
 
-	foreach( $postTypes AS $postType )
+	$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
+	if( !in_array( $_postTypeFilter, $allowedPostTypes ) )
 	{
-		$postType = preg_replace('/[^a-zA-Z0-9\-\_ ]/' , '' , $postType);
-		if( empty($postType) )
-			continue;
-
-		$postTypesArr[] = esc_sql( $postType );
+		$_postTypeFilter = '';
 	}
 
-	if( empty($postTypesArr) )
+	$_postTypeFilter = esc_sql( $_postTypeFilter );
+
+	if( !empty($_postTypeFilter) )
 	{
-		$postTypeFilter = '';
+		$postTypeFilter = "AND post_type='" . $_postTypeFilter . "'";
 	}
 	else
 	{
-		$postTypes = "'" . implode("','" , $postTypesArr) . "'";
+		$postTypes = "'" . implode("','" , array_map('esc_sql', $allowedPostTypes)) . "'";
 
 		$postTypeFilter = "AND post_type IN ({$postTypes})";
 	}
@@ -876,14 +880,14 @@ function scheduleNextPostFilters( $scheduleInf )
 	switch( $scheduleInf['post_date_filter'] )
 	{
 		case "this_week":
-			$week = date('w');
+			$week = current_time('w');
 			$week = $week == 0 ? 7 : $week;
 
 			$startDateFilter = date('Y-m-d 00:00' , strtotime('-'.($week-1).' day'));
 			$endDateFilter = date('Y-m-d 23:59');
 			break;
 		case "previously_week":
-			$week = date('w');
+			$week = current_time('w');
 			$week = $week == 0 ? 7 : $week;
 			$week += 7;
 
@@ -891,16 +895,16 @@ function scheduleNextPostFilters( $scheduleInf )
 			$endDateFilter = date('Y-m-d 23:59' , strtotime('-'.($week-7).' day'));
 			break;
 		case "this_month":
-			$startDateFilter = date('Y-m-01 00:00');
-			$endDateFilter = date('Y-m-t 23:59');
+			$startDateFilter = current_time('Y-m-01 00:00');
+			$endDateFilter = current_time('Y-m-t 23:59');
 			break;
 		case "previously_month":
 			$startDateFilter = date('Y-m-01 00:00' , strtotime('-1 month'));
 			$endDateFilter = date('Y-m-t 23:59' , strtotime('-1 month'));
 			break;
 		case "this_year":
-			$startDateFilter = date('Y-01-01 00:00');
-			$endDateFilter = date('Y-12-31 23:59');
+			$startDateFilter = current_time('Y-01-01 00:00');
+			$endDateFilter = current_time('Y-12-31 23:59');
 			break;
 	}
 
@@ -1038,7 +1042,9 @@ function fsPosterPluginRemove()
 		'fs_url_shortener',
 		'fs_url_short_access_token_bitly',
 		'fs_vk_load_admin_communities',
-		'fs_vk_load_members_communities'
+		'fs_vk_load_members_communities',
+		'fs_plugin_alert',
+		'fs_plugin_disabled'
 	];
 
 	foreach( $fsOptions AS $optionName )

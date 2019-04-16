@@ -21,6 +21,7 @@
 		align-items: center;
 	}
 </style>
+
 <span class="close" data-modal-close="true">&times;</span>
 
 <div style="width: 100%; margin-top: 60px; display: flex; justify-content: center; align-items: center;">

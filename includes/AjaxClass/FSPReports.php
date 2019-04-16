@@ -127,14 +127,26 @@ trait FSPReports
 
 				$proxy          = $nInf['info']['proxy'];
 				$accessToken    = $nInf['access_token'];
+				$options	    = $nInf['options'];
+				$accountId	    = $nInf['account_id'];
 				$appId			= $nInf['app_id'];
 
 				$appInf			= wpFetch('apps' , $appId);
 
 				if( $feedInf['driver'] == 'fb' )
 				{
-					require_once LIB_DIR . "fb/FacebookLib.php";
-					$insights = FacebookLib::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
+					if( empty( $options ) )
+					{
+						require_once LIB_DIR . "fb/FacebookLib.php";
+						$insights = FacebookLib::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
+					}
+					else
+					{
+						require_once LIB_DIR . "fb/FacebookCookieMethod.php";
+						$fbDriver = new FacebookCookieMethod( $accountId, $options, $proxy );
+						$insights = $fbDriver->getStats( $feedInf['driver_post_id'] );
+					}
+
 				}
 				else if( $feedInf['driver'] == 'vk' )
 				{

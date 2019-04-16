@@ -67,9 +67,20 @@ class CronJob
 	{
 		$getSchedules = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('schedules') . " WHERE status='active' AND next_execute_time<=%s", [ current_time('Y-m-d H:i:s') ]) , ARRAY_A );
 
-		foreach ( $getSchedules AS $scheduleInf )
+		foreach ( $getSchedules AS $key => $scheduleInf )
 		{
 			$currentDate = current_time('Y-m-d H:i:s');
+
+			if( $key )
+			{
+				// check if not sened yet
+				$checkSchedule = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('schedules') . " WHERE id=%d AND status='active' AND next_execute_time<=%s", [ (int)$scheduleInf['id'] , current_time('Y-m-d H:i:s') ]) , ARRAY_A );
+
+				if( !$checkSchedule )
+				{
+					continue;
+				}
+			}
 
 			wpDB()->query("UPDATE " . wpTable('schedules') . " SET next_execute_time=(next_execute_time + INTERVAL IF( ( TIMESTAMPDIFF( HOUR, next_execute_time, '{$currentDate}' ) / `interval` > 1 ) , (CEIL(TIMESTAMPDIFF( HOUR, next_execute_time, '{$currentDate}' ) / `interval`) * `interval` + 1) , `interval` ) HOUR) WHERE id='" . (int)$scheduleInf['id'] . "'");
 
@@ -91,7 +102,7 @@ class CronJob
 
 		if( is_null( $shareOn ) )
 		{
-			$shareOn = time();
+			$shareOn = current_time('timestamp');
 			if( (int)get_option('fs_share_timer', '0') > 0 )
 			{
 				$shareOn += (int)get_option('fs_share_timer', '0') * 60;
@@ -145,6 +156,15 @@ class CronJob
 
 		$userId = $scheduleInf['user_id'];
 
+		$interval = $scheduleInf['interval'];
+		$endDate = strtotime($scheduleInf['end_date']);
+
+		if( strtotime(date('Y-m-d' , ( current_time('timestamp') + $interval * 3600 ))) > $endDate )
+		{
+			wp_clear_scheduled_hook( 'check_scheduled_posts' , [$scheduleId] );
+			wpDB()->update(wpTable('schedules') , ['status' => 'finished'] , ['id' => $scheduleId]);
+		}
+
 		$filterQuery = scheduleNextPostFilters( $scheduleInf );
 
 		if( $scheduleInf['status'] != 'active' )
@@ -153,7 +173,7 @@ class CronJob
 		}
 
 		/* End post_sort */
-		$getRandomPost = wpDB()->get_row("SELECT * FROM ".wpDB()->base_prefix."posts WHERE post_status='publish' {$filterQuery} LIMIT 1" , ARRAY_A);
+		$getRandomPost = wpDB()->get_row("SELECT * FROM ".wpDB()->base_prefix."posts WHERE (post_status='publish' OR post_type='attachment') {$filterQuery} LIMIT 1" , ARRAY_A);
 		$postId = $getRandomPost['ID'];
 
 		if( !($postId > 0) )
@@ -304,17 +324,20 @@ class CronJob
 
 			if( !($accountInf['driver'] == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 			{
-				wpDB()->insert( wpTable('feeds'), $insertData);
+				if( wpDB()->insert( wpTable('feeds'), $insertData) )
+				{
+					$feedsArr[wpDB()->insert_id] = true;
+				}
 			}
-
-			$feedsArr[] = wpDB()->insert_id;
 
 			if( $accountInf['driver'] == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 			{
 				$insertData['feed_type'] = 'story';
-				wpDB()->insert( wpTable('feeds'), $insertData);
 
-				$feedsArr[] = wpDB()->insert_id;
+				if( wpDB()->insert( wpTable('feeds'), $insertData) )
+				{
+					$feedsArr[wpDB()->insert_id] = true;
+				}
 			}
 		}
 
@@ -372,14 +395,15 @@ class CronJob
 				$insertData['custom_post_message'] = (string)$customPostMessages[ $nodeInf['driver'] ];
 			}
 
-			wpDB()->insert( wpTable('feeds'), $insertData);
-
-			$feedsArr[] = wpDB()->insert_id;
+			if( wpDB()->insert( wpTable('feeds'), $insertData) )
+			{
+				$feedsArr[wpDB()->insert_id] = true;
+			}
 		}
 
 		require_once LIB_DIR . 'SocialNetworkPost.php';
 
-		foreach ($feedsArr AS $feedId)
+		foreach ($feedsArr AS $feedId => $true)
 		{
 			SocialNetworkPost::post( $feedId );
 			sleep($postInterval);

@@ -354,7 +354,7 @@ else
 			<div data-tab-id="pinterest" class="sb_tab"><i class="fab fa-pinterest "></i></div>
 			<div data-tab-id="reddit" class="sb_tab"><i class="fab fa-reddit "></i></div>
 			<div data-tab-id="tumblr" class="sb_tab"><i class="fab fa-tumblr "></i></div>
-			<div data-tab-id="google" class="sb_tab"><i class="fab fa-google "></i></div>
+			<!--<div data-tab-id="google" class="sb_tab"><i class="fab fa-google "></i></div>-->
 			<div data-tab-id="ok" class="sb_tab"><i class="fab fa-odnoklassniki"></i></div>
 		</div>
 		<div class="share_box_items share_box_sh" id="share_box1">

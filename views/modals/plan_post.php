@@ -277,7 +277,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div>
 							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 130px;" value="<?=date('Y-m-d', strtotime('+1 day' ))?>"></div>
 							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 115px;" value="<?=get_option('fs_use_wp_cron_jobs', '1')?date('H:i'):current_time('H:i')?>"></div>
-							<div style="margin-bottom: 10px;"><i>Server time: <?=date('Y-m-d H:i')?></i></div>
+							<div style="margin-bottom: 10px;"><i>Server time: <?=current_time('Y-m-d H:i')?></i></div>
 						</div>
 					</div>
 				</div>
@@ -294,7 +294,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>
+						<!--<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-sn-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-sn-id="vk"><i class="fab fa-vk"></i> VK.com</div>
@@ -385,7 +385,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-tab-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-tab-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-tab-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>
+						<!--<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-tab-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-tab-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-tab-id="vk"><i class="fab fa-vk"></i> VK.com</div>

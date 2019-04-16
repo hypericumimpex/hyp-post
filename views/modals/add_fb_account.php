@@ -78,7 +78,7 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 
 	.ws_methods
 	{
-		width: 280px;
+		width: 406px;
 		margin-top: 15px !important;
 		position:absolute; left: 0;
 		right: 0;
@@ -343,18 +343,12 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 	{
 		height: 50% !important;
 	}
-	.ws_step22_head
+	.ws_step22 .warning_text
 	{
-		display: flex;
-		justify-content: center;
-		padding: 0 30px;
-		background: #DDD;
-		border-top-left-radius: 10px;
-		border-top-right-radius: 10px;
-		background-size: 100% auto;
-		background-position: center;
-		height: 100px;
-		align-items: center;
+		padding: 20px 50px;
+		text-align: center;
+		color: #c5bf66;
+		font-weight: 300;
 	}
 	.ws_step23_head
 	{
@@ -413,12 +407,12 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 			<div class="ws_method_box_img"><i class="fa fa-key"></i></div>
 			<div class="ws_method_box_label ws_tooltip" data-title="Recomended" data-float="left"><?=esc_html__('Login & Pass', 'fs-poster')?></div>
 		</div>
-		<div class="ws_method_box" data-type="2" style="display: none;">
-			<div class="ws_method_box_img"><i class="fab fa-android" style="font-size: 38px;"></i></div>
-			<div class="ws_method_box_label"><?=esc_html__('Third-Party App', 'fs-poster')?></div>
+		<div class="ws_method_box" data-type="2">
+			<div class="ws_method_box_img"><i class="fa fa-rocket" style="font-size: 38px;"></i></div>
+			<div class="ws_method_box_label"><?=esc_html__('Cookie method', 'fs-poster')?></div>
 		</div>
 		<div class="ws_method_box" data-type="3">
-			<div class="ws_method_box_img"><i class="fa fa-rocket"></i></div>
+			<div class="ws_method_box_img"><i class="fab fa-android"></i></div>
 			<div class="ws_method_box_label"><?=esc_html__('Own App', 'fs-poster')?></div>
 		</div>
 		<div style="clear: both;"></div>
@@ -489,44 +483,43 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 
 <div class="ws_step22" style="display: none;">
 
-	<div class="ws_step22_head" style="background-image: url('<?=plugin_dir_url(__FILE__).'../../images/bg2.png'?>');">
-		<button type="button" class="ws_btn ws_bg_danger" data-tab="firefox" style="width: 160px; margin-right: 10px;"><i class="fab fa-firefox"></i> <?=esc_html__('For Firefox', 'fs-poster')?></button>
-		<button type="button" class="ws_btn ws_bg_default" data-tab="others" style="width: 160px;"><i class="fab fa-chrome"></i> <?=esc_html__('For other browsers', 'fs-poster')?></button>
-	</div>
+	<div style="width: 100%; margin-top: 30px; display: flex; justify-content: center; align-items: center;">
+		<div class="fb_logo"><img src="<?=plugin_dir_url(__FILE__).'../../images/fb.svg'?>"></div>
+		<div style="width: 45%;">
 
-	<div class="ws_steps" data-for="firefox" style="margin-left: 50px; margin-top: 25px;">
+			<div style="padding-top: 20px; font-size: 17px; color: #888; font-weight: 600; margin-right: 20px;">
+				<?=esc_html__('Enter your cookies', 'fs-poster')?>
+				<a href="https://youtu.be/8W5WRw5LpNc" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a>
+			</div>
 
-		<div data-step="1"><a href="<?=$authURL?>" target="_blank" class="ws_btn ws_bg_info"><i class="fab fa-facebook-f"></i> <?=esc_html__('CLICK AND OPEN FACEBOOK', 'fs-poster')?></a></div>
-		<div data-step="2" style="padding-top: 20px;font-size: 17px;font-weight: 500;color: #636e72;padding-bottom: 20px;"><?=esc_html__('When the authorize operation has finished, copy the URL', 'fs-poster')?></div>
-		<div data-step="3">
-			<textarea class="ws_form_element2 access_token_txt" placeholder="<?=esc_html__('Paste copied URL here...', 'fs-poster')?>"></textarea>
+			<form method="POST" target="fs-fb-login" action="<?=admin_url('admin-ajax.php')?>" style="margin-top: 20px;">
+				<input type="hidden" name="action" value="fs_account_login">
+				<div class="ws_fb_login">
+					<div>
+						<input type="text" placeholder="Cookie - c_user" name="c_user" class="cookie_c_user_input">
+						<i class="fa fa-user"></i>
+					</div>
+					<div>
+						<input type="text" placeholder="Cookie - xs" name="xs" class="cookie_xs_input">
+						<i class="fa fa-key"></i>
+					</div>
+					<div style="margin-bottom: 10px;" onclick="$(this).slideUp(200 , function(){ $('#proxy_show2').slideDown(200); });">
+						<label style="color: #74b9ff;"><i class="fa fa-globe"></i> Use proxy</label>
+					</div>
+					<div style="display: none; align-items: center" class="display-flex" id="proxy_show2">
+						<div style="position: relative;">
+							<input type="text" placeholder="Proxy" class="ws_form_element proxy" style="padding-left: 30px">
+							<i class="fas fa-globe" style="position: absolute; left: 10px; color: #74b9ff; top: 10px;"></i>
+						</div>
+						<div style="width: 30px; text-align: right; cursor: help;" class="ws_tooltip" data-float="left" data-title="<?=esc_html__('Optional field. Supported proxy formats: https://127.0.0.1:8888 or https://user:pass@127.0.0.1:8888' , 'fs-poster')?>"><i class="fa fa-info-circle" style="color: #999;"></i></div>
+					</div>
+				</div>
+
+				<div style="margin-top: 10px;">
+					<button class="ws_btn ws_bg_danger next_step_btn" type="button" style="width: 160px;"><?=esc_html__('ADD ACCOUNT', 'fs-poster')?></button>
+				</div>
+			</form>
 		</div>
-
-	</div>
-	<div class="ws_steps" data-for="others" style="display: none; margin-left: 50px; margin-top: 25px;">
-
-		<div data-step="1"><a href="https://facebook.com" target="_blank" class="ws_btn ws_bg_info"><i class="fab fa-facebook-f"></i> CLICK AND OPEN FACEBOOK</a></div>
-		<div data-step="2" style="padding-top: 20px;font-size: 17px;font-weight: 500;color: #636e72;padding-bottom: 20px;"><i class="fa fa-copy"></i> <?=esc_html__('Copy code', 'fs-poster')?> ( <span class=" ws_tooltip" data-title="Click for copy" data-float="left"><input type="text" class="ws_form_element2" value='var uid = document.cookie.match(/c_user=(\d+)/)[1], dtsg = document.getElementsByName("fb_dtsg")[0].value, http = new XMLHttpRequest, url = "//" + location.host + "/v1.0/dialog/oauth/confirm", params = "fb_dtsg=" + dtsg + "&app_id=193278124048833&redirect_uri=fbconnect%3A%2F%2Fsuccess&display=page&access_token=&from_post=1&return_format=access_token&domain=&sso_device=ios&__CONFIRM__=1&__user=" + uid;http.open("POST", url, !0), http.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), http.onreadystatechange = function () {if (4 == http.readyState && 200 == http.status) {var a = http.responseText.match(/access_token=(.*)(?=&expires_in)/);a = a ? a[1] : "Failed to get Access token! Make sure you authorized the App!", window.location.href = "https://developers.facebook.com/tools/debug/accesstoken/?access_token=" + a + "&expires_in=0"}}, http.send(params);' id="console_code_input" readonly></span> ) <?=esc_html__('and paste the console ( within Facebook tab ) and press enter', 'fs-poster')?></div>
-		<div data-step="3">
-			<textarea class="ws_form_element2 access_token_txt" placeholder="<?=esc_html__('Copy access token and paste here...', 'fs-poster')?>"></textarea>
-		</div>
-
-	</div>
-
-	<div style="margin: 5px 0 0 60px;" onclick="$(this).slideUp(200 , function(){ $('#proxy_show2').slideDown(200); });">
-		<label style="color: #74b9ff;"><i class="fa fa-globe"></i> Use proxy</label>
-	</div>
-
-	<div style="display: none; align-items: center; margin: 5px 0 0 60px;" class="display-flex" id="proxy_show2">
-		<div style="position: relative;">
-			<input type="text" placeholder="Proxy" class="ws_form_element proxy" style="padding-left: 30px">
-			<i class="fas fa-globe" style="position: absolute; left: 10px; color: #74b9ff; top: 10px;"></i>
-		</div>
-		<div style="width: 30px; text-align: right; cursor: help;" class="ws_tooltip" data-title="<?=esc_html__('Optional field. Supported proxy formats: https://127.0.0.1:8888 or https://user:pass@127.0.0.1:8888' , 'fs-poster')?>"><i class="fa fa-info-circle" style="color: #999;"></i></div>
-	</div>
-
-	<div style="text-align: center; margin-top: 20px;">
-		<button class="ws_btn ws_bg_danger next_step_btn" type="button" style="width: 100px;"><?=esc_html__('NEXT STEP', 'fs-poster')?></button>
 	</div>
 
 	<div style="text-align: center; margin-top: 15px;">
@@ -779,19 +772,18 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 
 		$("#proModal<?=$mn?> .ws_step22 .next_step_btn").click(function()
 		{
-			var tab = $(".ws_step22_head .ws_bg_danger").attr('data-tab'),
-				access_token = $(".ws_steps[data-for="+tab+"] .access_token_txt").val(),
-				proxy        = $("#proModal<?=$mn?> .ws_step22 .proxy").val();
+			var cookie_c_user	=	$("#proModal<?=$mn?> .ws_step22 .cookie_c_user_input").val(),
+				cookie_xs		=	$("#proModal<?=$mn?> .ws_step22 .cookie_xs_input").val(),
+				proxy			=   $("#proModal<?=$mn?> .ws_step22 .proxy").val();
 
-			if( access_token.trim() == '' )
+			if( cookie_c_user == '' || cookie_xs == '' )
 			{
-				fsCode.toast("<?=esc_html__('Error! Access steps not completed!', 'fs-poster')?>" , 'danger');
+				fsCode.toast("<?=esc_html__('Please enter your Cookies!', 'fs-poster')?>" , 'danger');
 				return;
 			}
 
-			fsCode.ajax('add_new_fb_account_with_at' , {'access_token': access_token , 'proxy': proxy} , function(result)
+			fsCode.ajax('add_new_fb_account_with_cookie' , {'cookie_c_user': cookie_c_user , 'cookie_xs': cookie_xs, 'proxy': proxy} , function(result)
 			{
-
 				$("#proModal<?=$mn?> .ws_step22").fadeOut(200, function()
 				{
 					$("#proModal<?=$mn?> .ws_step3").fadeIn(200);
@@ -799,7 +791,6 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 
 				displayStep3(result);
 			});
-
 		});
 
 		$("#proModal<?=$mn?> .ws_step23 .next_step_btn").click(function()
@@ -846,19 +837,6 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 			fsCode.toast("<?=esc_html__('Code has been copied!', 'fs-poster')?>" , 'success')
 		});
 
-		$(".ws_step22 [data-tab]").click(function()
-		{
-			$(this).parent().children('.ws_bg_danger').removeClass('ws_bg_danger');
-			$(this).addClass('ws_bg_danger');
-
-			var tab = $(this).attr('data-tab');
-			var stepDiv = $(this).closest('.ws_step22');
-			stepDiv.children('.ws_steps:not([data-for='+tab+'])').fadeOut(200, function()
-			{
-				stepDiv.children('.ws_steps[data-for='+tab+']').fadeIn(200)
-			});
-
-		});
 	});
 
 </script>

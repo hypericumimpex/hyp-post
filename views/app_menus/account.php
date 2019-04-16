@@ -195,10 +195,10 @@ foreach( $accountsList AS $aInf )
 			<div><i class="fab fa-tumblr-square"></i> Tumblr</div>
 			<div class="snd_badge"><?=$accountsCount['tumblr']?></div>
 		</div>
-		<div class="social_network_div" data-setting="google">
+		<!--<div class="social_network_div" data-setting="google">
 			<div><i class="fab fa-google"></i> Google+</div>
-			<div class="snd_badge"><?=$accountsCount['google']?></div>
-		</div>
+			<div class="snd_badge"><?/*=$accountsCount['google']*/?></div>
+		</div>-->
 		<div class="social_network_div" data-setting="ok">
 			<div><i class="fab fa-odnoklassniki"></i> OK.ru</div>
 			<div class="snd_badge"><?=$accountsCount['ok']?></div>

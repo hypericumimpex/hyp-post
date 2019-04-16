@@ -318,4 +318,41 @@ class FSInstagramApi
 		return (string)rand(10000 , 90000) . (string)rand(10000 , 90000);
 	}
 
+	public static function getDetailsBySessId( $sessId, $proxy = '' )
+	{
+		$cookiesArr = [
+			["Name" => "sessionid", "Value" => $sessId, "Domain" => ".instagram.com", "Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => true,"Discard" => false,"HttpOnly" =>	true]
+		];
+
+		$cookieJar		= new \GuzzleHttp\Cookie\CookieJar(false , $cookiesArr);
+
+		$clientt	= new \GuzzleHttp\Client([
+			'cookies' 			=>	$cookieJar,
+			'allow_redirects'	=>	[ 'max' => 10 ],
+			'verify'			=>	false,
+			'http_errors'		=>	false,
+			'proxy'				=>	empty($proxy) ? null : $proxy,
+			'headers'			=>	[
+				'User-Agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+			]
+		]);
+
+		$response = (string)$clientt->get( 'https://www.instagram.com/' )->getBody();
+
+		preg_match('/\"username\"\:\"([^\"]+)\"/i', $response, $username);
+		$username = isset($username[1]) ? $username[1] : '-';
+
+		preg_match('/\"csrf_token\"\:\"([^\"]+)\"/i', $response, $csrfToken);
+		$csrfToken = isset($csrfToken[1]) ? $csrfToken[1] : '-';
+
+		preg_match('/\"id\"\:\"([^\"]+)\"/i', $response, $accountId);
+		$accountId = isset($accountId[1]) ? $accountId[1] : '-';
+
+		return [
+			'id'		=>	$accountId,
+			'csrf'		=>	$csrfToken,
+			'username'	=>	$username
+		];
+	}
+
 }

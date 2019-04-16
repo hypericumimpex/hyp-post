@@ -67,22 +67,29 @@ class PostMetaBox
 				}
 			}
 
-			add_filter( 'bulk_actions-edit-post', function ($bulk_actions)
+			foreach( $allowedPostTypes AS $postType )
 			{
-				$bulk_actions['fs_schedule'] = __( 'FS Poster: Schedule', 'fs_schedule');
-				return $bulk_actions;
-			} );
 
-			add_filter( 'handle_bulk_actions-edit-post', function ( $redirect_to, $doaction, $post_ids )
-			{
-				if ( $doaction !== 'fs_schedule' )
+				add_filter( 'bulk_actions-edit-' . $postType, function ($bulk_actions)
 				{
-					return $redirect_to;
-				}
+					$bulk_actions['fs_schedule'] = __( 'FS Poster: Schedule', 'fs_schedule');
+					return $bulk_actions;
+				} );
 
-				$redirect_to = add_query_arg( 'fs_schedule_posts', implode(',' , $post_ids), $redirect_to );
-				return $redirect_to;
-			}, 10, 3 );
+				add_filter( 'handle_bulk_actions-edit-' . $postType, function ( $redirect_to, $doaction, $post_ids )
+				{
+					if ( $doaction !== 'fs_schedule' )
+					{
+						return $redirect_to;
+					}
+
+					$redirect_to = add_query_arg( 'fs_schedule_posts', implode(',' , $post_ids), $redirect_to );
+					return $redirect_to;
+				}, 10, 3 );
+
+			}
+
+
 
 			add_action( 'admin_notices', function ()
 			{
