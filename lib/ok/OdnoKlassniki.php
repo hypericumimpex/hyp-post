@@ -68,7 +68,7 @@ class OdnoKlassniki
 		]);
 
 		// fetch groups list
-		$groupIDsList = self::cmd('group.getUserGroupsV2', 'GET' , $accessToken , $appPublicKey , $appPrivateKey , [] , $proxy );
+		$groupIDsList = self::cmd('group.getUserGroupsV2', 'GET' , $accessToken , $appPublicKey , $appPrivateKey , ['count' => 100] , $proxy );
 		$idsArr = [];
 
 		foreach ($groupIDsList['groups'] AS $groupIdInf)
@@ -171,11 +171,18 @@ class OdnoKlassniki
 		}
 
 		$sendData['attachment'] = [
-			'media' => [
-				[ 'type' => 'text' , 'text' => $message ] ,
-				[ 'type' => 'link' , 'url' => $link ]
-			]
+			'media' => [ ]
 		];
+
+		if( !empty( $message ) )
+		{
+			$sendData['attachment']['media'][] = [ 'type' => 'text' , 'text' => $message ];
+		}
+
+		if( !empty( $link ) )
+		{
+			$sendData['attachment']['media'][] = [ 'type' => 'link' , 'url' => $link ];
+		}
 
 		if( $type == 'image' )
 		{
@@ -257,7 +264,7 @@ class OdnoKlassniki
 
 		$endPoint = 'mediatopic.post';
 
-		$result = self::cmd($endPoint , 'GET' , $accessToken , $appPublicKey , $appPrivateKey , $sendData , $proxy);
+		$result = self::cmd($endPoint , 'POST' , $accessToken , $appPublicKey , $appPrivateKey , $sendData , $proxy);
 
 		if( isset($result['error_msg']) )
 		{

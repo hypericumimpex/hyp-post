@@ -50,7 +50,16 @@ class CronJob
 		foreach ($sendPosts AS $postInf)
 		{
 			if( get_post_status( $postInf['post_id'] ) != 'publish' )
+			{
 				continue;
+			}
+
+			// prevent dublicates...
+			$checkIsSended = wpDB()->get_row( wpDB()->prepare("SELECT is_sended FROM " . wpTable('feeds') . " WHERE id=%d", [ $postInf['id'] ]) , ARRAY_A );
+			if( $checkIsSended['is_sended'] != 0 )
+			{
+				continue;
+			}
 
 			wpDB()->update(wpTable('feeds') , [ 'is_sended' => '2' ] , [ 'id' => $postInf['id'] ]);
 
@@ -257,8 +266,6 @@ class CronJob
 			);
 		}
 
-
-
 		$customPostMessages = json_decode($scheduleInf['custom_post_message'] , true);
 		$customPostMessages = is_array($customPostMessages) ? $customPostMessages : [];
 
@@ -314,7 +321,8 @@ class CronJob
 				'node_type'     =>  'account',
 				'node_id'       =>  (int)$accountInf['id'],
 				'interval'      =>  $postInterval,
-				'schedule_id'   =>  $scheduleId
+				'schedule_id'   =>  $scheduleId,
+				'is_sended'		=>	2
 			];
 
 			if( isset($customPostMessages[ $accountInf['driver'] ]) )
@@ -387,7 +395,8 @@ class CronJob
 				'node_type'     =>  $nodeInf['node_type'],
 				'node_id'       =>  (int)$nodeInf['id'],
 				'interval'      =>  $postInterval,
-				'schedule_id'   =>  $scheduleId
+				'schedule_id'   =>  $scheduleId,
+				'is_sended'		=>	2
 			];
 
 			if( isset($customPostMessages[ $nodeInf['driver'] ]) )

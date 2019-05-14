@@ -2,6 +2,14 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// fix...
+wpDB()->query("DELETE FROM ".wpTable("accounts")." WHERE driver='google'");
+wpDB()->query("DELETE FROM ".wpTable("account_nodes")." WHERE driver='google'");
+wpDB()->query('DELETE FROM '.wpTable('account_node_status').' WHERE (SELECT COUNT(0) FROM '.wpTable('account_nodes').' WHERE id='.wpTable('account_node_status').'.node_id)=0');
+wpDB()->query('DELETE FROM '.wpTable('account_status').' WHERE (SELECT COUNT(0) FROM '.wpTable('accounts').' WHERE id='.wpTable('account_status').'.account_id)=0');
+/////////
+
 $accountsList = wpDB()->get_results(wpDB()->prepare("SELECT driver, COUNT(0) AS _count FROM ".wpTable('accounts')." WHERE (user_id=%d OR is_public=1) GROUP BY driver",  [get_current_user_id()]) , ARRAY_A);
 $accountsCount = [
 	'fb'        =>  0,
@@ -24,6 +32,7 @@ foreach( $accountsList AS $aInf )
 }
 
 ?>
+
 <style>
 	.social_network_div
 	{
@@ -152,6 +161,7 @@ foreach( $accountsList AS $aInf )
 		cursor: pointer;
 	}
 </style>
+
 <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 

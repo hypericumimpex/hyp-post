@@ -140,6 +140,7 @@ trait FSPSettings
 
 		$fs_vk_load_admin_communities = _post('fs_vk_load_admin_communities' , 0 , 'string' , ['on']) === 'on' ? 1 : 0;
 		$fs_vk_load_members_communities = _post('fs_vk_load_members_communities' , 0 , 'string' , ['on']) === 'on' ? 1 : 0;
+		$fs_vk_upload_image = _post('fs_vk_upload_image' , 0 , 'string' , ['on']) === 'on' ? 1 : 0;
 
 		$fs_vk_max_communities_limit = _post('fs_vk_max_communities_limit' , '50' , 'num');
 
@@ -155,6 +156,7 @@ trait FSPSettings
 		update_option('fs_vk_load_members_communities' , (string)$fs_vk_load_members_communities);
 
 		update_option('fs_vk_max_communities_limit' , $fs_vk_max_communities_limit);
+		update_option('fs_vk_upload_image' , $fs_vk_upload_image);
 
 		response(true);
 	}
@@ -214,17 +216,6 @@ trait FSPSettings
 		$fs_post_text_message_reddit = _post('fs_post_text_message_reddit' , '' , 'string');
 
 		update_option('fs_post_text_message_reddit' , $fs_post_text_message_reddit);
-
-		response(true);
-	}
-
-	public function settings_google_save()
-	{
-		$this->isAdmin();
-
-		$fs_post_text_message_google = _post('fs_post_text_message_google' , '' , 'string');
-
-		update_option('fs_post_text_message_google' , $fs_post_text_message_google);
 
 		response(true);
 	}

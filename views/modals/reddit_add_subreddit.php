@@ -65,12 +65,6 @@ if( !$accountInf )
 		<div>
 			<select class="ws_form_element subreddit_select select2-init2">
 				<option></option>
-				<?php
-				foreach( $communities AS $cInfo )
-				{
-					print '<option value="'.htmlspecialchars($cInfo['id']).'" data-image="'.htmlspecialchars($cInfo['image']).'" data-members="'.number_format($cInfo['members']).'">'.htmlspecialchars($cInfo['name']).'</option>';
-				}
-				?>
 			</select>
 		</div>
 		<div class="categories_area" style="display: none;">

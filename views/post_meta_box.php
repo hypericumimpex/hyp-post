@@ -22,7 +22,6 @@ if( isset($postId) && $postId > 0 && get_post_status() == 'draft' )
 	$cm_fs_post_text_message_pinterest	= get_post_meta($postId, '_fs_poster_cm_pinterest', true);
 	$cm_fs_post_text_message_reddit		= get_post_meta($postId, '_fs_poster_cm_reddit', true);
 	$cm_fs_post_text_message_thumblr	= get_post_meta($postId, '_fs_poster_cm_thumblr', true);
-	$cm_fs_post_text_message_google		= get_post_meta($postId, '_fs_poster_cm_google', true);
 	$cm_fs_post_text_message_ok			= get_post_meta($postId, '_fs_poster_cm_ok', true);
 
 	$nodeList = get_post_meta($postId, '_fs_poster_node_list', true);
@@ -58,7 +57,7 @@ if( isset($postId) && $postId > 0 && get_post_status() == 'draft' )
 		$accounts = wpDB()->get_results(
 			"SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name,'account' AS node_type FROM ".wpTable('account_status')." tb1
 			LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
-			WHERE tb2.id IN ({$accountsList})
+			WHERE tb1.account_id IN ({$accountsList}) AND tb1.user_id='" . (int)get_current_user_id() . "'
 			ORDER BY name"
 			, ARRAY_A
 		);
@@ -76,7 +75,7 @@ if( isset($postId) && $postId > 0 && get_post_status() == 'draft' )
 			"
 			SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".wpTable('account_node_status')." tb1
 			LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
-			WHERE tb2.id IN ({$nodesList})
+			WHERE tb1.node_id IN ({$nodesList}) AND tb1.user_id='" . (int)get_current_user_id() . "'
 			ORDER BY (CASE node_type WHEN 'ownpage' THEN 1 WHEN 'group' THEN 2 WHEN 'page' THEN 3 END), name"
 			, ARRAY_A
 		);
@@ -96,7 +95,6 @@ else
 	$cm_fs_post_text_message_pinterest	= get_option('fs_post_text_message_pinterest');
 	$cm_fs_post_text_message_reddit		= get_option('fs_post_text_message_reddit');
 	$cm_fs_post_text_message_thumblr	= get_option('fs_post_text_message_thumblr');
-	$cm_fs_post_text_message_google		= get_option('fs_post_text_message_google');
 	$cm_fs_post_text_message_ok			= get_option('fs_post_text_message_ok');
 
 	$accounts = wpDB()->get_results(
@@ -354,7 +352,6 @@ else
 			<div data-tab-id="pinterest" class="sb_tab"><i class="fab fa-pinterest "></i></div>
 			<div data-tab-id="reddit" class="sb_tab"><i class="fab fa-reddit "></i></div>
 			<div data-tab-id="tumblr" class="sb_tab"><i class="fab fa-tumblr "></i></div>
-			<!--<div data-tab-id="google" class="sb_tab"><i class="fab fa-google "></i></div>-->
 			<div data-tab-id="ok" class="sb_tab"><i class="fab fa-odnoklassniki"></i></div>
 		</div>
 		<div class="share_box_items share_box_sh" id="share_box1">
@@ -425,10 +422,6 @@ else
 			<div data-tab="tumblr">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Thumblr post message' , 'fs-poster')?></label></div>
 				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_thumblr"><?=htmlspecialchars($cm_fs_post_text_message_thumblr)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
-			</div>
-			<div data-tab="google">
-				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Google+ post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_google"><?=htmlspecialchars($cm_fs_post_text_message_google)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
 			</div>
 			<div data-tab="ok">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize OK.ru post message' , 'fs-poster')?></label></div>
@@ -589,7 +582,6 @@ else
 			case 'linkedin':
 			case 'pinterest':
 			case 'reddit':
-			case 'google':
 				dIcon = "fab fa-" + tab;
 				break;
 			case 'ok':

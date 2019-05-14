@@ -238,8 +238,6 @@ class PostMetaBox
 		$post_text_message['pinterest'] = _post('fs_post_text_message_pinterest' , '' , 'string');
 		$post_text_message['reddit']    = _post('fs_post_text_message_reddit' , '' , 'string');
 		$post_text_message['thumblr']   = _post('fs_post_text_message_thumblr' , '' , 'string');
-		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
-		$post_text_message['google']  	= _post('fs_post_text_message_google' , '' , 'string');
 		$post_text_message['ok'] 		= _post('fs_post_text_message_ok' , '' , 'string');
 
 		if( $old_status == 'draft' )
@@ -254,8 +252,6 @@ class PostMetaBox
 			delete_post_meta( $post_id, '_fs_poster_cm_pinterest' );
 			delete_post_meta( $post_id, '_fs_poster_cm_reddit' );
 			delete_post_meta( $post_id, '_fs_poster_cm_thumblr' );
-			delete_post_meta( $post_id, '_fs_poster_cm_google' );
-			delete_post_meta( $post_id, '_fs_poster_cm_google' );
 			delete_post_meta( $post_id, '_fs_poster_cm_ok' );
 		}
 
@@ -273,14 +269,17 @@ class PostMetaBox
 			add_post_meta( $post_id, '_fs_poster_cm_pinterest', $post_text_message['pinterest'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_reddit', $post_text_message['reddit'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_thumblr', $post_text_message['thumblr'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_google', $post_text_message['google'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_google', $post_text_message['google'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_ok', $post_text_message['ok'], true );
 
 			return;
 		}
 
 		$postCats = getPostCatsArr( $post_id );
+
+		if( !is_array( $nodesList ) )
+		{
+			$nodesList = [];
+		}
 
 		foreach( $nodesList AS $nodeId )
 		{

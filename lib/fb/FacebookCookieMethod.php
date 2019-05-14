@@ -187,14 +187,9 @@ class FacebookCookieMethod
 
 	public function getMyPages()
 	{
-		$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/pages/launchpoint/' )->getBody();
+		$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/pages/launchpoint/owned_pages/' )->getBody();
 
-		preg_match('/\<ul.+id\=\"owned_pages_item\".*\>(.+)\<\/ul\>/Ui', $result, $myPagesList);
-
-		if( ! isset( $myPagesList[1] ) )
-			return [];
-
-		preg_match_all('/\<li.+\>(.+)\<\/li\>/Ui', $myPagesList[1], $myPages);
+		preg_match_all('/\<li class\=\"_4nwh\"\>(.+)\<\/li\>/Ui', $result, $myPages);
 
 		if( ! isset( $myPages[1] ) )
 			return [];

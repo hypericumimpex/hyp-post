@@ -411,10 +411,6 @@ function profilePic($info , $w = 40 , $h = 40)
 	{
 		return $info['profile_pic'];
 	}
-	else if( $info['driver'] == 'google' )
-	{
-		return $info['profile_pic'];
-	}
 	else if( $info['driver'] == 'reddit' )
 	{
 		return $info['profile_pic'];
@@ -457,17 +453,13 @@ function profileLink($info)
 		{
 			return "https://www.linkedin.com/company/" . esc_html($info['node_id']);
 		}
-		else if( $info['driver'] == 'google' )
-		{
-			return "https://plus.google.com/communities/" . esc_html($info['node_id']);
-		}
 		else if( $info['driver'] == 'ok' )
 		{
 			return "https://ok.ru/group/" . esc_html($info['node_id']);
 		}
 		else if( $info['driver'] == 'reddit' )
 		{
-			return "https://www.reddit.com/r/" . esc_html($info['node_id']);
+			return "https://www.reddit.com/r/" . esc_html($info['screen_name']);
 		}
 
 		return '';
@@ -504,10 +496,6 @@ function profileLink($info)
 	else if( $info['driver'] == 'tumblr' )
 	{
 		return "https://" . esc_html($info['username']) . ".tumblr.com";
-	}
-	else if( $info['driver'] == 'google' )
-	{
-		return 'https://plus.google.com/'.urlencode($info['profile_id']);
 	}
 	else if( $info['driver'] == 'ok' )
 	{
@@ -553,11 +541,6 @@ function postLink( $postId , $driver , $username = '' )
 	else if( $driver == 'tumblr' )
 	{
 		return 'https://'.$username.'.tumblr.com/post/' . $postId;
-	}
-	else if( $driver == 'google' )
-	{
-		$postId = explode(':' , $postId);
-		return 'https://plus.google.com/' . urlencode($postId[0]) . '/posts/' . urlencode(isset($postId[1]) ? $postId[1] : '-');
 	}
 	else if( $driver == 'ok' )
 	{
@@ -802,7 +785,7 @@ function checkRequirments()
 {
 	if( !ini_get('allow_url_fopen') )
 	{
-		response(false , esc_html__('"allow_url_fopen" disabled in your php.ini settings! Please actiavte id and try again!' , 'fs-poster'));
+		response(false , esc_html__('"allow_url_fopen" disabled in your php.ini settings! Please activate it and try again!' , 'fs-poster'));
 	}
 }
 
@@ -1071,7 +1054,6 @@ function socialIcon( $driver )
 		case 'linkedin':
 		case 'pinterest':
 		case 'reddit':
-		case 'google':
 			return "fab fa-{$driver}";
 			break;
 

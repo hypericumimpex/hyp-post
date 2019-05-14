@@ -275,22 +275,12 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<div style="width: 5%;"></div>
 					<div style="width: 50%; margin-top: 5px; display: flex; align-items: center;">
 						<select class="ws_form_element select2-init category_filter" data-placeholder="<?=esc_html__('Category filter' , 'fs-poster')?>" multiple>
-							<optgroup label="Post categories">
 							<?php
-							foreach( get_categories() AS $categ )
-							{
-								print '<option value="' . htmlspecialchars($categ->cat_ID) . '">' . htmlspecialchars($categ->cat_name) . '</option>';
-							}
-							?>
-							</optgroup>
-							<optgroup label="Product categories">
-							<?php
-							foreach( get_terms( 'product_cat', $cat_args ) AS $categ )
+							foreach( get_terms( [ 'hide_empty' => false ] ) AS $categ )
 							{
 								print '<option value="' . htmlspecialchars($categ->term_id) . '">' . htmlspecialchars($categ->name) . '</option>';
 							}
 							?>
-							</optgroup>
 						</select>
 						<span class="ws_tooltip" data-title="Filter posts by category. If you do not want to add this filter then keep empty." style="padding: 10px;"><i class="fa fa-info-circle"></i></span>
 					</div>
@@ -331,7 +321,6 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<!--<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-sn-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-sn-id="vk"><i class="fab fa-vk"></i> VK.com</div>
@@ -345,7 +334,6 @@ $activeNodes = array_merge($accounts , $activeNodes);
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="instagram"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="twitter"><?=esc_html(get_option('fs_post_text_message_twitter', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="linkedin"><?=esc_html(get_option('fs_post_text_message_linkedin', "{title}"))?></textarea>
-							<textarea class="ws_form_element2" style="display: none;" data-sn-id="google"><?=esc_html(get_option('fs_post_text_message_google', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="tumblr"><?=esc_html(get_option('fs_post_text_message_tumblr', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="reddit"><?=esc_html(get_option('fs_post_text_message_reddit', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="vk"><?=esc_html(get_option('fs_post_text_message_vk', "{title}"))?></textarea>
@@ -422,7 +410,6 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-tab-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-tab-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-tab-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<!--<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-tab-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-tab-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-tab-id="vk"><i class="fab fa-vk"></i> VK.com</div>

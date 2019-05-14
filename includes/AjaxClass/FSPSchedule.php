@@ -28,7 +28,7 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'google', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
 				{
 					$_custom_messages[$socialNetwork] = $message1;
 				}
@@ -193,7 +193,7 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'google', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
 				{
 					$_custom_messages[$socialNetwork] = $message1;
 				}

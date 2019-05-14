@@ -171,7 +171,7 @@ class Vk
 		if( !is_array($data) || !isset($data['response']) )
 		{
 			return [
-				'error' =>  ['message' => isset($data['error']) && isset($data['error']['error_msg']) ? $data['error']['error_msg'] : ( isset($data['error']) && isset($data['error']['message']) ? $data['error']['message'] : 'Error!') ]
+				'error' =>  ['message' => isset($data['error']) && isset($data['error']['error_msg']) ? $data['error']['error_msg'] : ( isset($data['error']) && isset($data['error']['message']) ? $data['error']['message'] : 'Error!' . htmlspecialchars( $data1 )) ]
 			];
 		}
 
@@ -291,7 +291,7 @@ class Vk
 			}
 		}
 
-		$result = self::cmd('wall.post' , 'GET' , $accessToken , $sendData , $proxy );
+		$result = self::cmd('wall.post' , 'POST' , $accessToken , $sendData , $proxy );
 
 		if( isset($result['error']) )
 		{

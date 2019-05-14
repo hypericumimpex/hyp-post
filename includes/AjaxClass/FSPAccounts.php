@@ -75,7 +75,7 @@ trait FSPAccounts
 		wpDB()->query("DELETE FROM ".wpTable('account_node_status')." WHERE node_id IN (SELECT id FROM ".wpTable('account_nodes')." WHERE account_id='$id')");
 		wpDB()->delete(wpTable('account_nodes') , ['account_id' => $id]);
 
-		if( $checkAccount['driver'] == 'instagram' || $checkAccount['driver'] == 'google' )
+		if( $checkAccount['driver'] == 'instagram' )
 		{
 			$checkIfUsernameExist = wpFetch('accounts' , ['username' => $checkAccount['username'] , 'driver' => $checkAccount['driver']]);
 
@@ -93,7 +93,7 @@ trait FSPAccounts
 	{
 		$name = _post('name' , '' , 'string');
 
-		$supported = ['fb' , 'twitter' , 'instagram' , 'linkedin', 'google', 'vk', 'pinterest' , 'reddit' , 'tumblr' , 'ok'];
+		$supported = ['fb' , 'twitter' , 'instagram' , 'linkedin', 'vk', 'pinterest' , 'reddit' , 'tumblr' , 'ok'];
 		if( empty($name) || !in_array( $name , $supported ) )
 		{
 			response(false);
@@ -509,406 +509,6 @@ trait FSPAccounts
 		response(true);
 	}
 
-	public function add_google_account($forceLogin = true)
-	{
-		$username	= _post('username' , '' , 'string');
-		$password	= _post('password' , '' , 'string');
-		$proxy		= _post('proxy' , '' , 'string');
-		$capcha		= _post('capcha' , '' , 'string');
-
-		if( empty($username) || empty($password) )
-		{
-			response(false, ['error_msg' => esc_html__('Please enter you email and password!' , 'fs-poster')]);
-		}
-
-		if( $forceLogin )
-		{
-			// try to delete old session folder
-			// wpDB()->delete(wpTable('account_sessions') , ['driver'=>'google' , 'username' => $username]);
-		}
-
-		require_once LIB_DIR . "google/GooglePlus.php";
-
-		$googlePlus = new GooglePlus($username , $password , $proxy);
-
-		if( !empty($capcha) )
-		{
-			$googlePlus->setCapcha($capcha);
-		}
-
-		$login = $googlePlus->login();
-		$googlePlus->saveData();
-
-		if( $login['status'] === 'error' )
-		{
-			if( isset($login['capcha_url']) )
-			{
-				response(true , [
-					'do'		=>	'capcha',
-					'error_msg' =>	htmlspecialchars($login['message']),
-					'capcha'	=>	$login['capcha_url']
-				] );
-			}
-			else
-			{
-				response(false , htmlspecialchars($login['message']) );
-			}
-
-		}
-		else if( $login['status'] === 'capcha' )
-		{
-			response(true , [
-				'do'		=>	'capcha',
-				'error_msg' =>	'Please fill the capcha field',
-				'capcha'	=>	isset($login['capcha_url']) ? $login['capcha_url'] : null,
-			] );
-		}
-		else if( $login['status'] === 'two_factor_auth' )
-		{
-			response(true , [
-				'do'            => 'two_factor' ,
-				'message'       => htmlspecialchars($login['message'])
-			]);
-		}
-		else if( $login['status'] === 'challenge_1st_step' )
-		{
-			response(true , [
-				'do'            => 'challenge_1st_step' ,
-				'message'       => htmlspecialchars($login['message'])
-			]);
-		}
-		else if( $login['status'] === 'challenge' )
-		{
-			response(true , [
-				'do'            => 'challenge' ,
-				'message'       => htmlspecialchars($login['message'])
-			]);
-		}
-
-		$data = $googlePlus->getUserInfo();
-
-		if( empty($data['id']) )
-		{
-			response(false, 'Colud not to get user info!');
-		}
-
-		$sqlData = [
-			'user_id'           =>  get_current_user_id(),
-			'profile_id'        =>  $data['id'],
-			'username'          =>  $username,
-			'password'          =>  $password,
-			'proxy'             =>  $proxy,
-			'driver'            =>  'google',
-			'name'              =>  $data['name'],
-			'profile_pic'       =>  $data['profile_image']
-		];
-
-		$checkIfExists = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'profile_id' => $data['id']]);
-		if( $checkIfExists )
-		{
-			wpDB()->update(wpTable('accounts') , $sqlData , ['id' => $checkIfExists['id']]);
-		}
-		else
-		{
-			wpDB()->insert(wpTable('accounts') , $sqlData);
-		}
-
-		response(true);
-	}
-
-	public function add_google_account_cookie_method($forceLogin = true)
-	{
-		$username		= _post('username' , '' , 'string');
-		$cookie_sid		= _post('cookie_sid' , '' , 'string');
-		$cookie_hsid	= _post('cookie_hsid' , '' , 'string');
-		$cookie_ssid	= _post('cookie_ssid' , '' , 'string');
-		$proxy			= _post('proxy' , '' , 'string');
-		$password		= '*****';
-
-		if( empty($username) || empty($cookie_sid) || empty($cookie_hsid) || empty($cookie_ssid) )
-		{
-			response(false, ['error_msg' => esc_html__('Please enter your email and cookies!' , 'fs-poster')]);
-		}
-
-		$cookies = [
-			["Name" => "SID","Value"  => $cookie_sid,  "Domain" => ".google.com","Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => false,"Discard" => false,"HttpOnly" => false,"Priority" => "HIGH"],
-			["Name" => "HSID","Value" => $cookie_hsid, "Domain" => ".google.com","Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => false,"Discard" => false,"HttpOnly" => true,"Priority" => "HIGH"],
-			["Name" => "SSID","Value" => $cookie_ssid, "Domain" => ".google.com","Path" => "/","Max-Age" => null,"Expires" => null,"Secure" => false,"Discard" => false,"HttpOnly" => false,"Priority" => "HIGH"]
-		];
-
-
-		require_once LIB_DIR . "google/GooglePlus.php";
-
-		$googlePlus = new GooglePlus($username , $password , $proxy , $cookies);
-
-		$data = $googlePlus->getUserInfo();
-
-		if( empty($data['id']) )
-		{
-			response(false, 'Colud not to get user info!');
-		}
-
-		$googlePlus->saveData();
-
-		$sqlData = [
-			'user_id'           =>  get_current_user_id(),
-			'profile_id'        =>  $data['id'],
-			'username'          =>  $username,
-			'password'          =>  $password,
-			'proxy'             =>  $proxy,
-			'driver'            =>  'google',
-			'name'              =>  $data['name'],
-			'profile_pic'       =>  $data['profile_image']
-		];
-
-		$checkIfExists = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'profile_id' => $data['id']]);
-		if( $checkIfExists )
-		{
-			wpDB()->update(wpTable('accounts') , $sqlData , ['id' => $checkIfExists['id']]);
-		}
-		else
-		{
-			wpDB()->insert(wpTable('accounts') , $sqlData);
-		}
-
-		response(true);
-	}
-
-	public function google_confirm_two_factor()
-	{
-		$username               = _post('username' , '' , 'string');
-		$password               = _post('password' , '' , 'string');
-		$proxy                  = _post('proxy' , '' , 'string');
-		$code                   = _post('code' , '' , 'string');
-
-		if( empty($username) || empty($password) || empty($code) )
-		{
-			response(false, ['error_msg' => esc_html__('Please enter the code!' , 'fs-poster')]);
-		}
-
-		require_once LIB_DIR . "google/GooglePlus.php";
-
-		$googlePlus = new GooglePlus( $username , $password , $proxy );
-		$activate = $googlePlus->approve2FactorAuth( $code );
-		$googlePlus->saveData();
-
-		if( $activate['status'] === 'error' )
-		{
-			response(false , htmlspecialchars($activate['message']));
-		}
-
-		$data = $googlePlus->getUserInfo();
-
-		if( empty($data['id']) )
-		{
-			response(false, 'Colud not to get user info!');
-		}
-
-		$sqlData = [
-			'user_id'           =>  get_current_user_id(),
-			'profile_id'        =>  $data['id'],
-			'username'          =>  $username,
-			'password'          =>  $password,
-			'proxy'             =>  $proxy,
-			'driver'            =>  'google',
-			'name'              =>  $data['name'],
-			'profile_pic'       =>  $data['profile_image']
-		];
-
-		$checkIfExists = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'profile_id' => $data['id']]);
-		if( $checkIfExists )
-		{
-			wpDB()->update(wpTable('accounts') , $sqlData , ['id' => $checkIfExists['id']]);
-		}
-		else
-		{
-			wpDB()->insert(wpTable('accounts') , $sqlData);
-		}
-
-		response(true);
-	}
-
-	public function google_confirm_challenge_1st_step()
-	{
-		$username               = _post('username' , '' , 'string');
-		$password               = _post('password' , '' , 'string');
-		$proxy                  = _post('proxy' , '' , 'string');
-		$code                   = _post('code' , '' , 'string');
-
-		if( empty($username) || empty($password) || empty($code) )
-		{
-			response(false, ['error_msg' => esc_html__('Please enter the code!' , 'fs-poster')]);
-		}
-
-		require_once LIB_DIR . "google/GooglePlus.php";
-
-		$googlePlus = new GooglePlus( $username , $password , $proxy );
-		$activate = $googlePlus->challenge1stStep( $code );
-		$googlePlus->saveData();
-
-		if( $activate['status'] === 'error' )
-		{
-			response(false , htmlspecialchars($activate['message']));
-		}
-
-		$data = $googlePlus->getUserInfo();
-
-		if( empty($data['id']) )
-		{
-			response(false, 'Colud not to get user info!');
-		}
-
-		$sqlData = [
-			'user_id'           =>  get_current_user_id(),
-			'profile_id'        =>  $data['id'],
-			'username'          =>  $username,
-			'password'          =>  $password,
-			'proxy'             =>  $proxy,
-			'driver'            =>  'google',
-			'name'              =>  $data['name'],
-			'profile_pic'       =>  $data['profile_image']
-		];
-
-		$checkIfExists = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'profile_id' => $data['id']]);
-		if( $checkIfExists )
-		{
-			wpDB()->update(wpTable('accounts') , $sqlData , ['id' => $checkIfExists['id']]);
-		}
-		else
-		{
-			wpDB()->insert(wpTable('accounts') , $sqlData);
-		}
-
-		response(true);
-	}
-
-	public function google_community_get_cats()
-	{
-		$id	= _post('id' , '' , 'string');
-		$accountId	= _post('account_id' , '0' , 'num');
-		if( !(!empty($id) && $accountId > 0) )
-		{
-			response(false);
-		}
-
-		$userId = (int)get_current_user_id();
-
-		$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='google' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
-
-		if( !$accountInf )
-		{
-			response(false, 'You have not a permission for adding community in this account!');
-		}
-
-		require_once LIB_DIR . '/google/GooglePlus.php';
-		$google = new GooglePlus($accountInf['username'] , $accountInf['password'] , $accountInf['proxy']);
-
-		$communities = $google->getCategories($id);
-
-		response(true , ['cats' => $communities]);
-	}
-
-	public function google_community_save()
-	{
-		$accountId	= _post('account_id' , '0' , 'num');
-		$community	= _post('community' , '' , 'string');
-		$communityCateg	= _post('community_categ' , '' , 'string');
-
-		$filter_type = _post('filter_type' , '' , 'string' , ['in' , 'ex']);
-		$categories = _post('categories' , [], 'array');
-
-		$categoriesArr = [];
-		foreach($categories AS $categId)
-		{
-			if(is_numeric($categId) && $categId > 0)
-			{
-				$categoriesArr[] = (int)$categId;
-			}
-		}
-		$categoriesArr = implode(',' , $categoriesArr);
-
-		$categoriesArr = empty($categoriesArr) ? null : $categoriesArr;
-		$filter_type = empty($filter_type) || empty($categoriesArr) ? 'no' : $filter_type;
-
-		if( !(!empty($community) && $accountId > 0) )
-		{
-			response(false);
-		}
-
-		$userId = (int)get_current_user_id();
-
-		$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='google' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
-
-		if( !$accountInf )
-		{
-			response(false, 'You have not a permission for adding community in this account!');
-		}
-
-		require_once LIB_DIR . '/google/GooglePlus.php';
-		$google = new GooglePlus($accountInf['username'] , $accountInf['password'] , $accountInf['proxy']);
-
-		$communities = $google->getCommunities();
-
-		$communityName = null;
-		$members = null;
-		$communityCover = null;
-		foreach( $communities AS $cInf )
-		{
-			if( $cInf['id'] == $community )
-			{
-				$communityName = $cInf['name'];
-				$members = $cInf['members'];
-				$communityCover = $cInf['image'];
-				break;
-			}
-		}
-
-		if( is_null( $communityName ) )
-		{
-			response(false, 'Community not found!');
-		}
-
-		$communityCategories = $google->getCategories( $community );
-		$communityCategName = null;
-		foreach( $communityCategories AS $categInf )
-		{
-			if( $categInf['id'] == $communityCateg )
-			{
-				$communityCategName = $categInf['name'];
-			}
-		}
-
-		if( is_null( $communityCategName ) )
-		{
-			response(false, 'Community category not found!');
-		}
-
-		wpDB()->insert(wpTable('account_nodes') , [
-			'user_id'			=>	$userId,
-			'driver'			=>	'google',
-			'account_id'		=>	$accountId,
-			'node_type'			=>	'community',
-			'node_id'			=>	$community,
-			'name'				=>	$communityName,
-			'access_token'		=>	$communityCateg,
-			'category'			=>	$communityCategName,
-			'fan_count'			=>	$members,
-			'cover'				=>	$communityCover
-		]);
-
-		$nodeId = wpDB()->insert_id;
-
-		// actiavte...
-		wpDB()->insert(wpTable('account_node_status') , [
-			'node_id'		=>	$nodeId,
-			'user_id'		=>	$userId,
-			'filter_type'	=>	$filter_type,
-			'categories'	=>	$categoriesArr
-		]);
-
-		response(true , ['id' => $nodeId]);
-	}
-
 	public function search_subreddits()
 	{
 		$accountId	= _post('account_id' , '0' , 'num');
@@ -934,16 +534,38 @@ trait FSPAccounts
 		}
 
 		$searchSubreddits = Reddit::cmd('https://oauth.reddit.com/api/search_subreddits', 'POST', $accessToken, [
-			'query' => $search,
+			'query'						=> $search,
 			'include_over_18'			=>	true,
 			'exact'						=>	false,
 			'include_unadvertisable'	=>	true
 		]);
 
 		$newArr = [];
+		$preventDublicates = [];
 
 		foreach( $searchSubreddits['subreddits'] AS $subreddit )
 		{
+			$preventDublicates[ $subreddit['name'] ] = true;
+
+			$newArr[] = [
+				'text'	=> htmlspecialchars($subreddit['name'] . ' ( ' . $subreddit['subscriber_count'] . ' subscribers )'),
+				'id'	=> htmlspecialchars($subreddit['name'])
+			];
+		}
+
+		// for fixing Reddit API bug
+		$searchSubreddits = Reddit::cmd('https://oauth.reddit.com/api/search_subreddits', 'POST', $accessToken, [
+			'query'						=> $search,
+			'exact'						=>	true
+		]);
+
+		foreach( $searchSubreddits['subreddits'] AS $subreddit )
+		{
+			if( isset( $preventDublicates[ $subreddit['name'] ] ) )
+			{
+				continue;
+			}
+
 			$newArr[] = [
 				'text'	=> htmlspecialchars($subreddit['name'] . ' ( ' . $subreddit['subscriber_count'] . ' subscribers )'),
 				'id'	=> htmlspecialchars($subreddit['name'])

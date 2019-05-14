@@ -8,7 +8,7 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 		*,
 		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='ownpage') ownpages,
 		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='page') pages,
-		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='group') groups,
+		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='group') `groups`,
 		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active
 	FROM ".wpTable('accounts')." tb1
 	WHERE (user_id=%d OR is_public=1) AND driver='fb'",  [get_current_user_id(),get_current_user_id()]) , ARRAY_A);

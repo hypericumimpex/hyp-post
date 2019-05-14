@@ -3,7 +3,7 @@
 class SocialNetworkPost
 {
 
-	public static function post($feedId)
+	public static function post( $feedId )
 	{
 		$feedInf    = wpFetch("feeds" , $feedId);
 
@@ -32,6 +32,8 @@ class SocialNetworkPost
 
 		$postInf    = get_post($postId , ARRAY_A);
 		$postType   = $postInf['post_type'];
+
+		$unlinkTmpFiles = [];
 
 		if( $driver == 'reddit' )
 		{
@@ -205,10 +207,25 @@ class SocialNetworkPost
 
 				$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-				if( !empty($url) && file_exists( $url ) )
+				if( !empty($url) )
 				{
-					$sendType = 'image';
-					$imagesLocale = [ $url ];
+					if( file_exists( $url ) )
+					{
+						$sendType = 'image';
+						$imagesLocale = [ $url ];
+					}
+					else
+					{
+						$tmpImage = tempnam(sys_get_temp_dir(), 'FS_tmpfile_');
+
+						$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+						file_put_contents( $tmpImage, file_get_contents( $url ) );
+
+						$sendType = 'image';
+						$imagesLocale = [ $tmpImage ];
+
+						$unlinkTmpFiles[] = $tmpImage;
+					}
 				}
 			}
 
@@ -241,10 +258,25 @@ class SocialNetworkPost
 
 				$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-				if( !empty($url) && file_exists( $url ) )
+				if( !empty($url) )
 				{
-					$sendType = 'image_link';
-					$imagesLocale = [$url];
+					if( file_exists( $url ) )
+					{
+						$sendType = 'image_link';
+						$imagesLocale = [ $url ];
+					}
+					else
+					{
+						$tmpImage = tempnam(sys_get_temp_dir(), 'FS_tmpfile_');
+
+						$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+						file_put_contents( $tmpImage, file_get_contents( $url ) );
+
+						$sendType = 'image';
+						$imagesLocale = [ $tmpImage ];
+
+						$unlinkTmpFiles[] = $tmpImage;
+					}
 				}
 			}
 
@@ -327,10 +359,25 @@ class SocialNetworkPost
 
 					$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-					if( !empty($url) && file_exists( $url ) )
+					if( !empty($url) )
 					{
-						$imagesLocale = [$url];
-						$sendType = 'image';
+						if( file_exists( $url ) )
+						{
+							$sendType = 'image';
+							$imagesLocale = [ $url ];
+						}
+						else
+						{
+							$tmpImage = tempnam(sys_get_temp_dir(), 'FS_tmpfile_');
+
+							$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+							file_put_contents( $tmpImage, file_get_contents( $url ) );
+
+							$sendType = 'image';
+							$imagesLocale = [ $tmpImage ];
+
+							$unlinkTmpFiles[] = $tmpImage;
+						}
 					}
 				}
 				else if( $pMethod == '3' )
@@ -384,16 +431,6 @@ class SocialNetworkPost
 			require_once LIB_DIR . "twitter/TwitterLib.php";
 			$res = TwitterLib::sendPost($appId , $sendType , $message , $link , $imagesLocale , $videoURLLocale , $accessToken , $accessTokenSecret , $proxy);
 		}
-		else if( $driver == 'google' )
-		{
-			require_once LIB_DIR . "google/GooglePlus.php";
-
-			$google = new GooglePlus($nInf['username'] , $nInf['password'] , $nInf['proxy']);
-
-			$shareTo = $feedInf['node_type'] == 'account' ? 'profile' : [$nInf['info']['node_id'] , $nInf['info']['access_token']];
-
-			$res = $google->sendPost( $shareTo , $message , $link);
-		}
 		else if( $driver == 'ok' )
 		{
 			if( $sendType != 'image' && $sendType != 'video' )
@@ -412,10 +449,25 @@ class SocialNetworkPost
 
 					$url = $mediaId > 0 ? get_attached_file($mediaId) : '';
 
-					if( !empty($url) && file_exists( $url ) )
+					if( !empty($url) )
 					{
-						$imagesLocale = [$url];
-						$sendType = 'image';
+						if( file_exists( $url ) )
+						{
+							$sendType = 'image';
+							$imagesLocale = [ $url ];
+						}
+						else
+						{
+							$tmpImage = tempnam(sys_get_temp_dir(), 'FS_tmpfile_');
+
+							$url = $mediaId > 0 ? wp_get_attachment_url($mediaId) : '';
+							file_put_contents( $tmpImage, file_get_contents( $url ) );
+
+							$sendType = 'image';
+							$imagesLocale = [ $tmpImage ];
+
+							$unlinkTmpFiles[] = $tmpImage;
+						}
 					}
 				}
 				else if( $pMethod == '3' )
@@ -464,6 +516,14 @@ class SocialNetworkPost
 		else
 		{
 			$res = ['status' => 'error' , 'error_msg' => 'Driver error! Driver type: ' . htmlspecialchars($driver)];
+		}
+
+		foreach ( $unlinkTmpFiles AS $unlinkFile )
+		{
+			if( file_exists( $unlinkFile ) )
+			{
+				unlink( $unlinkFile );
+			}
 		}
 
 		$udpateDate = [

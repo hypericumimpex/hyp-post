@@ -63,7 +63,7 @@ class FSInstagramApi
 
 		$response = (string)$this->_client->post( 'https://www.instagram.com/create/upload/photo/' , [
 			'multipart' => [
-				['name'	=> 'photo', 'contents' => fopen( $photo->getFile(), 'r' ),],
+				['name'	=> 'photo', 'contents' => fopen( $photo->getFile(), 'r' )],
 				['name'	=> 'upload_id', 'contents' => $uploadId],
 				['name'	=> 'media_type', 'contents' => '1']
 			],

@@ -36,6 +36,10 @@ trait FSPSharePanel
 		{
 			add_post_meta($id, '_thumbnail_id', $image);
 		}
+		else
+		{
+			delete_post_meta( $id, '_thumbnail_id' );
+		}
 
 		response(true , ['id'		=>	$id]);
 	}

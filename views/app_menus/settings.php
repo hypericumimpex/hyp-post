@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'google' , 'ok']);
+$settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'ok']);
 ?>
 
 <style>
@@ -225,7 +225,6 @@ $settingTab = _get('setting' , 'general' , 'string' , ['general' , 'facebook' , 
 		<a href="?page=fs-poster-settings&setting=pinterest" class="settings_menu<?=$settingTab=='pinterest'?' active_menu':''?>"><i class="fab fa-pinterest"></i> <?=esc_html__('Pinterest settings' , 'fs-poster');?></a>
 		<a href="?page=fs-poster-settings&setting=tumblr" class="settings_menu<?=$settingTab=='tumblr'?' active_menu':''?>"><i class="fab fa-tumblr"></i> <?=esc_html__('Tumblr settings' , 'fs-poster');?></a>
 		<a href="?page=fs-poster-settings&setting=reddit" class="settings_menu<?=$settingTab=='reddit'?' active_menu':''?>"><i class="fab fa-reddit"></i> <?=esc_html__('Reddit settings' , 'fs-poster');?></a>
-		<!--<a href="?page=fs-poster-settings&setting=google" class="settings_menu<?/*=$settingTab=='google'?' active_menu':''*/?>"><i class="fab fa-google"></i> <?/*=esc_html__('Google settings' , 'fs-poster');*/?></a>-->
 		<a href="?page=fs-poster-settings&setting=ok" class="settings_menu<?=$settingTab=='ok'?' active_menu':''?>"><i class="fab fa-odnoklassniki"></i> <?=esc_html__('OK settings' , 'fs-poster');?></a>
 	</div>
 	<div class="settings_panel_r">

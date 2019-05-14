@@ -137,6 +137,7 @@ else
 			<div style="margin-top: 10px;">
 				<textarea class="ws_form_element2 message_box" style="height: 150px !important;" placeholder="Post Message" maxlength="2000"><?=esc_html($message)?></textarea>
 			</div>
+			<div>Characters count: <span id="char_count">0</span></div>
 
 			<div style="margin-top: 10px; display: flex; justify-content: space-between">
 				<button type="button" class="ws_btn ws_bg_success shareNowBtn" typeof="button" style="width: 32.5%;">Share now</button>
@@ -326,5 +327,12 @@ else
 				}
 			});
 		}
+
+		$(".message_box").on('keyup', function()
+		{
+			var length = $(this).val().length;
+
+			$("#char_count").text( length );
+		}).trigger('keyup');
 	});
 </script>

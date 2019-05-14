@@ -280,6 +280,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 							<div style="margin-bottom: 10px;"><i>Server time: <?=current_time('Y-m-d H:i')?></i></div>
 						</div>
 					</div>
+
 				</div>
 			</div>
 			<div data-oppen-tab-id="custom_messages" style="display: none; position: relative;">

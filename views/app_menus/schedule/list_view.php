@@ -102,7 +102,7 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 			$postTypesTxt = str_replace('|' , ', ' , $scheduleInf['post_type_filter']);
 			$postTypesTxt = $postTypesTxt == '' ? ' - ' : htmlspecialchars($postTypesTxt);
 
-			$categoryFilters = explode('|' , $scheduleInf['post_type_filter']);
+			$categoryFilters = explode('|' , (string)$scheduleInf['category_filter']);
 			$categoryFiltersArr = [];
 			foreach ($categoryFilters AS $categId)
 			{
@@ -118,7 +118,7 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 			}
 			else
 			{
-				$getCategNames = wpDB()->get_row("SELECT group_concat(name , ', ') AS categs_name FROM wp_terms WHERE term_id IN ('" . implode("','" , $categoryFiltersTxt) . "')");
+				$getCategNames = wpDB()->get_row("SELECT group_concat(name , ', ') AS categs_name FROM wp_terms WHERE term_id IN ('" . implode("','" , $categoryFiltersArr) . "')", ARRAY_A);
 				$categoryFiltersTxt = htmlspecialchars($getCategNames['categs_name']);
 			}
 
