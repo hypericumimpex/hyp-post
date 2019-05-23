@@ -43,7 +43,7 @@ class AjaxClass
 
 		if( get_option('fs_poster_plugin_installed' , '0') )
 		{
-			response(false , 'Your plugin also installed!');
+			response(false , 'Your plugin is already installed!');
 		}
 
 		set_time_limit(0);
@@ -107,7 +107,7 @@ class AjaxClass
 
 		if( get_option('fs_poster_plugin_installed') == getVersion() )
 		{
-			response(false , 'Your plugin also updated!');
+			response(false , 'Your plugin is already updated!');
 		}
 
 		$result = AjaxClass::updatePlugin( $code );

@@ -9,6 +9,7 @@ class AdminMenuClass
 	{
 		add_action('init' , function()
 		{
+			$this->getNotifications();
 			$res1 = $this->checkLicense();
 			if( false === $res1 )
 			{
@@ -134,8 +135,6 @@ class AdminMenuClass
 
 			} );
 		});
-
-
 	}
 
 	public function app_base()
@@ -165,7 +164,7 @@ class AdminMenuClass
 		require_once VIEWS_DIR . "app_update.php";
 	}
 
-	public function checkLicense()
+	public function getNotifications()
 	{
 		$lastTime = get_option('fs_license_last_checked_time', 0);
 
@@ -212,8 +211,10 @@ class AdminMenuClass
 		}
 
 		update_option('fs_license_last_checked_time', time());
+	}
 
-		/*********************/
+	public function checkLicense()
+	{
 		$alert = get_option('fs_plugin_alert');
 		$disabled = get_option('fs_plugin_disabled', '0');
 

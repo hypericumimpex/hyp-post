@@ -222,7 +222,7 @@ class CronJob
 						SELECT tb1.*, IFNULL(filter_type,'no') AS filter_type, categories
 						FROM ".wpTable('accounts')." tb1
 						LEFT JOIN ".wpTable('account_status')." tb2 ON tb1.id=tb2.account_id AND tb2.user_id=%d
-						WHERE (tb1.is_public=1 OR tb2.id > 0) AND tb1.id in (".implode(',', $_accountsList).")" , [ $userId ])
+						WHERE (tb1.is_public=1 OR tb1.user_id=%d) AND tb1.id in (".implode(',', $_accountsList).")" , [ $userId, $userId ])
 					, ARRAY_A
 				);
 			}
@@ -238,7 +238,7 @@ class CronJob
 						SELECT tb1.*, IFNULL(filter_type,'no') AS filter_type, categories
 						FROM ".wpTable('account_nodes')." tb1
 						LEFT JOIN ".wpTable('account_node_status')." tb2 ON tb1.id=tb2.node_id AND tb2.user_id=%d
-						WHERE (tb1.is_public=1 OR tb2.id > 0) AND tb1.id in (".implode(',', $_nodeList).")" , [ $userId ])
+						WHERE (tb1.is_public=1 OR tb1.user_id=%d) AND tb1.id in (".implode(',', $_nodeList).")" , [ $userId, $userId ])
 					, ARRAY_A
 				);
 			}

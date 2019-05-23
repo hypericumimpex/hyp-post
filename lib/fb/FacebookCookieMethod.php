@@ -73,7 +73,7 @@ class FacebookCookieMethod
 					'node_id'			=>	$accountInfo['id'],
 					'name'				=>	$accountInfo['name'],
 					'access_token'		=>	null,
-					'category'			=>	null,
+					'category'			=>	$accountInfo['category'],
 					'fan_count'			=>	null
 				]);
 				$loadedOwnPages[ $accountInfo['id'] ] = true;
@@ -187,26 +187,30 @@ class FacebookCookieMethod
 
 	public function getMyPages()
 	{
-		$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/pages/launchpoint/owned_pages/' )->getBody();
+		$myPagesArr = [];
 
-		preg_match_all('/\<li class\=\"_4nwh\"\>(.+)\<\/li\>/Ui', $result, $myPages);
+		$result = (string)$this->client->request('GET' , 'https://m.facebook.com/pages/?viewallpywo=1' )->getBody();
+
+		preg_match_all('/\<div class\=\"ca g cb\" id\=\"page_suggestion_([0-9]+)\"\>(.+)\<\/div\>/Ui', $result, $myPages);
 
 		if( ! isset( $myPages[1] ) )
 			return [];
 
-		$myPagesArr = [];
-
-		foreach( $myPages[1] AS $myPage )
+		foreach( $myPages[1] AS $key => $myPageId )
 		{
-			preg_match( '/page_id\"\: ?([0-9]+)/i', urldecode($myPage), $pageId );
-			$pageId = isset($pageId[1]) ? $pageId[1] : 0;
+			if( !isset( $myPages[2][$key] ) || strpos( $myPages[2][$key], 'class="ch ci cj"' ) !== false || strpos( $myPages[2][$key], 'class="ce"' ) !== false )
+				continue;
 
-			preg_match( '/\<div class\=\"_27vp\"\>(.+)\<\/div\>/Ui', $myPage, $pageName );
+			preg_match( '/\<a.+\>\<span\>(.+)\<\/span\>/Ui', $myPages[2][$key], $pageName );
 			$pageName = isset($pageName[1]) ? $pageName[1] : '???';
 
+			preg_match( '/\<span class\=\"cc\"\>(.+)\<\/span\>/Ui', $myPages[2][$key], $pageCateg );
+			$pageCateg = isset($pageCateg[1]) ? $pageCateg[1] : '???';
+
 			$myPagesArr[] = [
-				'id'    =>  $pageId,
-				'name'  =>  $pageName
+				'id'    	=>  $myPageId,
+				'name'  	=>  $pageName,
+				'category'	=>	htmlspecialchars_decode( $pageCateg )
 			];
 		}
 
@@ -477,12 +481,14 @@ class FacebookCookieMethod
 
 			if( !isset($fb_dtsg[1]) )
 			{
-				var_dump($getFbDtsg);
-				die;
-
+				$this->fb_dtsg = '';
+				//var_dump($getFbDtsg);
+				//die;
 			}
-
-			$this->fb_dtsg = $fb_dtsg[1];
+			else
+			{
+				$this->fb_dtsg = $fb_dtsg[1];
+			}
 		}
 
 		return $this->fb_dtsg;
