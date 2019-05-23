@@ -910,16 +910,7 @@ function scheduleNextPostFilters( $scheduleInf )
 		}
 	}
 
-	if( empty($postIDFilter) )
-	{
-		$postIDFilter = '';
-	}
-	else
-	{
-		$postIDFilter = " AND id IN ('" . implode("','" , $postIDFilter) . "') ";
-		$postTypeFilter = '';
-	}
-
+	$postIDFilter = empty($postIDFilter) ? '' : " AND id IN ('" . implode("','" , $postIDFilter) . "') ";
 	/* End ofid filter */
 
 	/* post_sort */
