@@ -101,7 +101,25 @@ class CronJob
 	{
 		CronJob::createScheduleTime();
 
-		wp_schedule_event( strtotime($startTime), $interval.'hour', 'check_scheduled_posts' , [ $scheduleId ] );
+		$timezone_string = get_option( 'timezone_string' );
+		if ( ! empty( $timezone_string ) )
+		{
+			$wpTimezoneStr = $timezone_string;
+		}
+		else
+		{
+			$offset  = get_option( 'gmt_offset' );
+			$hours   = (int) $offset;
+			$minutes = abs( ( $offset - (int) $offset ) * 60 );
+			$offset  = sprintf( '%+03d:%02d', $hours, $minutes );
+
+			$wpTimezoneStr = $offset;
+		}
+
+		$startTime = new DateTime( $startTime, new DateTimeZone( $wpTimezoneStr ) );
+		$startTime->setTimezone( new DateTimeZone( date_default_timezone_get( ) ) );
+
+		wp_schedule_event( $startTime->getTimestamp(), $interval . 'hour', 'check_scheduled_posts' , [ $scheduleId ] );
 	}
 
 	public static function setbackgroundTask( $postId , $shareOn = null )
@@ -111,14 +129,10 @@ class CronJob
 
 		if( is_null( $shareOn ) )
 		{
-			$shareOn = current_time('timestamp');
+			$shareOn = time();
 			if( (int)get_option('fs_share_timer', '0') > 0 )
 			{
 				$shareOn += (int)get_option('fs_share_timer', '0') * 60;
-			}
-			else
-			{
-				$shareOn += 5;
 			}
 		}
 

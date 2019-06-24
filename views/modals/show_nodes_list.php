@@ -325,13 +325,13 @@ else
 				$count++;
 				?>
 				<div class="node_div" data-id="<?=(int)$node['id']?>" data-public="<?=(int)$node['is_public']?>">
-					<div class="node_img"><img src="<?=profilePic($node)?>"></div>
+					<div class="node_img"><img src="<?=profilePic($node)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 					<div class="node_label">
 						<div>
 							<div class="node_label_title">
 								<a href="<?=profileLink($node)?>" target="_blank" title="Profile link"><?=esc_html($node['name']);?></a>
 							</div>
-							<span class="node_public_icon" title="Make public for use this community by other WordPress users"><i class="fa fa-globe"></i></span>
+							<span class="node_public_icon ws_tooltip" data-title="Make public for use this community by other WordPress users"><i class="fa fa-globe"></i></span>
 						</div>
 						<div class="node_category">
 							<i class="far fa-paper-plane"></i> <?=ucfirst(esc_html($node['driver'] == 'vk'?($node['node_type']).($node['category'] == 'admin' ? ' (admin)' : ''):$node['category']));?>
@@ -434,7 +434,7 @@ else
 			$(this).closest('.node_toolbar').next('.nodes_list').children('.node_div:contains("' + fsCode.htmlspecialchars(val) + '")').show(500);
 		});
 
-		$(document).on('click' , ".node_public_icon" , function ()
+		$("#proModal<?=$mn?> .node_public_icon").click( function ()
 		{
 			var nodeId		=	$(this).closest('.node_div').attr('data-id'),
 				t			=	$(this);

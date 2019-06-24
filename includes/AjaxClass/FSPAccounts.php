@@ -27,13 +27,6 @@ trait FSPAccounts
 		$accessToken = _post('access_token' , '' , 'string');
 		$proxy       = _post('proxy' , '' , 'string');
 
-		$getAppDetails = wpDB()->get_row("SELECT * FROM " . wpTable('apps') . " WHERE is_standart=3 AND driver='fb' LIMIT 1" , ARRAY_A);
-
-		if( !$getAppDetails )
-		{
-			response(false , ['error_msg' => esc_html__('No FB App found!' , 'fs-poster')]);
-		}
-
 		require_once LIB_DIR . "fb/FacebookLib.php";
 
 		$accessToken = FacebookLib::extractAccessToken($accessToken);
@@ -45,7 +38,7 @@ trait FSPAccounts
 
 		$accessToken = $accessToken['access_token'];
 
-		$data = FacebookLib::authorizeFbUser( $getAppDetails['id'] , $accessToken , $proxy );
+		$data = FacebookLib::authorizeFbUser( 0 , $accessToken , $proxy );
 
 		response(true , ['data' => $data]);
 	}

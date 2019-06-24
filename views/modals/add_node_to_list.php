@@ -2,23 +2,38 @@
 <?php
 
 $accountsList = wpDB()->get_results(
-	wpDB()->prepare('SELECT * FROM ' . wpTable('accounts') . " WHERE user_id=%d AND driver<>'tumblr' ORDER BY driver", [get_current_user_id()])
+	wpDB()->prepare('SELECT *, \'account\' AS node_type, \'account\' AS category FROM ' . wpTable('accounts') . " WHERE (user_id=%d OR is_public=1) AND driver<>'tumblr' ORDER BY driver", [get_current_user_id()])
 	, ARRAY_A
 );
-foreach( $accountsList AS &$aInf )
-{
-	$aInf['node_type'] = 'account';
-	$aInf['category'] = 'account';
-}
+
 
 $pagesList = wpDB()->get_results(
-	wpDB()->prepare('SELECT * FROM ' . wpTable('account_nodes') . " WHERE user_id=%d ORDER BY node_type", [get_current_user_id()])
+	wpDB()->prepare('SELECT * FROM ' . wpTable('account_nodes') . " WHERE (user_id=%d OR is_public=1) ORDER BY node_type", [get_current_user_id()])
 	, ARRAY_A
 );
 
 $nodesAll = array_merge($accountsList , $pagesList);
 
-$notShowList = _post('dont_show' , [] , 'array');
+$nodesAllByKey = [];
+$nodesAllSorted = [ '-' => [] ];
+
+foreach ( $nodesAll AS &$nodeInf )
+{
+	$nodesAllByKey[ $nodeInf['node_type'] . ':'.(int)$nodeInf['id'] ] = $nodeInf;
+}
+
+foreach ( $nodesAll AS $nodeInf2 )
+{
+	if( isset( $nodeInf2['account_id'] ) && isset( $nodesAllByKey[ 'account:' . $nodeInf2['account_id'] ] ) )
+	{
+		$nodesAllSorted[ 'account:' . $nodeInf2['account_id'] ][] = $nodeInf2['node_type'] . ':'.(int)$nodeInf2['id'];
+	}
+	else
+	{
+		$nodesAllSorted[ '-' ][] = $nodeInf2['node_type'] . ':'.(int)$nodeInf2['id'];
+	}
+}
+
 ?>
 
 <style>
@@ -200,6 +215,23 @@ $notShowList = _post('dont_show' , [] , 'array');
 		margin: 10px 30px;
 		position: absolute;
 	}
+
+	#proModal<?=$mn?> .node_div.sub_node_d
+	{
+		margin-left: 40px;
+		position: relative;
+	}
+
+	#proModal<?=$mn?> .node_div.sub_node_d:before
+	{
+		position: absolute;
+		top: 36px;
+		left: -18px;
+		content: ' ';
+		width: 17px;
+		height: 1px;
+		border-top: 1px solid #EEE;
+	}
 </style>
 
 <div class="nodes_container">
@@ -214,22 +246,71 @@ $notShowList = _post('dont_show' , [] , 'array');
 	</div>
 	<div class="nodes_list">
 		<?php
-		foreach ($nodesAll AS $node)
+
+		function dontShowNodesArr()
+		{
+			$notShowList = _post('dont_show' , [] , 'array');
+
+			$listArr = [];
+			foreach ( $notShowList AS $nodeKey )
+			{
+				$nodeKey = explode(':', $nodeKey);
+				$nodeKey = count($nodeKey) > 2 ? $nodeKey[0] . ':' . $nodeKey[1] . ':' . $nodeKey[2] : '';
+
+				if( !empty($nodeKey) )
+				{
+					$listArr[] = $nodeKey;
+				}
+			}
+
+			return $listArr;
+		}
+
+		function printNodeCart( $node, $isSub = false )
 		{
 			$val = esc_html($node['driver'].':'.$node['node_type']).':'.(int)$node['id'];
-			if( in_array($val , $notShowList) )
+			if( in_array( $val , dontShowNodesArr() ) )
 			{
-				continue;
+				return;
 			}
+
+			$isSub = $isSub ? ' sub_node_d' : ''
+
 			?>
-			<div class="node_div" data-id="<?=$val?>">
-				<div class="node_img"><img src="<?=profilePic($node);?>"></div>
+			<div class="node_div<?=$isSub?>" data-id="<?=$val?>">
+				<div class="node_img"><img src="<?=profilePic($node);?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 				<div class="node_label">
 					<div class="node_label_title"><?=esc_html($node['name']);?></div>
-					<div class="node_category"><i class="far fa-paper-plane"></i> <?=esc_html(ucfirst($node['driver']) ) . ' <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> ' . esc_html($node['category']);?></div>
+					<div class="node_category"><i class="far fa-paper-plane"></i> <?=esc_html(ucfirst($node['driver']) ) . ' <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> ' . esc_html( $node['node_type'] );?></div>
 				</div>
 			</div>
 			<?php
+		}
+
+		foreach ($nodesAllSorted[ '-' ] AS $nodeKey)
+		{
+			$node = isset( $nodesAllByKey[ $nodeKey ] ) ? $nodesAllByKey[ $nodeKey ] : [];;
+
+			if( empty($node) )
+				continue;
+
+			printNodeCart( $node );
+
+			if( isset( $nodesAllSorted[ $nodeKey ] ) )
+			{
+
+				foreach( $nodesAllSorted[ $nodeKey ] AS $nodeSubKey )
+				{
+					$subNode = isset( $nodesAllByKey[ $nodeSubKey ] ) ? $nodesAllByKey[ $nodeSubKey ] : [];;
+
+					if( empty($subNode) )
+						continue;
+
+					printNodeCart( $subNode, true );
+				}
+
+			}
+
 		}
 		?>
 	</div>

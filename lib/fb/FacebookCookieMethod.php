@@ -43,7 +43,7 @@ class FacebookCookieMethod
 
 			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $fbAccId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $fbAccId , 'app_id' => $appId] );
+			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $fbAccId] );
 
 			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $fbAccId] );
 		}
@@ -189,28 +189,20 @@ class FacebookCookieMethod
 	{
 		$myPagesArr = [];
 
-		$result = (string)$this->client->request('GET' , 'https://m.facebook.com/pages/?viewallpywo=1' )->getBody();
+		$result = (string)$this->client->request('GET' , 'https://www.facebook.com/bookmarks/pages?ref=u2u' )->getBody();
 
-		preg_match_all('/\<div class\=\"ca g cb\" id\=\"page_suggestion_([0-9]+)\"\>(.+)\<\/div\>/Ui', $result, $myPages);
+		preg_match('/require\:(\[\[\"BookmarkSeeAllEntsSectionController\".+\}\]\]\]\])\,/Ui', $result, $myPages);
 
-		if( ! isset( $myPages[1] ) )
-			return [];
+		$myPages = preg_replace('/(\,|\{)([a-zA-Z0-9\_]+)\:/', '$1"$2":', $myPages[1]);
+		$myPages = json_decode( $myPages, true );
+		$myPages = is_array( $myPages ) && isset($myPages[0][3][1]) ? $myPages[0][3][1] : [];
 
-		foreach( $myPages[1] AS $key => $myPageId )
+		foreach( $myPages AS $myPageInf )
 		{
-			if( !isset( $myPages[2][$key] ) || strpos( $myPages[2][$key], 'class="ch ci cj"' ) !== false || strpos( $myPages[2][$key], 'class="ce"' ) !== false )
-				continue;
-
-			preg_match( '/\<a.+\>\<span\>(.+)\<\/span\>/Ui', $myPages[2][$key], $pageName );
-			$pageName = isset($pageName[1]) ? $pageName[1] : '???';
-
-			preg_match( '/\<span class\=\"cc\"\>(.+)\<\/span\>/Ui', $myPages[2][$key], $pageCateg );
-			$pageCateg = isset($pageCateg[1]) ? $pageCateg[1] : '???';
-
 			$myPagesArr[] = [
-				'id'    	=>  $myPageId,
-				'name'  	=>  $pageName,
-				'category'	=>	htmlspecialchars_decode( $pageCateg )
+				'id'    	=>  isset($myPageInf['id']) ? $myPageInf['id'] : 0,
+				'name'  	=>  isset($myPageInf['name']) ? $myPageInf['name'] : '-',
+				'category'	=>	''
 			];
 		}
 
@@ -298,6 +290,14 @@ class FacebookCookieMethod
 			'fb_dtsg'   =>  $this->fb_dtsg(),
 			'__ajax__'  =>  'true'
 		];
+
+		if( empty( $sendData['fb_dtsg'] ) )
+		{
+			return [
+				'status'	=>	'error',
+				'error_msg'	=>	'Session expired. Please remove your Facebook account from the plugin and add it again! P.S. Don\'t Log out from your Facebook account after adding that . When you Log out your account, session will be destroyed and you can\'t share any post. Best practic is to add your account within Incognito mode!'
+			];
+		}
 
 		if( $preset_id > 0 && $type == 'status' )
 		{
@@ -432,6 +432,14 @@ class FacebookCookieMethod
 			{
 				preg_match('/\&(?:amp\;)?id\=([0-9]+)/i', $post, $postId);
 				$postId = isset($postId[1]) ? $postId[1] : 0;
+
+				if( empty( $postId ) )
+				{
+					$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/' )->getBody();
+
+					preg_match('/id\=\"like_([0-9]+)\"/i', $getLastPostId, $postId);
+					$postId = isset($postId[1]) ? $postId[1] : 0;
+				}
 			}
 		}
 

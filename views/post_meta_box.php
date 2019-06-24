@@ -372,11 +372,11 @@ else
 				?>
 				<div class="share_box_node" data-tab="<?=$nodeInf['driver']?>">
 					<input type="hidden" name="share_on_nodes[]" value="<?=$nodeInf['driver'].':'.$nodeInf['node_type'].':'.$nodeInf['id'].':'.htmlspecialchars($nodeInf['filter_type']).':'.htmlspecialchars($nodeInf['categories'])?>">
-					<div class="node_img"><img src="<?=$coverPhoto?>"></div>
+					<div class="node_img"><img src="<?=$coverPhoto?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../images/no-photo.png'?>');"></div>
 					<div class="node_label" style="width: 100%;">
 						<div>
 							<?=esc_html($nodeInf['name']);?>
-							<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn" title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+							<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 						</div>
 						<div class="node_label_help"><i class="<?=socialIcon($nodeInf['driver'])?>"></i> <?=ucfirst($nodeInf['driver'])?> <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> <?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter" title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
 					</div>

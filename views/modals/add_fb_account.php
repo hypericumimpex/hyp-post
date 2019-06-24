@@ -463,7 +463,7 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 				</div>
 
 				<div style="margin-top: 10px;">
-					<button class="ws_btn ws_bg_danger next_step_btn" type="button" style="width: 160px;"><?=esc_html__('GET ACCESS TOOKEN', 'fs-poster')?></button>
+					<button class="ws_btn ws_bg_danger next_step_btn" type="button" style="width: 160px;"><?=esc_html__('GET ACCESS TOKEN', 'fs-poster')?></button>
 				</div>
 			</form>
 		</div>

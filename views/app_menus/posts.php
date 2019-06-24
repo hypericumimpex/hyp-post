@@ -205,7 +205,7 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 							'<tr>' +
 							'<td class="td_post_inf">' +
 							'<div class="tg_img">' +
-							'<img src="' + result['data'][i]['cover'] + '">' +
+							'<img src="' + result['data'][i]['cover'] + '" onerror="$(this).attr(\'src\', \'<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>\');">' +
 							'</div>' +
 							'<div class="post_names">' +
 							'<div class="post_acc_name">' +

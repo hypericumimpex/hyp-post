@@ -336,7 +336,7 @@ var fsCode = {
         return false;
     },
 
-    ajax: function ( action , params , func , noLoading )
+    ajax: function ( action , params , func , noLoading, funcOnErr )
     {
 	    noLoadin = typeof noLoading == 'undefined' ? false : noLoading;
 
@@ -345,24 +345,40 @@ var fsCode = {
 	        t.loading(true);
 	    params['action'] = action;
 
-        $.post( ajaxurl , params , function( result )
-        {
-        	if( !noLoading )
-	            t.loading(false);
-            if( fsCode.ajaxResultCheck( result ) )
-            {
-	            try
-	            {
-		            result = JSON.parse(result);
-	            }
-	            catch(e)
-	            {
+        $.post( ajaxurl , params ).always(function( result )
+		{
+			if( !noLoading )
+				t.loading(false);
 
-	            }
-	            if( typeof func == 'function' )
-	                func( result );
-            }
-        });
+			if( fsCode.ajaxResultCheck( result ) )
+			{
+				try
+				{
+					result = JSON.parse(result);
+				}
+				catch(e)
+				{
+
+				}
+
+				if( typeof func == 'function' )
+					func( result );
+			}
+			else
+			{
+				try
+				{
+					result = JSON.parse(result);
+				}
+				catch(e)
+				{
+
+				}
+
+				if( typeof funcOnErr == 'function' )
+					funcOnErr( funcOnErr );
+			}
+		});
     },
 
     zeroPad: function(n)
@@ -473,6 +489,42 @@ jQuery(document).ready(function()
 	}).on('click' , '.modal [data-modal-close=true]' , function ()
 	{
 		fsCode.modalHide( $(this).closest('.modal') );
+	}).on('mouseover', '.ws_tooltip', function ( e )
+	{
+		if( $(this).data('fs-tooltip-opened') )
+		{
+			if( $(this).data('fs-hide-timer') )
+			{
+				clearTimeout( $(this).data('fs-hide-timer') );
+			}
+
+			return;
+		}
+
+		var tooltipDiv = $('<div class="fs_tooltip_div"></div>');
+
+		tooltipDiv.css('top' , $(this).offset().top + 35 - $(window).scrollTop());
+		tooltipDiv.css('left' , $(this).offset().left - ($("#sub_menu").width()/2) + 10);
+		tooltipDiv.html( $(this).attr('data-title') );
+
+		$('body').append( tooltipDiv );
+		$(this).data('fs-tooltip-opened', $('body > .fs_tooltip_div:eq(-1)'));
+
+	}).on('mouseout', '.ws_tooltip', function ( e )
+	{
+		if( $(this).data('fs-tooltip-opened') )
+		{
+			var th = $(this);
+			$(this).data('fs-hide-timer', setTimeout(function()
+			{
+				if( typeof th.data('fs-tooltip-opened').remove == 'function' )
+				{
+					th.data('fs-tooltip-opened').remove( );
+				}
+				th.removeData('fs-hide-timer');
+				th.removeData('fs-tooltip-opened');
+			}, 100));
+		}
 	});
 
 	try

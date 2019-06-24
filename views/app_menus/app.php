@@ -168,7 +168,7 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 					?>
 					<tr data-id="<?=$appInf['id']?>">
 						<td>
-							<img class="ws_img_style" src="<?=appIcon($appInf)?>">
+							<img class="ws_img_style" src="<?=appIcon($appInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');">
 							<span style="vertical-align: middle;"><?php print esc_html($appInf['name']);?></span>
 						</td>
 						<td>

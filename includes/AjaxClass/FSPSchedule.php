@@ -156,9 +156,9 @@ trait FSPSchedule
 		{
 			response(false , 'Plan date or time is not valid!');
 		}
-		else if( strtotime($plan_date) < time() )
+		else if( strtotime($plan_date) < current_time('timestamp') )
 		{
-			response(false , 'Plan date or time is not valid!');
+			response(false , 'Plan date or time is not valid!<br>Please select Schedule date/time according to your server time. <br>Your server time is: ' . current_time('Y-m-d g:i:s A'));
 		}
 
 		$plan_date = date('Y-m-d H:i' , strtotime($plan_date));
@@ -223,16 +223,16 @@ trait FSPSchedule
 
 		$postsCount = count($post_ids);
 
-		$title = $postsCount == 1 ? cutText(get_the_title(reset($post_ids))) :  'Schedule ( '.$postsCount.' posts )';
+		$title = $postsCount == 1 ? 'Scheduled post: "' . cutText(get_the_title(reset($post_ids))) . '"' :  'Schedule ( '.$postsCount.' posts )';
 		$post_ids = implode(',' , $post_ids);
 
 		$start_date = date('Y-m-d', strtotime($plan_date));
 		$end_date = date('Y-m-d', (strtotime($plan_date) + ($postsCount - 1) * $interval * 3600 ));
 		$share_time = date('H:i' , strtotime($plan_date));
 
-		$post_type_filter = [];
-		$category_filter = [];
-		$post_sort = _post('post_sort' , 'old_first' , 'string', ['old_first' , 'random' , 'new_first']);
+		$post_type_filter = '';
+		$category_filter = '';
+		$post_sort = $postsCount == 1 ? 'new_first' : _post('post_sort' , 'old_first' , 'string', ['old_first' , 'random' , 'new_first']);
 		$post_date_filter = 'all';
 
 		wpDB()->insert(wpTable('schedules') , [

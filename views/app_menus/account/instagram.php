@@ -32,8 +32,8 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 		<tr>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
 			<th><?=esc_html__('USERNAME', 'fs-poster')?></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
-			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -43,7 +43,7 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 			?>
 			<tr data-id="<?=$accountInf['id']?>">
 				<td>
-					<img class="ws_img_style" src="<?=profilePic($accountInf)?>">
+					<img class="ws_img_style" src="<?=profilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
 					<span style="vertical-align: middle;"><?php print esc_html($accountInf['name']);?></span>
 					<?php
 					if( !empty($accountInf['proxy']) )

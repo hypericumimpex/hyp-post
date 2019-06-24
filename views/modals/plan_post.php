@@ -275,9 +275,9 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<div style="margin-top: 10px; margin-bottom: <?=(count($parameters['postIds']) > 1 ? '20px' : '50px')?>; display: flex; align-items: center;">
 						<label style="color: #999; width: 90px;">Share on:</label>
 						<div>
-							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 130px;" value="<?=date('Y-m-d', strtotime('+1 day' ))?>"></div>
-							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 115px;" value="<?=get_option('fs_use_wp_cron_jobs', '1')?date('H:i'):current_time('H:i')?>"></div>
-							<div style="margin-bottom: 10px;"><i>Server time: <?=current_time('Y-m-d H:i')?></i></div>
+							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 130px;" value="<?=current_time('Y-m-d')?>"></div>
+							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 115px;" value=""></div>
+							<div style="margin-bottom: 10px; color: #888; font-size: 12px;"><span style="color: #ff9172;">Note!</span> Please select Schedule date/time according to your server time.<br> <i>Server time: <?=current_time('Y-m-d g:i A')?></i></div>
 						</div>
 					</div>
 
@@ -416,9 +416,9 @@ $activeNodes = array_merge($accounts , $activeNodes);
 									<div class="node_label" style="width: 100%;">
 										<div>
 											<?=esc_html($nodeInf['name']);?>
-											<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn" title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+											<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 										</div>
-										<div class="node_label_help"><?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter" title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
+										<div class="node_label_help"><?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter ws_tooltip" data-title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
 									</div>
 									<div class="node_remove"><div class="node_remove_btn" type="button"><i class="fa fa-times"></i></div></div>
 								</div>

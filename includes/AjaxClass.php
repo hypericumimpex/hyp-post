@@ -34,9 +34,10 @@ class AjaxClass
 
 	public function activate_app()
 	{
-		$code = _post('code' , '' , 'string');
+		$code		= _post('code' , '' , 'string');
+		$statistic	= _post('statistic' , '' , 'string');
 
-		if( empty($code) )
+		if( empty($code) || empty($statistic) )
 		{
 			response(false, 'Please type purchase key!');
 		}
@@ -178,14 +179,7 @@ class AjaxClass
 		{
 			require_once LIB_DIR . "fb/FacebookLib.php";
 
-			$getAppDetails = wpFetch('apps' , ['driver' => 'fb', 'is_standart' => '2']);
-
-			if( !$getAppDetails )
-			{
-				response(false , ['error_msg' => esc_html__('No FB App found!' , 'fs-poster')]);
-			}
-
-			$url = FacebookLib::getLoginUrlWithAuth($email , $password , $getAppDetails['app_key'] , $getAppDetails['app_secret']);
+			$url = FacebookLib::getLoginUrlWithAuth($email , $password , '882a8490361da98702bf97a021ddc14d' , '62f8ce9f74b12f84c123cc23437a4a32');
 			header('Location: ' . $url);
 			exit();
 		}

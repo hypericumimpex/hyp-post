@@ -530,7 +530,7 @@ class SocialNetworkPost
 			'is_sended'         => 1,
 			'send_time'         => current_time('Y-m-d H:i:s'),
 			'status'            => $res['status'],
-			'error_msg'         => isset($res['error_msg']) ? $res['error_msg'] : '',
+			'error_msg'         => isset($res['error_msg']) ? cutText($res['error_msg'], 299) : '',
 			'driver_post_id'    => isset($res['id']) ? $res['id'] : null,
 			'driver_post_id2'   => isset($res['id2']) ? $res['id2'] : null
 		];

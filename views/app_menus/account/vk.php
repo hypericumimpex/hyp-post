@@ -5,10 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $accountsList = wpDB()->get_results(wpDB()->prepare("SELECT 
 		*,
-	 	(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id) AS comunities,
+	 	(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND (user_id=%d OR is_public=1)) AS comunities,
 		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active
 	 FROM ".wpTable('accounts')." tb1 
-	 WHERE (user_id=%d OR is_public=1) AND driver='vk'",  [get_current_user_id(), get_current_user_id()]) , ARRAY_A);
+	 WHERE (user_id=%d OR is_public=1) AND driver='vk'",  [get_current_user_id(), get_current_user_id(), get_current_user_id()]) , ARRAY_A);
 
 ?>
 
@@ -22,8 +22,8 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("SELECT
 		<tr>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
 			<th><?=esc_html__('COMMUNITIES', 'fs-poster')?></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
-			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -33,7 +33,7 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("SELECT
 			?>
 			<tr data-id="<?=$accountInf['id']?>">
 				<td>
-					<img class="ws_img_style" src="<?=profilePic($accountInf)?>">
+					<img class="ws_img_style" src="<?=profilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
 					<span style="vertical-align: middle;"><?php print esc_html($accountInf['name']);?></span>
 					<?php
 					if( !empty($accountInf['proxy']) )

@@ -2,9 +2,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
+$userId = (int)get_current_user_id();
 //report 3 data
-$report3Data = wpDB()->get_results("SELECT driver , SUM(visit_count) AS c FROM ".wpTable('feeds')." GROUP BY driver ORDER BY c DESC LIMIT 0,10" , ARRAY_A);
+$report3Data = wpDB()->get_results("SELECT driver , SUM(visit_count) AS c FROM ".wpTable('feeds')." tb1 WHERE ( (node_type='account' AND (SELECT COUNT(0) FROM ".wpTable('accounts')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId' OR tb2.is_public=1))>0) OR (node_type<>'account' AND (SELECT COUNT(0) FROM ".wpTable('account_nodes')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId')>0 OR tb2.is_public=1)) ) GROUP BY driver ORDER BY c DESC LIMIT 0,10" , ARRAY_A);
 $report3 = [
 	'data' => [],
 	'labels' => []
@@ -16,7 +16,7 @@ foreach($report3Data AS $r3Data)
 }
 
 //report 4 data
-$report4Data = wpDB()->get_results("SELECT CONCAT(node_id,'_',node_type) AS node , SUM(visit_count) AS c FROM ".wpTable('feeds')." GROUP BY CONCAT(node_id,'_',node_type) ORDER BY c DESC LIMIT 0,10" , ARRAY_A);
+$report4Data = wpDB()->get_results("SELECT CONCAT(node_id,'_',node_type) AS node , SUM(visit_count) AS c FROM ".wpTable('feeds')." tb1 WHERE ( (node_type='account' AND (SELECT COUNT(0) FROM ".wpTable('accounts')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId' OR tb2.is_public=1))>0) OR (node_type<>'account' AND (SELECT COUNT(0) FROM ".wpTable('account_nodes')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId')>0 OR tb2.is_public=1)) ) GROUP BY CONCAT(node_id,'_',node_type) ORDER BY c DESC LIMIT 0,10" , ARRAY_A);
 $report4 = [
 	'data' => [],
 	'labels' => []
@@ -43,15 +43,15 @@ foreach($report4Data AS $r4Data)
 
 $monthStart = date('Y-m-01');
 $monthEnd = date('Y-m-d');
-$sharesThisMonth = wpDB()->get_row("SELECT COUNT(0) AS c FROM ".wpTable('feeds')." WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd'" , ARRAY_A);
+$sharesThisMonth = wpDB()->get_row("SELECT COUNT(0) AS c FROM ".wpTable('feeds')." tb1 WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd' AND ( (node_type='account' AND (SELECT COUNT(0) FROM ".wpTable('accounts')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId' OR tb2.is_public=1))>0) OR (node_type<>'account' AND (SELECT COUNT(0) FROM ".wpTable('account_nodes')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId')>0 OR tb2.is_public=1)) )" , ARRAY_A);
 
-$hitsThisMonth = wpDB()->get_row("SELECT SUM(visit_count) AS c FROM ".wpTable('feeds')." WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd'" , ARRAY_A);
+$hitsThisMonth = wpDB()->get_row("SELECT SUM(visit_count) AS c FROM ".wpTable('feeds')." tb1 WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd' AND ( (node_type='account' AND (SELECT COUNT(0) FROM ".wpTable('accounts')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId' OR tb2.is_public=1))>0) OR (node_type<>'account' AND (SELECT COUNT(0) FROM ".wpTable('account_nodes')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId')>0 OR tb2.is_public=1)) )" , ARRAY_A);
 
-$accounts = wpDB()->get_row("SELECT COUNT(0) AS c FROM ".wpTable('accounts') . " tb1" , ARRAY_A);
+$accounts = wpDB()->get_row(wpDB()->prepare( "SELECT COUNT(0) AS c FROM ".wpTable('accounts') . " tb1 WHERE is_public=1 OR user_id=%d", [get_current_user_id()] ) , ARRAY_A);
 
-$nodes = wpDB()->get_row("SELECT COUNT(0) AS c FROM ".wpTable('account_nodes') . " tb1" , ARRAY_A);
+$nodes = wpDB()->get_row(wpDB()->prepare("SELECT COUNT(0) AS c FROM ".wpTable('account_nodes') . " tb1 WHERE is_public=1 OR user_id=%d", [get_current_user_id()]) , ARRAY_A);
 
-$hitsThisMonthSchedule = wpDB()->get_row("SELECT SUM(visit_count) AS c FROM ".wpTable('feeds')." WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd' AND schedule_id>0" , ARRAY_A);
+$hitsThisMonthSchedule = wpDB()->get_row("SELECT SUM(visit_count) AS c FROM ".wpTable('feeds')." tb1 WHERE is_sended='1' AND status='ok' AND CAST(send_time AS DATE) BETWEEN '$monthStart' AND '$monthEnd' AND schedule_id>0 AND ( (node_type='account' AND (SELECT COUNT(0) FROM ".wpTable('accounts')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId' OR tb2.is_public=1))>0) OR (node_type<>'account' AND (SELECT COUNT(0) FROM ".wpTable('account_nodes')." tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id='$userId')>0 OR tb2.is_public=1)) )" , ARRAY_A);
 ?>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>

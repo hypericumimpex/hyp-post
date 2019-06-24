@@ -103,7 +103,7 @@
 				?>
 				<tr data-id="<?=(int)$feedInf['id']?>" data-interval="<?=(int)$feedInf['interval']?>" data-status="<?=(int)$feedInf['is_sended']?>">
 					<td class="node_name">
-						<div><img class="ws_img_style" src="<?=profilePic($nodeInf)?>"></div>
+						<div><img class="ws_img_style" src="<?=profilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 						<div>
 							<div style="color: #888;">
 								<?=esc_html($nodeInf['name'])?>
@@ -198,7 +198,24 @@
 				}
 
 				reloadStats();
-			} , true);
+			} , true, function(result)
+			{
+				next.attr('data-status' , '1');
+				next.find('.status_td').html('<div class="ws_bg_danger ws_tooltip" data-title="Error on posting!" data-float="left" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('error' , 'fs-poster')?>"+' <i class="fa fa-info-circle"></i></div>');
+
+				if( $("#share_table>tbody>tr[data-status=0]").length > 0 )
+				{
+					$("#share_table>tbody>tr[data-status=0]:eq(0)").find('.status_td').html('<div class="ws_bg_warning" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('waiting interval...' , 'fs-poster')?>"+'</div>');
+
+					setTimeout(sendNext , parseInt($("#share_table>tbody>tr[data-status=0]:eq(0)").attr('data-interval')) * 1000 );
+				}
+				else
+				{
+					$(".process_text").html('<span class="ws_color_success">'+"<?=esc_html__('Process Finished!' , 'fs-poster')?>"+'</span><span><button type="button" data-modal-close="true" onclick="<?=isset($parameters['dont_reload'])?'':'location.reload();'?>" class="ws_btn ws_color_danger">'+"<?=esc_html__('Close window' , 'fs-poster')?>"+'</button></span>');
+				}
+
+				reloadStats();
+			});
 
 		}
 		sendNext();

@@ -97,9 +97,10 @@ trait FSPReports
 			$queryAdd = ' AND schedule_id="'.(int)$schedule_id.'"';
 		}
 
-		$allCount = wpDB()->get_row("SELECT COUNT(0) AS c FROM " . wpTable('feeds') . ' WHERE is_sended=1 ' . $queryAdd , ARRAY_A);
+		$userId = (int)get_current_user_id();
 
-		$getData = wpDB()->get_results("SELECT * FROM " . wpTable('feeds') . ' WHERE is_sended=1 ' . $queryAdd . " ORDER BY id DESC LIMIT $offset , $limit" , ARRAY_A);
+		$allCount = wpDB()->get_row("SELECT COUNT(0) AS c FROM " . wpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd , ARRAY_A);
+		$getData = wpDB()->get_results("SELECT * FROM " . wpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd . " ORDER BY id DESC LIMIT $offset , $limit" , ARRAY_A);
 		$resultData = [];
 
 		foreach($getData AS $feedInf)
@@ -215,7 +216,9 @@ trait FSPReports
 
 	public function fs_clear_logs()
 	{
-		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE is_sended=1 OR (send_time+INTERVAL 1 DAY)<NOW()');
+		$userId = (int)get_current_user_id();
+
+		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE (is_sended=1 OR (send_time+INTERVAL 1 DAY)<NOW()) AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id='.wpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id='.wpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) )');
 
 		response(true);
 	}

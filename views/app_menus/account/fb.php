@@ -6,12 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 $accountsList = wpDB()->get_results(wpDB()->prepare("
 	SELECT 
 		*,
-		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='ownpage') ownpages,
-		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='page') pages,
-		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='group') `groups`,
+		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='ownpage' AND (user_id=%d OR is_public=1)) ownpages,
+		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='page' AND (user_id=%d OR is_public=1)) pages,
+		(SELECT COUNT(0) FROM ".wpTable('account_nodes')." WHERE account_id=tb1.id AND node_type='group' AND (user_id=%d OR is_public=1)) `groups`,
 		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active
 	FROM ".wpTable('accounts')." tb1
-	WHERE (user_id=%d OR is_public=1) AND driver='fb'",  [get_current_user_id(),get_current_user_id()]) , ARRAY_A);
+	WHERE (user_id=%d OR is_public=1) AND driver='fb'",  [get_current_user_id(),get_current_user_id(),get_current_user_id(),get_current_user_id(),get_current_user_id()]) , ARRAY_A);
 
 ?>
 
@@ -27,8 +27,8 @@ $accountsList = wpDB()->get_results(wpDB()->prepare("
 				<th style="width: 15%;"><?=__('GROUPS' , 'fs-poster')?></th>
 				<th style="width: 15%;"><?=__('MY PAGES' , 'fs-poster')?></th>
 				<th style="width: 15%;"><?=__('LIKED PAGES' , 'fs-poster')?></th>
-				<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
-				<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle" title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
+				<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
+				<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
 			</tr>
 		</thead>
 		<tbody>

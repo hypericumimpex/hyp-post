@@ -910,7 +910,16 @@ function scheduleNextPostFilters( $scheduleInf )
 		}
 	}
 
-	$postIDFilter = empty($postIDFilter) ? '' : " AND id IN ('" . implode("','" , $postIDFilter) . "') ";
+	if( empty($postIDFilter) )
+	{
+		$postIDFilter = '';
+	}
+	else
+	{
+		$postIDFilter = " AND id IN ('" . implode("','" , $postIDFilter) . "') ";
+		$postTypeFilter = '';
+	}
+
 	/* End ofid filter */
 
 	/* post_sort */
@@ -1063,4 +1072,18 @@ function socialIcon( $driver )
 
 	}
 
+}
+
+function statisticOption()
+{
+	$getOptions = file_get_contents( FS_API_URL . 'api.php?act=statistic_option' );
+	$getOptions = json_decode($getOptions, true);
+
+	$options = '<option selected disabled>Please select</option>';
+	foreach ( $getOptions AS $optionName => $optionValue )
+	{
+		$options .= '<option value="' . htmlspecialchars($optionName) . '">' . htmlspecialchars($optionValue) . '</option>';
+	}
+
+	return $options;
 }

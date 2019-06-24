@@ -140,6 +140,9 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 			$addTxt = (isset($namesArray1[$scheduleInf['post_sort']]) ? $namesArray1[$scheduleInf['post_sort']] : '-') . ' ; ';
 			$addTxt .= (isset($namesArray2[$scheduleInf['post_date_filter']]) ? $namesArray2[$scheduleInf['post_date_filter']] : '-');
 
+			$postIds = $scheduleInf['post_ids'];
+			$postIds = empty($postIds) ? [] : explode(',', $postIds);
+
 			?>
 			<tr data-id="<?=$scheduleInf['id']?>">
 				<td>
@@ -167,7 +170,7 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 					?>
 
 				</td>
-				<td style="font-size: 14px; color: #888;"><i class="fa fa-sync"></i> <?=($scheduleInf['interval'] % 24 == 0 ? ($scheduleInf['interval'] / 24) . ' day(s)' : $scheduleInf['interval'] . ' hour(s)')?></td>
+				<td style="font-size: 14px; color: #888;"><i class="fa fa-sync"></i> <?=( count( $postIds ) == 1 ? 'no interval' : ($scheduleInf['interval'] % 24 == 0 ? ($scheduleInf['interval'] / 24) . ' day(s)' : $scheduleInf['interval'] . ' hour(s)'))?></td>
 				<td>
 					<button type="button" class="ws_btn ws_btn_small ws_bg_<?=$statusBtn?>"><?=esc_html($scheduleInf['status'])?></button>
 

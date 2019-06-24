@@ -234,8 +234,6 @@
 	color: #FFF;
 }
 
-
-
 @keyframes ws_display_tooltip {
 	from { margin-left: 10px; opacity: 0.2 }
 	to { margin-left: 0px; opacity: 1 }
@@ -244,17 +242,10 @@
 	from { margin-right: 10px; opacity: 0.2 }
 	to { margin-right: 0px; opacity: 1 }
 }
-.ws_tooltip
-{
-	position: relative;
-}
 
-.ws_tooltip:hover:after
+.fs_tooltip_div
 {
-	content: attr(data-title);
-	position: absolute;
-	top: calc(100% + 11px);
-	left: -5px;
+	position: fixed;
 	min-height: 26px !important;
 	background: #555;
 	border: 1px solid #555;
@@ -262,41 +253,15 @@
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	color: #FFF;
-	white-space: pre;
 	padding: 2px 15px;
 	min-width: 75px;
+	max-width: 400px;
 	text-align: left !important;
 	display: flex;
 	align-items: center;
 	animation: ws_display_tooltip 0.5s ease;
 	font-size: 13px !important;
 	z-index: 999999999;
-}
-
-.ws_tooltip[data-float=left]:hover:after
-{
-	left: auto;
-	right: -5px !important;
-	animation: ws_display_tooltip_l 0.5s ease;
-}
-
-.ws_tooltip:hover:before
-{
-	position: absolute;
-	top: 100%;
-	border: 6px solid #555;
-	content: ' ';
-	border-left-color: transparent;
-	border-right-color: transparent;
-	border-top-color: transparent;
-	animation: ws_display_tooltip 0.5s ease;
-}
-
-.ws_tooltip[data-float=left]:hover:before
-{
-	left: auto;
-	right: 7px !important;
-	animation: ws_display_tooltip_l 0.5s ease;
 }
 
 .ws_form_element2

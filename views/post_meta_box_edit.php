@@ -132,7 +132,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 
 				?>
 				<div class="share_box_node_edit">
-					<div class="node_img"><img src="<?=profilePic($nodeInf)?>"></div>
+					<div class="node_img"><img src="<?=profilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../images/no-photo.png'?>');"></div>
 					<div class="node_label" style="width: 100%;">
 						<div><a href="<?=profileLink($nodeInf)?>" target="_blank"><?=esc_html($nodeInf['name']);?></a></div>
 						<div class="node_label_help"><?=esc_html(ucfirst($nodeInf['driver']) . ' > ' . $nodeInf['node_type']);?></div>
@@ -142,7 +142,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 						if( $feedInf['status'] == 'ok' )
 						{
 							?>
-							<span class="ws_bg_success status_action" title="<?=esc_html__('Posted successfully' , 'fs-poster')?>">
+							<span class="ws_bg_success status_action ws_tooltip" data-title="<?=esc_html__('Posted successfully' , 'fs-poster')?>">
 								<i class="fa fa-check"></i>
 							</span>
 							<a href="<?=postLink($feedInf['driver_post_id'] , $feedInf['driver'] , (isset($nodeInf['screen_name'])?$nodeInf['screen_name']:''))?>" target="_blank" class="post_link" title="<?=esc_html__('Open post in facebook!' , 'fs-poster')?>"><i class="fa fa-external-link fa-external-link-alt"></i></a>
@@ -151,7 +151,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 						else if( $feedInf['is_sended'] == '0' && get_post_status($post->ID) == 'future' )
 						{
 							?>
-							<span class="ws_bg_warning status_action" title="<?=esc_html__('Scheduled' , 'fs-poster')?>">
+							<span class="ws_bg_warning status_action ws_tooltip" data-title="<?=esc_html__('Scheduled' , 'fs-poster')?>">
 								<i class="fa fa-clock"></i>
 							</span>
 							<?php
@@ -159,7 +159,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 						else if( $feedInf['is_sended'] == '0' || $feedInf['is_sended'] == '2' )
 						{
 							?>
-							<span class="ws_bg_warning status_action" title="<?=esc_html__('Sharing...' , 'fs-poster')?>">
+							<span class="ws_bg_warning status_action ws_tooltip" data-title="<?=esc_html__('Sharing...' , 'fs-poster')?>">
 								<i class="fa fa-clock"></i>
 							</span>
 							<?php
@@ -167,7 +167,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 						else
 						{
 							?>
-							<span class="ws_bg_danger status_action" title="<?php printf(esc_html__('Post failed! %s' , 'fs-poster') , esc_html($feedInf['error_msg']))?>">
+							<span class="ws_bg_danger status_action ws_tooltip" data-title="<?php printf(esc_html__('Post failed! %s' , 'fs-poster') , esc_html($feedInf['error_msg']))?>">
 								<i class="fa fa-exclamation-triangle"></i>
 							</span>
 							<?php

@@ -108,7 +108,10 @@ class TwitterLib
 
 				try
 				{
-					$uploadImage = $connection->upload('media/upload', ['media' => $imageURL], true);
+					$uploadImage = $connection->upload('media/upload', [
+						'media'			=>	$imageURL,
+						'media_type'	=>	''
+					], true);
 
 					if( isset($uploadImage->media_id_string) && !empty($uploadImage->media_id_string) && is_string($uploadImage->media_id_string) )
 					{
