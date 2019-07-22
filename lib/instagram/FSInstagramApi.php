@@ -1,6 +1,6 @@
 <?php
 
-require_once LIB_DIR . 'vendor/autoload.php';
+require_once FS_LIB_DIR . 'vendor/autoload.php';
 
 class FSInstagramApi
 {
@@ -59,19 +59,46 @@ class FSInstagramApi
 	{
 		$photo = new \InstagramAPI\Media\Photo\InstagramPhoto( $photo );
 
+		try
+		{
+			$photoDetails = new \InstagramAPI\Media\Photo\PhotoDetails( $photo->getFile() );
+		}
+		catch (Exception $e)
+		{
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> $e->getMessage()
+			];
+		}
+
 		$uploadId = $this->createUploadId();
 
-		$response = (string)$this->_client->post( 'https://www.instagram.com/create/upload/photo/' , [
-			'multipart' => [
-				['name'	=> 'photo', 'contents' => fopen( $photo->getFile(), 'r' )],
-				['name'	=> 'upload_id', 'contents' => $uploadId],
-				['name'	=> 'media_type', 'contents' => '1']
-			],
-			'headers'	=>	[
-				'X-Requested-With'	=> 'XMLHttpRequest',
-				'X-CSRFToken'		=> $this->getCsrfToken()
-			]
-		])->getBody();
+		$params = [
+			'media_type'				=> '1',
+			'upload_media_height'		=> (string) $photoDetails->getHeight(),
+			'upload_media_width'		=> (string) $photoDetails->getWidth(),
+			'upload_id'					=> $uploadId,
+		];
+
+		try
+		{
+			$response = (string)$this->_client->post( 'https://www.instagram.com/rupload_igphoto/fb_uploader_' . $uploadId , [
+				'headers'	=>	[
+					'X-Requested-With'				=>	'XMLHttpRequest',
+					'X-CSRFToken'					=>	$this->getCsrfToken(),
+					'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
+					'X-Entity-Name'					=>	'feed_' . $uploadId,
+					'X-Entity-Length'				=>	filesize( $photo->getFile() ),
+					'Offset'						=>	'0'
+				],
+				'body'		=>	fopen($photo->getFile(), 'r')
+			])->getBody();
+		}
+		catch( Exception $e )
+		{
+			$response = '[]';
+		}
+
 		$response = json_decode($response , true);
 
 		if( isset($response['status']) && $response['status'] == 'fail' )
@@ -90,20 +117,28 @@ class FSInstagramApi
 			];
 		}
 
-		$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure/' , [
-			'form_params' =>
-			[
-				'upload_id'						=>	$uploadId,
-				'caption'						=>	$caption,
-				'usertags'						=>	'',
-				'custom_accessibility_caption'	=>	'',
-				'retry_timeout'					=>	''
-			],
-			'headers'	=>	[
-				'X-Requested-With'	=> 'XMLHttpRequest',
-				'X-CSRFToken'		=> $this->getCsrfToken()
-			]
-		])->getBody();
+		try
+		{
+			$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure/' , [
+				'form_params' =>
+					[
+						'upload_id'						=>	$uploadId,
+						'caption'						=>	$caption,
+						'usertags'						=>	'',
+						'custom_accessibility_caption'	=>	'',
+						'retry_timeout'					=>	''
+					],
+				'headers'	=>	[
+					'X-Requested-With'	=> 'XMLHttpRequest',
+					'X-CSRFToken'		=> $this->getCsrfToken()
+				]
+			])->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '[]';
+		}
+
 		$result = json_decode($result , true);
 
 		if( isset($result['status']) && $result['status'] == 'fail' )
@@ -159,17 +194,24 @@ class FSInstagramApi
 			'upload_id'					=> $uploadId,
 		];
 
-		$response = $this->_client->post( 'https://www.instagram.com/rupload_igvideo/feed_' . $uploadId , [
-			'headers'	=>	[
-				'X-Requested-With'				=>	'XMLHttpRequest',
-				'X-CSRFToken'					=>	$this->getCsrfToken(),
-				'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
-				'X-Entity-Name'					=>	'feed_' . $uploadId,
-				'X-Entity-Length'				=>	filesize( $video->getFile() ),
-				'Offset'						=>	'0'
-			],
-			'body'		=>	fopen($video->getFile(), 'r')
-		]);
+		try
+		{
+			$response = $this->_client->post( 'https://www.instagram.com/rupload_igvideo/feed_' . $uploadId , [
+				'headers'	=>	[
+					'X-Requested-With'				=>	'XMLHttpRequest',
+					'X-CSRFToken'					=>	$this->getCsrfToken(),
+					'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
+					'X-Entity-Name'					=>	'feed_' . $uploadId,
+					'X-Entity-Length'				=>	filesize( $video->getFile() ),
+					'Offset'						=>	'0'
+				],
+				'body'		=>	fopen($video->getFile(), 'r')
+			]);
+		}
+		catch( Exception $e )
+		{
+			$response = '[]';
+		}
 
 		$response = json_decode($response , true);
 
@@ -190,32 +232,47 @@ class FSInstagramApi
 			'upload_id'					=> $uploadId
 		];
 
-		$response = $this->_client->post( 'https://www.instagram.com/rupload_igphoto/feed_' . $uploadId , [
-			'headers'	=>	[
-				'X-Requested-With'				=>	'XMLHttpRequest',
-				'X-CSRFToken'					=>	$this->getCsrfToken(),
-				'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
-				'X-Entity-Name'					=>	'feed_' . $uploadId,
-				'X-Entity-Length'				=>	filesize( $videoThumbnail->getFile() ),
-				'Offset'						=>	'0'
-			],
-			'body'		=>	fopen( $videoThumbnail->getFile() , 'r' )
-		]);
-
-		$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure/' , [
-			'form_params' =>
-				[
-					'upload_id'						=>	$uploadId,
-					'caption'						=>	$caption,
-					'usertags'						=>	'',
-					'custom_accessibility_caption'	=>	'',
-					'retry_timeout'					=>	'12'
+		try
+		{
+			$response = $this->_client->post( 'https://www.instagram.com/rupload_igphoto/feed_' . $uploadId , [
+				'headers'	=>	[
+					'X-Requested-With'				=>	'XMLHttpRequest',
+					'X-CSRFToken'					=>	$this->getCsrfToken(),
+					'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
+					'X-Entity-Name'					=>	'feed_' . $uploadId,
+					'X-Entity-Length'				=>	filesize( $videoThumbnail->getFile() ),
+					'Offset'						=>	'0'
 				],
-			'headers'	=>	[
-				'X-Requested-With'	=> 'XMLHttpRequest',
-				'X-CSRFToken'		=> $this->getCsrfToken()
-			]
-		])->getBody();
+				'body'		=>	fopen( $videoThumbnail->getFile() , 'r' )
+			]);
+		}
+		catch( Exception $e )
+		{
+			$response = '[]';
+		}
+
+		try
+		{
+			$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure/' , [
+				'form_params' =>
+					[
+						'upload_id'						=>	$uploadId,
+						'caption'						=>	$caption,
+						'usertags'						=>	'',
+						'custom_accessibility_caption'	=>	'',
+						'retry_timeout'					=>	'12'
+					],
+				'headers'	=>	[
+					'X-Requested-With'	=> 'XMLHttpRequest',
+					'X-CSRFToken'		=> $this->getCsrfToken()
+				]
+			])->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '[]';
+		}
+
 		$result = json_decode($result , true);
 
 		if( isset($result['status']) && $result['status'] == 'fail' )
@@ -235,21 +292,48 @@ class FSInstagramApi
 
 	public function uploadPhotoStory( $photo , $link )
 	{
-		$photo = new \InstagramAPI\Media\Photo\InstagramPhoto( $photo , ['targetFeed' => \InstagramAPI\Constants::FEED_STORY] );
+		$photo = new \InstagramAPI\Media\Photo\InstagramPhoto( $photo );
+
+		try
+		{
+			$photoDetails = new \InstagramAPI\Media\Photo\PhotoDetails( $photo->getFile() );
+		}
+		catch (Exception $e)
+		{
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> $e->getMessage()
+			];
+		}
 
 		$uploadId = $this->createUploadId();
 
-		$response = (string)$this->_client->post( 'https://www.instagram.com/create/upload/photo/' , [
-			'multipart' => [
-				['name'	=> 'photo', 'contents' => fopen( $photo->getFile(), 'r' ),],
-				['name'	=> 'upload_id', 'contents' => $uploadId],
-				['name'	=> 'media_type', 'contents' => '1']
-			],
-			'headers'	=>	[
-				'X-Requested-With'	=> 'XMLHttpRequest',
-				'X-CSRFToken'		=> $this->getCsrfToken()
-			]
-		])->getBody();
+		$params = [
+			'media_type'				=> '1',
+			'upload_media_height'		=> (string) $photoDetails->getHeight(),
+			'upload_media_width'		=> (string) $photoDetails->getWidth(),
+			'upload_id'					=> $uploadId,
+		];
+
+		try
+		{
+			$response = (string)$this->_client->post( 'https://www.instagram.com/rupload_igphoto/fb_uploader_' . $uploadId , [
+				'headers'	=>	[
+					'X-Requested-With'				=>	'XMLHttpRequest',
+					'X-CSRFToken'					=>	$this->getCsrfToken(),
+					'X-Instagram-Rupload-Params'	=>	json_encode( $params ),
+					'X-Entity-Name'					=>	'feed_' . $uploadId,
+					'X-Entity-Length'				=>	filesize( $photo->getFile() ),
+					'Offset'						=>	'0'
+				],
+				'body'		=>	fopen($photo->getFile(), 'r')
+			])->getBody();
+		}
+		catch( Exception $e )
+		{
+			$response = '[]';
+		}
+
 		$response = json_decode($response , true);
 
 		if( isset($response['status']) && $response['status'] == 'fail' )
@@ -268,18 +352,26 @@ class FSInstagramApi
 			];
 		}
 
-		$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure_to_story/' , [
-			'form_params' =>
-				[
-					'upload_id'						=>	$uploadId,
-					'caption'						=>	'',
-					'story_cta'						=>	json_encode( [["links" => [["webUri" => $link ]] ]] )
-				],
-			'headers'	=>	[
-				'X-Requested-With'	=> 'XMLHttpRequest',
-				'X-CSRFToken'		=> $this->getCsrfToken()
-			]
-		])->getBody();
+		try
+		{
+			$result = (string)$this->_client->post( 'https://www.instagram.com/create/configure_to_story/' , [
+				'form_params' =>
+					[
+						'upload_id'						=>	$uploadId,
+						'caption'						=>	'',
+						'story_cta'						=>	json_encode( [["links" => [["webUri" => $link ]] ]] )
+					],
+				'headers'	=>	[
+					'X-Requested-With'	=> 'XMLHttpRequest',
+					'X-CSRFToken'		=> $this->getCsrfToken()
+				]
+			])->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '[]';
+		}
+
 		$result = json_decode($result , true);
 
 		if( isset($result['status']) && $result['status'] == 'fail' )
@@ -299,7 +391,14 @@ class FSInstagramApi
 
 	public function getPostInfo( $postId )
 	{
-		$response = (string)$this->_client->get( 'https://www.instagram.com/p/' . $postId . '/')->getBody();
+		try
+		{
+			$response = (string)$this->_client->get( 'https://www.instagram.com/p/' . $postId . '/')->getBody();
+		}
+		catch( Exception $e )
+		{
+			$response = '';
+		}
 
 		preg_match("/\"edge_media_to_comment\"\:\{\"count\"\:([0-9]+)\,/i" , $response , $commentsCount);
 		preg_match("/\"edge_media_preview_like\"\:\{\"count\"\:([0-9]+)\,/i" , $response , $likesCount);
@@ -315,7 +414,7 @@ class FSInstagramApi
 
 	private function createUploadId()
 	{
-		return (string)rand(10000 , 90000) . (string)rand(10000 , 90000);
+		return time() . (string)rand(100,999);
 	}
 
 	public static function getDetailsBySessId( $sessId, $proxy = '' )

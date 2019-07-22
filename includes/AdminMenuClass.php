@@ -173,8 +173,8 @@ class AdminMenuClass
 
 		$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
 
-		$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
-		$result2 = file_get_contents($checkPurchaseCodeURL);
+		//$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
+		//$result2 = file_get_contents($checkPurchaseCodeURL);
 		$result = json_decode($result2 , true);
 
 		if( $result['action'] == 'empty' )
