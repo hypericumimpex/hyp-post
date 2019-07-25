@@ -20,7 +20,7 @@ class FacebookCookieMethod
 			return false;
 		}
 
-		$checkLoginRegistered = wpDB()->get_row( wpDB()->prepare( "SELECT * FROM ".wpTable('accounts')." WHERE user_id=%d AND driver='fb' AND profile_id=%s" , [get_current_user_id() ,$myInfo['id']] ) , ARRAY_A );
+		$checkLoginRegistered = FSwpDB()->get_row( FSwpDB()->prepare( "SELECT * FROM ".FSwpTable('accounts')." WHERE user_id=%d AND driver='fb' AND profile_id=%s" , [get_current_user_id() ,$myInfo['id']] ) , ARRAY_A );
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -33,19 +33,19 @@ class FacebookCookieMethod
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$fbAccId = wpDB()->insert_id;
+			$fbAccId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$fbAccId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $fbAccId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $fbAccId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $fbAccId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $fbAccId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $fbAccId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $fbAccId] );
 		}
 
 		$returnStatisticsData = [
@@ -65,7 +65,7 @@ class FacebookCookieMethod
 			{
 				$returnStatisticsData['ownpages'][] = [$accountInfo['id'] , $accountInfo['name']];
 
-				wpDB()->insert(wpTable('account_nodes') , [
+				FSwpDB()->insert(FSwpTable('account_nodes') , [
 					'user_id'			=>	get_current_user_id(),
 					'driver'			=>	'fb',
 					'account_id'		=>	$fbAccId,
@@ -102,7 +102,7 @@ class FacebookCookieMethod
 
 				$returnStatisticsData['pages'][] = [$accountInfo['id'] , $accountInfo['name']];
 
-				wpDB()->insert(wpTable('account_nodes') , [
+				FSwpDB()->insert(FSwpTable('account_nodes') , [
 					'user_id'			=>	get_current_user_id(),
 					'driver'			=>	'fb',
 					'account_id'		=>	$fbAccId,
@@ -136,7 +136,7 @@ class FacebookCookieMethod
 
 				$returnStatisticsData['groups'][] = [$accountInfo['id'] , $accountInfo['name'] , $cover];
 
-				wpDB()->insert(wpTable('account_nodes') , [
+				FSwpDB()->insert(FSwpTable('account_nodes') , [
 					'user_id'			=>	get_current_user_id(),
 					'driver'			=>	'fb',
 					'account_id'		=>	$fbAccId,
@@ -189,7 +189,14 @@ class FacebookCookieMethod
 	{
 		$myPagesArr = [];
 
-		$result = (string)$this->client->request('GET' , 'https://www.facebook.com/bookmarks/pages?ref=u2u' )->getBody();
+		try
+		{
+			$result = (string)$this->client->request('GET' , 'https://www.facebook.com/bookmarks/pages?ref=u2u' )->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '';
+		}
 
 		preg_match('/require\:(\[\[\"BookmarkSeeAllEntsSectionController\".+\}\]\]\]\])\,/Ui', $result, $myPages);
 
@@ -211,7 +218,14 @@ class FacebookCookieMethod
 
 	public function getLikedPages()
 	{
-		$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/pages/launchpoint/liked_pages/' )->getBody();
+		try
+		{
+			$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/pages/launchpoint/liked_pages/' )->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '';
+		}
 
 		preg_match('/\<ul.*\>(.+)\<\/ul\>/Ui', $result, $likedPagesList);
 
@@ -248,7 +262,14 @@ class FacebookCookieMethod
 
 	public function getGroups()
 	{
-		$result = (string)$this->client->request('GET' , 'https://m.facebook.com/groups/?seemore' )->getBody();
+		try
+		{
+			$result = (string)$this->client->request('GET' , 'https://m.facebook.com/groups/?seemore' )->getBody();
+		}
+		catch( Exception $e )
+		{
+			$result = '';
+		}
 
 		preg_match_all('/\<a href\=\"\/groups\/([0-9]+)(?:\?refid\=[0-9]+)?\"\>(.+)\<\/a\>/Ui', $result, $groups);
 
@@ -270,7 +291,14 @@ class FacebookCookieMethod
 
 	public function getStats( $postId )
 	{
-		$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/' . $postId )->getBody();
+		try
+		{
+			$result = (string)$this->client->request('GET' , 'https://touch.facebook.com/' . $postId )->getBody();
+		}
+		catch ( Exception $e )
+		{
+			$result = '';
+		}
 
 		preg_match('/\,comment_count\:([0-9]+)\,/i', $result, $comments);
 		preg_match('/\,share_count\:([0-9]+)\,/i', $result, $shares);
@@ -305,7 +333,7 @@ class FacebookCookieMethod
 		}
 		else if( $type == 'link' )
 		{
-			$sendData['linkUrl'] = spintax( $link );
+			$sendData['linkUrl'] = $link;
 		}
 
 		$postType = 'form_params';
@@ -329,13 +357,13 @@ class FacebookCookieMethod
 			{
 				$endpoint = "https://touch.facebook.com/_mupload_/composer/?target=" . $nodeFbId;
 
-				$sendData['message'] = spintax( $message );
+				$sendData['message'] = $message;
 			}
 			else if( $nodeType == 'ownpage' )
 			{
 				$endpoint = 'https://upload.facebook.com/_mupload_/composer/?target=' . $nodeFbId . '&av=' . $nodeFbId;
 
-				$sendData['status']             = spintax( $message );
+				$sendData['status']             = $message;
 				$sendData['waterfall_id']       = $this->waterfallId();
 				$sendData['waterfall_source']   = 'composer_pages_feed';
 
@@ -345,7 +373,7 @@ class FacebookCookieMethod
 			{
 				$endpoint = 'https://upload.facebook.com/_mupload_/composer/?target=' . $nodeFbId . '&av=' . $nodeFbId;
 
-				$sendData['message']            = spintax( $message );
+				$sendData['message']            = $message;
 				$sendData['waterfall_id']       = $this->waterfallId();
 				$sendData['waterfall_source']   = 'composer_pages_feed';
 
@@ -355,7 +383,7 @@ class FacebookCookieMethod
 			{
 				$endpoint = "https://touch.facebook.com/_mupload_/composer/?target=" . $nodeFbId;
 
-				$sendData['status']             = spintax( $message );
+				$sendData['status']             = $message;
 				$sendData['waterfall_id']       = $this->waterfallId();
 				$sendData['waterfall_source']   = 'composer_pages_feed';
 				$sendData['privacyx']           = $this->getPrivacyX();
@@ -365,31 +393,31 @@ class FacebookCookieMethod
 		else if( $type == 'video' )
 		{
 			$endPoint = 'videos';
-			$sendData['file_url']		= spintax( $video );
-			$sendData['description']	= spintax( $message );
+			$sendData['file_url']		= $video;
+			$sendData['description']	= $message;
 		}
 		else
 		{
 			if( $nodeType == 'group' )
 			{
 				$endpoint = 'https://touch.facebook.com/a/group/post/add/?gid=' . $nodeFbId;
-				$sendData['message'] = spintax( $message );
+				$sendData['message'] = $message;
 			}
 			else if( $nodeType == 'ownpage' )
 			{
 				$endpoint = 'https://touch.facebook.com/a/home.php?av=' . $nodeFbId;
-				$sendData['status'] = spintax( $message );
+				$sendData['status'] = $message;
 			}
 			else if( $nodeType == 'page' )
 			{
 				$endpoint = 'https://touch.facebook.com/a/wall.php?id=' . $nodeFbId;
-				$sendData['message'] = spintax( $message );
+				$sendData['message'] = $message;
 			}
 			else
 			{
 				$endpoint = 'https://touch.facebook.com/a/home.php';
 
-				$sendData['status']     = spintax( $message );
+				$sendData['status']     = $message;
 				$sendData['target']     = $nodeFbId;
 				$sendData['privacyx']   = $this->getPrivacyX();
 			}
@@ -400,25 +428,59 @@ class FacebookCookieMethod
 			$sendData = $this->conertToMultipartArray( $sendData );
 		}
 
-		$post = (string)$this->client->request(
-			'POST' ,
-			$endpoint ,
-			[
-				$postType	=> $sendData ,
-				'headers'	=> [ 'Referer' => 'https://touch.facebook.com/' ]
-			]
-		)->getBody();
+		try
+		{
+			$post = (string)$this->client->request(
+				'POST' ,
+				$endpoint ,
+				[
+					$postType	=> $sendData ,
+					'headers'	=> [ 'Referer' => 'https://touch.facebook.com/' ]
+				]
+			)->getBody();
+		}
+		catch( Exception $e )
+		{
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
+		}
+
+		$hasError = $this->parsePostRepsonse( $post );
+
+		if( !$hasError[0] )
+		{
+			return [
+				'status'	=>	'error',
+				'error_msg'	=>	$hasError[1]
+			];
+		}
 
 		if( $nodeType == 'page' )
 		{
-			$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/?filter=2' )->getBody();
+			try
+			{
+				$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/?filter=2' )->getBody();
+			}
+			catch( Exception $e )
+			{
+				$getLastPostId = '';
+			}
 
 			preg_match('/top_level_post_id\.([0-9]+)/i', $getLastPostId, $postId);
 			$postId = isset($postId[1]) ? $postId[1] : 0;
 		}
 		else if( $nodeType == 'account' && $type == 'image' )
 		{
-			$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/' )->getBody();
+			try
+			{
+				$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/' )->getBody();
+			}
+			catch( Exception $e )
+			{
+				$getLastPostId = '';
+			}
 
 			preg_match('/id\=\"like_([0-9]+)\"/i', $getLastPostId, $postId);
 			$postId = isset($postId[1]) ? $postId[1] : 0;
@@ -435,7 +497,14 @@ class FacebookCookieMethod
 
 				if( empty( $postId ) )
 				{
-					$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/' )->getBody();
+					try
+					{
+						$getLastPostId = (string)$this->client->request('GET' , 'https://m.facebook.com/' . $nodeFbId . '/' )->getBody();
+					}
+					catch( Exception $e )
+					{
+						$getLastPostId = '';
+					}
 
 					preg_match('/id\=\"like_([0-9]+)\"/i', $getLastPostId, $postId);
 					$postId = isset($postId[1]) ? $postId[1] : 0;
@@ -447,6 +516,28 @@ class FacebookCookieMethod
 			'status'	=>  'ok',
 			'id'		=>	$postId
 		];
+	}
+
+	private function parsePostRepsonse( $response )
+	{
+		if( empty($response) )
+		{
+			return [false, 'Error! Response is empty!' ];
+		}
+
+		$hasError = preg_match('/\,\"error\"\:([0-9]+)\,/iU', $response, $errCode);
+
+		if( $hasError && (int)$errCode[1] > 0 )
+		{
+			$errCode = (int)$errCode[1];
+
+			preg_match('/\,\"errorDescription\"\:\"(.+)\"\,/iU', $response, $errMsg);
+			$errMsg = isset($errMsg[1]) ? $errMsg[1] : 'Error!';
+
+			return [false, $errMsg . ' ( Error code: ' . $errCode . ')' ];
+		}
+
+		return [true];
 	}
 
 	private function uploadPhoto( $photo, $target, $targetType )
@@ -465,14 +556,21 @@ class FacebookCookieMethod
 			$endpoint .= '&av=' . urlencode( $target );
 		}
 
-		$post = (string)$this->client->request(
-			'POST' ,
-			$endpoint ,
-			[
-				'multipart' => $postData ,
-				'headers'   => [ 'Referer' => 'https://touch.facebook.com/' ]
-			]
-		)->getBody();
+		try
+		{
+			$post = (string)$this->client->request(
+				'POST' ,
+				$endpoint ,
+				[
+					'multipart' => $postData ,
+					'headers'   => [ 'Referer' => 'https://touch.facebook.com/' ]
+				]
+			)->getBody();
+		}
+		catch( Exception $e )
+		{
+			$post = '';
+		}
 
 		preg_match('/\"fbid\"\:\"([0-9]+)/i', $post, $photoId);
 
@@ -483,7 +581,14 @@ class FacebookCookieMethod
 	{
 		if( is_null( $this->fb_dtsg ) )
 		{
-			$getFbDtsg = (string)$this->client->request('GET' , 'https://m.facebook.com/' )->getBody();
+			try
+			{
+				$getFbDtsg = (string)$this->client->request('GET' , 'https://m.facebook.com/' )->getBody();
+			}
+			catch( Exception $e )
+			{
+				$getFbDtsg = '';
+			}
 
 			preg_match('/name\=\"fb_dtsg\" value\=\"(.+)\"/Ui', $getFbDtsg, $fb_dtsg);
 
@@ -539,7 +644,14 @@ class FacebookCookieMethod
 	{
 		$url = 'https://touch.facebook.com/privacy/timeline/saved_custom_audience_selector_dialog/?fb_dtsg=' . $this->fb_dtsg();
 
-		$getData = (string)$this->client->request('GET' , $url )->getBody();
+		try
+		{
+			$getData = (string)$this->client->request('GET' , $url )->getBody();
+		}
+		catch( Exception $e )
+		{
+			$getData = '';
+		}
 
 		preg_match('/\:\"([0-9]+)\"/i', htmlspecialchars_decode( $getData ), $firstPrivacyX);
 
@@ -548,7 +660,14 @@ class FacebookCookieMethod
 
 	public function myInfo()
 	{
-		$getInfo = (string)$this->client->request('GET' , 'https://touch.facebook.com/' )->getBody();
+		try
+		{
+			$getInfo = (string)$this->client->request('GET' , 'https://touch.facebook.com/' )->getBody();
+		}
+		catch( Exception $e )
+		{
+			$getInfo = '';
+		}
 
 		preg_match('/\"USER_ID\"\:\"([0-9]+)\"/i', $getInfo, $accountId);
 		$accountId = isset($accountId[1]) ? $accountId[1] : '?';

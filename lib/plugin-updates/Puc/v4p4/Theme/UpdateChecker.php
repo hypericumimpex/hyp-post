@@ -68,7 +68,7 @@ if ( !class_exists('Puc_v4p4_Theme_UpdateChecker', false) ):
 		 *
 		 * @return string Version number.
 		 */
-		public function getInstalledVersion() {
+		public function FSgetInstalledVersion() {
 			return $this->theme->get('Version');
 		}
 

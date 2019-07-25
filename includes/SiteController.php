@@ -33,6 +33,9 @@ class SiteController
 		$this->okRedirect();
 		$this->okCallback();
 
+		$this->mediumRedirect();
+		$this->mediumCallback();
+
 		$this->standartFSApp();
 	}
 
@@ -46,7 +49,7 @@ class SiteController
 				$post_id = $post->ID;
 				$feed_id = (int)$_GET['feed_id'];
 
-				wpDB()->query( wpDB()->prepare("UPDATE " . wpTable('feeds') . " SET visit_count=visit_count+1 WHERE id=%d AND post_id=%d", [$feed_id , $post_id] ) );
+				FSwpDB()->query( FSwpDB()->prepare("UPDATE " . FSwpTable('feeds') . " SET visit_count=visit_count+1 WHERE id=%d AND post_id=%d", [$feed_id , $post_id] ) );
 			}
 		}
 	}
@@ -55,7 +58,7 @@ class SiteController
 	{
 		if( isset($_GET['fb_callback']) && $_GET['fb_callback'] == '1' )
 		{
-			require_once LIB_DIR . "fb/FacebookLib.php";
+			require_once FS_LIB_DIR . "fb/FacebookLib.php";
 
 			FacebookLib::getAccessToken();
 		}
@@ -66,7 +69,7 @@ class SiteController
 		if( isset($_GET['fb_app_redirect']) && is_numeric($_GET['fb_app_redirect']) && $_GET['fb_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['fb_app_redirect'];
-			require_once LIB_DIR . "fb/FacebookLib.php";
+			require_once FS_LIB_DIR . "fb/FacebookLib.php";
 
 			$link = FacebookLib::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -81,7 +84,7 @@ class SiteController
 			&& isset($_GET['oauth_token']) && is_string($_GET['oauth_token']) && !empty($_GET['oauth_token'])
 		)
 		{
-			do_action('registerSession');
+			do_action('FSregisterSession');
 
 			if( !isset($_SESSION['save_app_id']) || !isset($_SESSION['oauth_token']) || !isset($_SESSION['oauth_token_secret']) || $_GET['oauth_token'] != $_SESSION['oauth_token'] )
 			{
@@ -94,7 +97,7 @@ class SiteController
 
 			$appId = (int)$_SESSION['save_app_id'];
 
-			$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
+			$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
 
 			$proxy = '';
 			if( isset($_SESSION['fs_proxy_save']) )
@@ -104,8 +107,8 @@ class SiteController
 				unset($_SESSION['fs_proxy_save']);
 			}
 
-			require_once LIB_DIR . 'twitter/autoload.php';
-			require_once LIB_DIR . 'twitter/TwitterLib.php';
+			require_once FS_LIB_DIR . 'twitter/autoload.php';
+			require_once FS_LIB_DIR . 'twitter/TwitterLib.php';
 
 			$connection = new Abraham\TwitterOAuth\TwitterOAuth($appInf['app_key'], $appInf['app_secret'], $_SESSION['oauth_token'], $_SESSION['oauth_token_secret'] , $proxy);
 			$access_token = $connection->oauth("oauth/access_token", array("oauth_verifier" => $_GET['oauth_verifier']));
@@ -131,10 +134,10 @@ class SiteController
 	{
 		if( isset($_GET['twitter_app_redirect']) && is_numeric($_GET['twitter_app_redirect']) && $_GET['twitter_app_redirect'] > 0 )
 		{
-			do_action('registerSession');
+			do_action('FSregisterSession');
 			$appId = (int)$_GET['twitter_app_redirect'];
 
-			$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
+			$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
 			if( !$appInf )
 			{
 				print 'Error!';
@@ -142,7 +145,7 @@ class SiteController
 			}
 
 			$_SESSION['save_app_id'] = $appId;
-			$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+			$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
 			require_once __DIR__ . '/../lib/twitter/autoload.php';
 
@@ -215,7 +218,7 @@ class SiteController
 	{
 		if( isset($_GET['reddit_callback']) && $_GET['reddit_callback'] == '1' )
 		{
-			require_once LIB_DIR . "reddit/Reddit.php";
+			require_once FS_LIB_DIR . "reddit/Reddit.php";
 
 			Reddit::getAccessToken();
 		}
@@ -238,7 +241,7 @@ class SiteController
 	{
 		if( isset($_GET['tumblr_callback']) && $_GET['tumblr_callback'] == '1' )
 		{
-			require_once LIB_DIR . "tumblr/Tumblr.php";
+			require_once FS_LIB_DIR . "tumblr/Tumblr.php";
 
 			Tumblr::getAccessToken();
 		}
@@ -280,28 +283,52 @@ class SiteController
 		}
 	}
 
+	public function mediumCallback()
+	{
+		if( isset($_GET['medium_callback']) && $_GET['medium_callback'] == '1' )
+		{
+			require_once FS_LIB_DIR . "medium/Medium.php";
+
+			Medium::getAccessToken();
+		}
+	}
+
+	public function mediumRedirect()
+	{
+		if( isset($_GET['medium_app_redirect']) && is_numeric($_GET['medium_app_redirect']) && $_GET['medium_app_redirect'] > 0 )
+		{
+			$appId = (int)$_GET['medium_app_redirect'];
+			require_once plugin_dir_path(__FILE__ ) . "../lib/medium/Medium.php";
+
+			$link = Medium::getLoginURL($appId);
+			header('Location: ' . $link);
+			exit();
+		}
+	}
+
+
 	public function standartFSApp()
 	{
-		$supportedFSApps = ['twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr' , 'ok'];
+		$supportedFSApps = ['twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr' , 'ok', 'medium'];
 
-		$sn                 = _get('sn' , '' , 'string' , $supportedFSApps);
-		$callback           = _get('fs_app_redirect' , '0' , 'num' , ['1']);
-		$proxy              = _get('proxy' , '' , 'string');
+		$sn                 = FS_get('sn' , '' , 'string' , $supportedFSApps);
+		$callback           = FS_get('fs_app_redirect' , '0' , 'num' , ['1']);
+		$proxy              = FS_get('proxy' , '' , 'string');
 
 		if( !$callback || empty($sn) )
 			return;
 
-		$appInf = wpFetch('apps' , ['driver' => $sn , 'is_standart' => '1']);
+		$appInf = FSwpFetch('apps' , ['driver' => $sn , 'is_standart' => '1']);
 
 		if( $sn == 'twitter' )
 		{
-			$oauth_token = _get('oauth_token' , '' , 'string');
-			$oauth_token_secret = _get('oauth_token_secret' ,'' , 'string');
+			$oauth_token = FS_get('oauth_token' , '' , 'string');
+			$oauth_token_secret = FS_get('oauth_token_secret' ,'' , 'string');
 
 			if( empty($oauth_token) || empty($oauth_token_secret) )
 				return;
 
-			require_once LIB_DIR . 'twitter/TwitterLib.php';
+			require_once FS_LIB_DIR . 'twitter/TwitterLib.php';
 
 			TwitterLib::authorizeUser($appInf , $oauth_token , $oauth_token_secret , $proxy);
 
@@ -310,13 +337,13 @@ class SiteController
 		}
 		else if( $sn == 'linkedin' )
 		{
-			$access_token = _get('access_token' , '' , 'string');
-			$expire_in = _get('expire_in' ,'' , 'string');
+			$access_token = FS_get('access_token' , '' , 'string');
+			$expire_in = FS_get('expire_in' ,'' , 'string');
 
 			if( empty($access_token) || empty($expire_in) )
 				return;
 
-			require_once LIB_DIR . 'linkedin/Linkedin.php';
+			require_once FS_LIB_DIR . 'linkedin/Linkedin.php';
 
 			Linkedin::authorizeLinkedinUser($appInf['id'] , $access_token , $expire_in , $proxy);
 
@@ -325,12 +352,12 @@ class SiteController
 		}
 		else if( $sn == 'pinterest' )
 		{
-			$access_token = _get('access_token' , '' , 'string');
+			$access_token = FS_get('access_token' , '' , 'string');
 
 			if( empty($access_token) )
 				return;
 
-			require_once LIB_DIR . 'pinterest/Pinterest.php';
+			require_once FS_LIB_DIR . 'pinterest/Pinterest.php';
 
 			Pinterest::authorizePinterestUser($appInf['id'] , $access_token , $proxy);
 
@@ -339,14 +366,14 @@ class SiteController
 		}
 		else if( $sn == 'reddit' )
 		{
-			$access_token = _get('access_token' , '' , 'string');
-			$refreshToken = _get('refresh_token' , '' , 'string');
-			$expiresIn = _get('expires_in' , '' , 'string');
+			$access_token = FS_get('access_token' , '' , 'string');
+			$refreshToken = FS_get('refresh_token' , '' , 'string');
+			$expiresIn = FS_get('expires_in' , '' , 'string');
 
 			if( empty($access_token) || empty($refreshToken) || empty($expiresIn) )
 				return;
 
-			require_once LIB_DIR . 'reddit/Reddit.php';
+			require_once FS_LIB_DIR . 'reddit/Reddit.php';
 
 			Reddit::authorizeRedditUser( $appInf['id'] , $access_token , $refreshToken , $expiresIn , $proxy );
 
@@ -355,14 +382,17 @@ class SiteController
 		}
 		else if( $sn == 'tumblr' )
 		{
-			$access_token = _get('access_token' , '' , 'string');
-			$access_token_secret = _get('access_token_secret' , '' , 'string');
+			$access_token = FS_get('access_token' , '' , 'string');
+			$access_token_secret = FS_get('access_token_secret' , '' , 'string');
 
 			if( empty($access_token) || empty($access_token_secret) )
 				return;
 
-			require_once LIB_DIR . 'vendor/autoload.php';
-			require_once LIB_DIR . 'tumblr/Tumblr.php';
+			// sync timezone for FS Poster server...
+			date_default_timezone_set('Asia/Baku');
+
+			require_once FS_LIB_DIR . 'vendor/autoload.php';
+			require_once FS_LIB_DIR . 'tumblr/Tumblr.php';
 
 			Tumblr::authorizeTumblrUser( $appInf['id'] , $appInf['app_key'] , $appInf['app_secret'] , $access_token , $access_token_secret , $proxy );
 
@@ -371,16 +401,32 @@ class SiteController
 		}
 		else if( $sn == 'ok' )
 		{
-			$access_token = _get('access_token' , '' , 'string');
-			$refreshToken = _get('refresh_token' , '' , 'string');
-			$expiresIn = _get('expires_in' , '' , 'string');
+			$access_token = FS_get('access_token' , '' , 'string');
+			$refreshToken = FS_get('refresh_token' , '' , 'string');
+			$expiresIn = FS_get('expires_in' , '' , 'string');
 
 			if( empty($access_token) || empty($refreshToken) || empty($expiresIn) )
 				return;
 
-			require_once LIB_DIR . 'ok/OdnoKlassniki.php';
+			require_once FS_LIB_DIR . 'ok/OdnoKlassniki.php';
 
 			OdnoKlassniki::authorizeOkUser( $appInf['id'] , $appInf['app_key'] , $appInf['app_secret'] , $access_token , $refreshToken , $expiresIn , $proxy );
+
+			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
+			exit();
+		}
+		else if( $sn == 'medium' )
+		{
+			$access_token = FS_get('access_token' , '' , 'string');
+			$refreshToken = FS_get('refresh_token' , '' , 'string');
+			$expiresIn = FS_get('expires_in' , '' , 'string');
+
+			if( empty($access_token) || empty($refreshToken) || empty($expiresIn) )
+				return;
+
+			require_once FS_LIB_DIR . 'medium/Medium.php';
+
+			Medium::authorizeMediumUser( $appInf['id'] , $access_token , $refreshToken , $expiresIn , $proxy );
 
 			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
 			exit();

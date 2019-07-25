@@ -1,6 +1,6 @@
 <?php
 
-require_once LIB_DIR . 'FSCurl.php';
+require_once FS_LIB_DIR . 'FSCurl.php';
 
 class Linkedin
 {
@@ -21,47 +21,46 @@ class Linkedin
 	 */
 	public static function authorizeLinkedinUser( $appId , $accessToken , $scExpireIn , $proxy)
 	{
-		$me = self::cmd('people/~:(id,first-name,last-name,picture-url,public-profile-url,num-connections)', 'GET' , $accessToken , []  , $proxy );
+		$me = self::cmd('me', 'GET' , $accessToken , []  , $proxy );
 
 		if( isset($me['error']) && isset($me['error']['message']) )
 		{
-			response(false , $me['error']['message'] );
+			FSresponse(false , $me['error']['message'] );
 		}
 
 		$meId = $me['id'];
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'linkedin', 'profile_id' => $meId]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'linkedin', 'profile_id' => $meId]);
 
 		$dataSQL = [
-			'user_id'			=>	get_current_user_id(),
-			'name'		  		=>	$me['firstName'] .' ' . $me['lastName'],
-			'driver'			=>	'linkedin',
-			'profile_id'		=>	$meId,
-			'profile_pic'		=>	$me['pictureUrl'],
-			'friends_count'		=>	$me['numConnections'],
-			'username'			=>	str_replace(['https://www.linkedin.com/in/', 'http://www.linkedin.com/in/'] , '' , $me['publicProfileUrl']),
-			'proxy'             =>  $proxy
+			'user_id'		=>	get_current_user_id(),
+			'name'		  	=>	$me['localizedFirstName'] .' ' . $me['localizedLastName'],
+			'driver'		=>	'linkedin',
+			'profile_id'	=>	$meId,
+			'profile_pic'	=>	isset($me['profilePicture']['displayImage']) ? $me['profilePicture']['displayImage'] : '',
+			//'username'		=>	str_replace(['https://www.linkedin.com/in/', 'http://www.linkedin.com/in/'] , '' , $me['publicProfileUrl']),
+			'proxy'			=>  $proxy
 		];
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $accId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $accId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$accId,
 			'app_id'		=>	$appId,
 			'expires_on'	=>	$scExpireIn,
@@ -69,21 +68,25 @@ class Linkedin
 		]);
 
 		// my pages load
-		$companiesList = self::cmd('companies:(id,company-type,name,logo-url,num-followers)', 'GET' , $accessToken , ['is-company-admin' => 'true'] , $proxy );
-		if( isset($companiesList['values']) && is_array($companiesList['values']) )
+		$companiesList = self::cmd('organizationalEntityAcls', 'GET' , $accessToken , [
+			'q' 			=> 'roleAssignee',
+			'role'			=>	'ADMINISTRATOR',
+			'projection'	=>	'(elements*(organizationalTarget~(id,localizedName,vanityName,logoV2,organizationType)))'
+		] , $proxy );
+
+		if( isset($companiesList['elements']) && is_array($companiesList['elements']) )
 		{
-			foreach($companiesList['values'] AS $companyInf)
+			foreach($companiesList['elements'] AS $companyInf)
 			{
-				wpDB()->insert(wpTable('account_nodes') , [
+				FSwpDB()->insert(FSwpTable('account_nodes') , [
 					'user_id'			=>	get_current_user_id(),
 					'driver'			=>	'linkedin',
 					'account_id'		=>	$accId,
 					'node_type'			=>	'company',
-					'node_id'			=>	$companyInf['id'],
-					'name'				=>	$companyInf['name'],
-					'category'			=>	isset($companyInf['companyType']['name']) ? $companyInf['companyType']['name'] : '',
-					'fan_count'			=>	$companyInf['numFollowers'],
-					'cover'				=>	isset($companyInf['logoUrl']) ? $companyInf['logoUrl'] : '',
+					'node_id'			=>	isset($companyInf['id']) ? $companyInf['id'] : 0,
+					'name'				=>	isset($companyInf['localizedName']) ? $companyInf['localizedName'] : '-',
+					'category'			=>	isset($companyInf['organizationType']) && is_string($companyInf['organizationType']) ? $companyInf['organizationType'] : '',
+					'cover'				=>	isset($companyInf['logoV2']['cropped']) && is_string($companyInf['logoV2']['cropped']) ? $companyInf['logoV2']['cropped'] : '',
 				]);
 			}
 		}
@@ -100,13 +103,15 @@ class Linkedin
 	 */
 	public static function cmd( $cmd , $method , $accessToken , array $data = [] , $proxy = '' )
 	{
-		$url = 'https://api.linkedin.com/v1/' . $cmd . '?oauth2_access_token=' . $accessToken;
+		$url = 'https://api.linkedin.com/v2/' . $cmd;
 
 		$method = $method == 'POST' ? 'POST' : ( $method == 'DELETE' ? 'DELETE' : 'GET' );
 
 		$headers = [
-			'Content-Type'  =>  'application/json',
-			'x-li-format'   =>  'json'
+			'Connection'				=>  'Keep-Alive',
+			'Content-Type'				=>	'text/plain',
+			'X-RestLi-Protocol-Version'	=>  '2.0.0',
+			'Authorization'				=>  'Bearer ' . $accessToken
 		];
 
 		if( $method == 'POST' )
@@ -138,40 +143,78 @@ class Linkedin
 	 * @param string $proxy
 	 * @return array
 	 */
-	public static function sendPost( $nodeInf , $type , $message , $title , $link , $images , $video , $accessToken , $proxy )
+	public static function sendPost( $profileId , $nodeInf , $type , $message , $title , $link , $images , $video , $accessToken , $proxy )
 	{
 		$sendData = [
-			'comment'       =>  $message,
-			'visibility'    =>  ['code' =>  'anyone']
+			'lifecycleState'	=> 'PUBLISHED',
+			'specificContent'	=> [
+				'com.linkedin.ugc.ShareContent'	=> [
+					'shareCommentary'		=> [ 'text'	=> $message ],
+					'shareMediaCategory'	=> 'ARTICLE'
+				]
+			],
+			'visibility'	=> [ 'com.linkedin.ugc.MemberNetworkVisibility'	=> 'PUBLIC' ]
 		];
 
 		if( $type == 'link' && !empty($link) )
 		{
-			$sendData['content'] = [];
-			$sendData['content']['title'] = $title;
-			$sendData['content']['submitted-url'] = $link;
+			$sendData['specificContent']['com.linkedin.ugc.ShareContent']['media'] = [
+				[
+					'status'		=> 'READY',
+					'originalUrl'	=> $link,
+					'description'	=> [ 'text'	=> $message ],
+					'title'			=> [ 'text'	=> $title ],
+				]
+			];
+
+			if( !empty( $images ) )
+			{
+				$thumbImage = reset( $images );
+				$sendData['specificContent']['com.linkedin.ugc.ShareContent']['media'][0]['thumbnails'] = [ [ 'url' => $thumbImage ] ];
+			}
 		}
-		if( $type == 'image' )
+		else if( $type == 'image' )
 		{
-			$sendData['content'] = [];
-			$sendData['content']['title'] = $title;
-			//$sendData['content']['submitted-image-url'] = reset($images);
-			$sendData['content']['submitted-url'] = reset($images);
+			$thumbImage = reset( $images );
+
+			$sendData['specificContent']['com.linkedin.ugc.ShareContent']['media'] = [
+				[
+					'status'		=> 'READY',
+					'originalUrl'	=> $thumbImage,
+					'description'	=> [ 'text'	=> $message ],
+					'title'			=> [ 'text'	=> $title ],
+					'thumbnails'	=> [ [ 'url' => $thumbImage ] ]
+				]
+			];
 		}
-		if( $type == 'video' )
+		else if( $type == 'video' )
 		{
-			$sendData['content'] = [];
-			$sendData['content']['title'] = $title;
-			$sendData['content']['submitted-url'] = $video;
+			$sendData['specificContent']['com.linkedin.ugc.ShareContent']['media'] = [
+				[
+					'status'		=> 'READY',
+					'originalUrl'	=> $video,
+					'description'	=> [ 'text'	=> $message ],
+					'title'			=> [ 'text'	=> $title ],
+					'thumbnails'	=> [ [ 'url' => $video ] ]
+				]
+			];
 		}
 
-		$endPoint = 'people/~/shares';
 		if( isset($nodeInf['node_type']) && $nodeInf['node_type'] == 'company' )
 		{
-			$endPoint = 'companies/' . urlencode($nodeInf['node_id']) . '/shares';
+			$sendData['author'] = 'urn:li:organization:' . $nodeInf['node_id'];
+		}
+		else if( isset($nodeInf['node_type']) && $nodeInf['node_type'] == 'company' )
+		{
+			$sendData['author'] = 'urn:li:person:' . $profileId;
+			$sendData['containerEntity'] = 'urn:li:group:' . $nodeInf['node_id'];
+		}
+		else
+		{
+			$sendData['author'] = 'urn:li:person:' . $nodeInf['profile_id'];
 		}
 
-		$result = self::cmd($endPoint , 'POST' , $accessToken , $sendData , $proxy);
+		$result = self::cmd( 'ugcPosts' , 'POST' , $accessToken , $sendData , $proxy);
 
 		if( isset($result['error']) && isset($result['error']['message']) )
 		{
@@ -189,7 +232,7 @@ class Linkedin
 		}
 		else
 		{
-			$postIdGet = explode('-' , $result['updateKey']);
+			$postIdGet = explode('-' , $result['id']);
 			$postIdGet = end($postIdGet);
 
 			$result2 = [
@@ -206,7 +249,7 @@ class Linkedin
 	 */
 	public static function getScope()
 	{
-		$permissions = ['r_basicprofile', 'rw_company_admin', 'w_share'];
+		$permissions = ['r_liteprofile', 'rw_company_admin', 'w_member_social'];
 
 		return implode(',' , array_map('urlencode' , $permissions));
 	}
@@ -217,11 +260,11 @@ class Linkedin
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'linkedin']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'linkedin']);
 		$appId = $appInf['app_id'];
 
 		$permissions = self::getScope();
@@ -236,19 +279,20 @@ class Linkedin
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
+
 		if( !isset($_SESSION['save_app_id']) )
 		{
 			return false;
 		}
 
-		$code = _get('code' , '' , 'string');
+		$code = FS_get('code' , '' , 'string');
 
 		if( empty($code) )
 		{
-			if( isset($_GET['error_message']) && is_string($_GET['error_message']) )
+			if( isset($_GET['error_description']) && is_string($_GET['error_description']) )
 			{
-				$errorMsg = esc_html($_GET['error_message']);
+				$errorMsg = esc_html(str_replace('&quot;', '', $_GET['error_description']));
 				print 'Loading... <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(false , "'.$errorMsg.'");window.close();}else{document.write("This account already has been added!");} </script>';
 				exit;
 			}
@@ -267,7 +311,7 @@ class Linkedin
 			unset($_SESSION['fs_proxy_save']);
 		}
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'linkedin']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'linkedin']);
 		$appSecret = $appInf['app_secret'];
 		$appId2 = $appInf['app_id'];
 
@@ -302,10 +346,10 @@ class Linkedin
 		//$result = self::cmd('people/~/shares' , 'GET' , 'AQUJ2UMke09Iqj1tj7iL9evS8sZRb0YtWV_l_orSEsmA_ypxDAtIq4UiOh1AFDEFWBSMnXnIgMp72VOAptz7Tbrzfh-FIv1LTtk6x3wCj-Y_6pNbZWKWyYDoFOaUHfZlQ1gY9_zGhcA_SahjyIAVdTPEzRmALl-ebjz94X1MTTRWk0P6k4_LShlxT0oSCcrcH95VdoEQKda3h2bNNwr9oMD5ydKHXsA6xsGBQNBlS2ieRTPOqJDJ97gd5aWDz1vw8ukF7ESwYNo1r86cWJ4duLovksy3yGL68_N41wd1Czt39AlBaiVeqSlIoj2jaRIc_-NQ8_GUyNEFprAM5F5fQqTK9feDDA' , []);
 
 		return [
-			'comments'      =>  0,
-			'like'          =>  0,
-			'shares'        =>  0,
-			'details'       =>  ''
+			'comments'	  =>  0,
+			'like'		  =>  0,
+			'shares'		=>  0,
+			'details'	   =>  ''
 		];
 	}
 

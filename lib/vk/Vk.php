@@ -25,7 +25,7 @@ class Vk
 
 		if( isset($me['error']) && isset($me['error']['message']) )
 		{
-			response(false , $me['error']['message'] );
+			FSresponse(false , $me['error']['message'] );
 		}
 		else if( isset($me['error']) )
 		{
@@ -35,7 +35,7 @@ class Vk
 		$me = reset($me);
 		$meId = $me['id'];
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'vk', 'profile_id' => $meId]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'vk', 'profile_id' => $meId]);
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -53,23 +53,23 @@ class Vk
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $accId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $accId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$accId,
 			'app_id'		=>	$appId,
 			'expires_on'	=>	null,
@@ -92,7 +92,7 @@ class Vk
 				{
 					$loadedOwnPages[$accountInfo['id']] = true;
 
-					wpDB()->insert(wpTable('account_nodes') , [
+					FSwpDB()->insert(FSwpTable('account_nodes') , [
 						'user_id'			=>	get_current_user_id(),
 						'driver'			=>	'vk',
 						'screen_name'		=>	$accountInfo['screen_name'],
@@ -130,7 +130,7 @@ class Vk
 						continue;
 					}
 
-					wpDB()->insert(wpTable('account_nodes') , [
+					FSwpDB()->insert(FSwpTable('account_nodes') , [
 						'user_id'			=>	get_current_user_id(),
 						'driver'			=>	'vk',
 						'screen_name'		=>	$accountInfo['screen_name'],
@@ -192,13 +192,13 @@ class Vk
 	public static function sendPost( $nodeFbId , $type , $message , $link , $images , $video , $accessToken , $proxy )
 	{
 		$sendData = [
-			'message'	=>	spintax( $message ),
+			'message'	=>	$message,
 			'owner_id'	=>	$nodeFbId
 		];
 
 		if( $type == 'link' )
 		{
-			$sendData['attachments'] = spintax( $link );
+			$sendData['attachments'] = $link;
 		}
 		else if( $type == 'image' || $type == 'image_link' )
 		{

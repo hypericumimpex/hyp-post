@@ -24,7 +24,7 @@ class TwitterLib
 			exit();
 		}
 
-		$checkUserExist = wpFetch('accounts' , [
+		$checkUserExist = FSwpFetch('accounts' , [
 			'user_id'       =>  get_current_user_id(),
 			'driver'        =>  'twitter',
 			'profile_id'    =>  $user->id_str
@@ -36,7 +36,7 @@ class TwitterLib
 			exit();
 		}
 
-		wpDB()->insert(wpTable('accounts') , [
+		FSwpDB()->insert(FSwpTable('accounts') , [
 			'user_id'           =>  get_current_user_id(),
 			'driver'            =>  'twitter',
 			'name'              =>  $user->name,
@@ -51,8 +51,8 @@ class TwitterLib
 			'proxy'             =>  $proxy
 		]);
 
-		wpDB()->insert(wpTable('account_access_tokens') , [
-			'account_id'            =>  wpDB()->insert_id,
+		FSwpDB()->insert(FSwpTable('account_access_tokens') , [
+			'account_id'            =>  FSwpDB()->insert_id,
 			'app_id'                =>  $appInf['id'],
 			'access_token'          =>  $oauth_token,
 			'access_token_secret'   =>  $oauth_token_secret
@@ -73,7 +73,7 @@ class TwitterLib
 	 */
 	public static function sendPost( $appId , $type , $message , $link , $images , $video , $accessToken , $accessTokenSecret , $proxy )
 	{
-		$appInfo = wpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
+		$appInfo = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
 		if( !$appInfo )
 		{
 			return [
@@ -198,7 +198,7 @@ class TwitterLib
 	 */
 	public static function getStats( $postId , $accessToken , $accessTokenSecret , $appId , $proxy )
 	{
-		$appInfo = wpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
+		$appInfo = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'twitter']);
 
 		$connection = new TwitterOAuth($appInfo['app_key'], $appInfo['app_secret'], $accessToken, $accessTokenSecret , $proxy);
 		$stat = (array)$connection->get("statuses/show/" . $postId);

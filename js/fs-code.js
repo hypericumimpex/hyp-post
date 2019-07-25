@@ -83,7 +83,12 @@ var fsCode = {
 
 	modalWidth: function( _mn , width )
 	{
-		$("#proModal" + _mn + '>.modal-content' ).attr("style", "width: " + width + "% !important");
+		if( !String(width).match(/px$/) )
+		{
+			width = width + '%';
+		}
+
+		$("#proModal" + _mn + '>.modal-content' ).attr("style", "width: " + width + " !important");
 	},
 
 	loadModal: function ( url , postParams, modalOptions )
@@ -504,7 +509,7 @@ jQuery(document).ready(function()
 		var tooltipDiv = $('<div class="fs_tooltip_div"></div>');
 
 		tooltipDiv.css('top' , $(this).offset().top + 35 - $(window).scrollTop());
-		tooltipDiv.css('left' , $(this).offset().left - ($("#sub_menu").width()/2) + 10);
+		tooltipDiv.css('left' , $(this).offset().left - ($("#fs_sub_menu").width()/2) + 10);
 		tooltipDiv.html( $(this).attr('data-title') );
 
 		$('body').append( tooltipDiv );

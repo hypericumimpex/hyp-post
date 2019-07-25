@@ -1,19 +1,19 @@
 <?php
 defined('MODAL') or exit();
 
-$accounts = wpDB()->get_results(
-	wpDB()->prepare("
-		SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name,'account' AS node_type FROM ".wpTable('account_status')." tb1
-		LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
+$accounts = FSwpDB()->get_results(
+    FSwpDB()->prepare("
+		SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".FSwpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name,'account' AS node_type FROM ".FSwpTable('account_status')." tb1
+		LEFT JOIN ".FSwpTable('accounts')." tb2 ON tb2.id=tb1.account_id
 		WHERE tb1.user_id=%d
 		ORDER BY name" , [ get_current_user_id() ])
 	, ARRAY_A
 );
 
-$activeNodes = wpDB()->get_results(
-	wpDB()->prepare("
-	SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".wpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".wpTable('account_node_status')." tb1
-	LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
+$activeNodes = FSwpDB()->get_results(
+    FSwpDB()->prepare("
+	SELECT tb2.*, tb1.filter_type, tb1.categories, (SELECT GROUP_CONCAT(`name`) FROM ".FSwpDB()->base_prefix."terms WHERE FIND_IN_SET(term_id,tb1.categories) ) AS categories_name FROM ".FSwpTable('account_node_status')." tb1
+	LEFT JOIN ".FSwpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
 	WHERE tb1.user_id=%d
 	ORDER BY (CASE node_type WHEN 'ownpage' THEN 1 WHEN 'group' THEN 2 WHEN 'page' THEN 3 END), name" , [ get_current_user_id() ])
 	, ARRAY_A
@@ -92,16 +92,16 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		border-color: #FFAB00 !important;
 	}
 
-	#proModal<?=$mn?> .text_codes
+	#proModal<?=$mn?> .fs_text_codes
 	{
 		display: flex;
 		font-size: 10px;
 	}
-	#proModal<?=$mn?> .text_codes>:first-child
+	#proModal<?=$mn?> .fs_text_codes>:first-child
 	{
 		width: 180px;
 	}
-	#proModal<?=$mn?> .text_codes>:last-child
+	#proModal<?=$mn?> .fs_text_codes>:last-child
 	{
 		font-weight: 700;
 		cursor: pointer;
@@ -146,7 +146,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		display: none !important;
 	}
 
-	#proModal<?=$mn?> .share_box_items
+	#proModal<?=$mn?> .fs_share_box_items
 	{
 		width: 295px;
 		max-height: 300px;
@@ -162,7 +162,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		box-shadow: 2px 2px 2px #EEE;
 	}
 
-	#proModal<?=$mn?> .share_box_node
+	#proModal<?=$mn?> .fs_share_box_node
 	{
 		display: flex;
 		align-items: center;
@@ -170,7 +170,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		height: 35px;
 		border-bottom: 1px solid #DDD;
 	}
-	#proModal<?=$mn?> .share_box_node:last-child
+	#proModal<?=$mn?> .fs_share_box_node:last-child
 	{
 		border-bottom: 0 !important;
 	}
@@ -215,7 +215,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		border-radius: 15px;
 		cursor: pointer;
 	}
-	#proModal<?=$mn?> .share_box_node:hover .node_remove>.node_remove_btn
+	#proModal<?=$mn?> .fs_share_box_node:hover .node_remove>.node_remove_btn
 	{
 		display: block;
 	}
@@ -223,6 +223,14 @@ $activeNodes = array_merge($accounts , $activeNodes);
 	{
 		font-size: 11px;
 		color: #888;
+	}
+
+	#local_timezone
+	{
+		margin-bottom: 10px;
+		color: #999;
+		font-weight: 600;
+		padding-left: 3px;
 	}
 </style>
 
@@ -275,9 +283,9 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<div style="margin-top: 10px; margin-bottom: <?=(count($parameters['postIds']) > 1 ? '20px' : '50px')?>; display: flex; align-items: center;">
 						<label style="color: #999; width: 90px;">Share on:</label>
 						<div>
-							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 130px;" value="<?=current_time('Y-m-d')?>"></div>
-							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 115px;" value=""></div>
-							<div style="margin-bottom: 10px; color: #888; font-size: 12px;"><span style="color: #ff9172;">Note!</span> Please select Schedule date/time according to your server time.<br> <i>Server time: <?=current_time('Y-m-d g:i A')?></i></div>
+							<div><input type="date" class="ws_form_element2" id="plan_date" style="width: 150px;" value="<?=current_time('Y-m-d')?>"></div>
+							<div><input type="time" class="ws_form_element2" id="plan_time" style="width: 125px;" value="<?=current_time('H:i')?>"></div>
+							<div id="local_timezone">Local time: <?=current_time('Y-m-d h:i A')?></div>
 						</div>
 					</div>
 
@@ -295,12 +303,14 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<!--<div data-sn-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-sn-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-sn-id="vk"><i class="fab fa-vk"></i> VK.com</div>
 						<div data-sn-id="ok"><i class="fab fa-odnoklassniki"></i> OK.ru</div>
 						<div data-sn-id="pinterest"><i class="fab fa-pinterest-square"></i> Pinterest</div>
+						<div data-sn-id="google_b"><i class="fab fa-google"></i> Google MyBusiness</div>
+						<div data-sn-id="telegram"><i class="fab fa-telegram"></i> Telegram</div>
+						<div data-sn-id="medium"><i class="fab fa-medium"></i> Medium</div>
 					</div>
 					<div style="width: calc(100% - 150px) !important; margin-left: 10px;">
 						<div>Custom text:</div>
@@ -315,59 +325,70 @@ $activeNodes = array_merge($accounts , $activeNodes);
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="vk"><?=esc_html(get_option('fs_post_text_message_vk', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="ok"><?=esc_html(get_option('fs_post_text_message_ok', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="pinterest"><?=esc_html(get_option('fs_post_text_message_pinterest', "{title}"))?></textarea>
+							<textarea class="ws_form_element2" style="display: none;" data-sn-id="google_b"><?=esc_html(get_option('fs_post_text_message_google_b', "{title}"))?></textarea>
+							<textarea class="ws_form_element2" style="display: none;" data-sn-id="telegram"><?=esc_html(get_option('fs_post_text_message_telegram', "{title}"))?></textarea>
+							<textarea class="ws_form_element2" style="display: none;" data-sn-id="medium"><?=esc_html(get_option('fs_post_text_message_medium', "{title}"))?></textarea>
 						</div>
 						<div style="background: #FFFCF7; padding: 5px; margin-top: 5px; border: 1px solid #fceed8;">
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post ID' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{id}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post title' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{title}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post excerpt' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_short_40}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post content Full' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_full}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post link' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{link}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post short link' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{short_link}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
+								<div><?=esc_html__('Featured image URL' , 'fs-poster')?></div>
+								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{featured_image_url}</div>
+							</div>
+							<div class="fs_text_codes">
 								<div><?=esc_html__('WooCommerce - product price' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{product_regular_price}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('WooCommerce - product sale price' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{product_sale_price}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Unique ID' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{uniq_id}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post Tags' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{tags}</div>
 							</div>
-							<div class="text_codes">
+							<div class="fs_text_codes">
 								<div><?=esc_html__('Post Categories' , 'fs-poster')?></div>
 								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{categories}</div>
+							</div>
+							<div class="fs_text_codes">
+								<div><?=esc_html__('Custom fields' , 'fs-poster')?></div>
+								<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{cf_KEY}</div>
 							</div>
 						</div>
 					</div>
@@ -386,19 +407,21 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div data-tab-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
 						<div data-tab-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-tab-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
-						<!--<div data-tab-id="google"><i class="fab fa-google-plus-square"></i> Google+</div>-->
 						<div data-tab-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
 						<div data-tab-id="reddit"><i class="fab fa-reddit-square"></i> Reddit</div>
 						<div data-tab-id="vk"><i class="fab fa-vk"></i> VK.com</div>
 						<div data-tab-id="ok"><i class="fab fa-odnoklassniki"></i> OK.ru</div>
 						<div data-tab-id="pinterest"><i class="fab fa-pinterest-square"></i> Pinterest</div>
+						<div data-tab-id="google_b"><i class="fab fa-google"></i> Googe My Business</div>
+						<div data-tab-id="telegram"><i class="fab fa-telegram"></i> Telegram</div>
+						<div data-tab-id="medium"><i class="fab fa-medium"></i> Medium</div>
 					</div>
 					<div style="padding: 3px 15px;">
-						<div class="share_box_items" id="share_box1">
+						<div class="fs_share_box_items" id="share_box1">
 							<?php
 							foreach ($activeNodes AS $nodeInf)
 							{
-								$coverPhoto = profilePic($nodeInf);
+								$coverPhoto = FSprofilePic($nodeInf);
 								if( $nodeInf['filter_type'] == 'no' )
 								{
 									$titleText = '';
@@ -410,13 +433,13 @@ $activeNodes = array_merge($accounts , $activeNodes);
 								}
 
 								?>
-								<div class="share_box_node" data-tab="<?=$nodeInf['driver']?>">
+								<div class="fs_share_box_node" data-tab="<?=$nodeInf['driver']?>">
 									<input type="hidden" name="share_on_nodes[]" value="<?=$nodeInf['node_type'].':'.$nodeInf['id']?>">
 									<div class="node_img"><img src="<?=$coverPhoto?>"></div>
 									<div class="node_label" style="width: 100%;">
 										<div>
 											<?=esc_html($nodeInf['name']);?>
-											<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+											<a href="<?=FSprofileLink($nodeInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 										</div>
 										<div class="node_label_help"><?=esc_html($nodeInf['node_type']);?> <?=empty($titleText) ? '' : '<i class="fa fa-filter ws_tooltip" data-title="'.$titleText.'" style="padding-left: 5px; color: #fdcb6e;"></i>'?></div>
 									</div>
@@ -478,7 +501,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 			}
 			if( $("#proModal<?=$mn?> .change_accounts_btn").length == 0 )
 			{
-				$("#proModal<?=$mn?> #share_box1 > .share_box_node").each(function()
+				$("#proModal<?=$mn?> #share_box1 > .fs_share_box_node").each(function()
 				{
 					accounts_list.push( $(this).find('input[name="share_on_nodes[]"]').val() );
 				});
@@ -551,7 +574,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 
 		$("#proModal<?=$mn?> #share_box1").on('click' , '.node_remove_btn', function()
 		{
-			$(this).closest('.share_box_node').slideUp(300 , function()
+			$(this).closest('.fs_share_box_node').slideUp(300 , function()
 			{
 				$(this).remove();
 			});
@@ -570,7 +593,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 		{
 			fsCode.confirm("<?=esc_html__('Do you want to empty share list?' , 'fs-poster')?>" , 'danger', function()
 			{
-				$("#proModal<?=$mn?> #share_box1 > .share_box_node").remove();
+				$("#proModal<?=$mn?> #share_box1 > .fs_share_box_node").remove();
 			} , true);
 		});
 
@@ -601,8 +624,8 @@ $activeNodes = array_merge($accounts , $activeNodes);
 			nodeType    =   dataId[1],
 			id          =   dataId[2];
 
-		$(".share_box_items").append(
-			'<div class="share_box_node" data-tab="'+tab+'">'+
+		$(".fs_share_box_items").append(
+			'<div class="fs_share_box_node" data-tab="'+tab+'">'+
 			'<input type="hidden" name="share_on_nodes[]" value="' + (nodeType+':'+id) + '">'+
 			'<div class="node_img"><img src="'+cover+'"></div>'+
 			'<div class="node_label" style="width: 100%;">'+

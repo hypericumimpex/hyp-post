@@ -3,7 +3,7 @@ defined('ABSPATH') or exit();
 
 class AdminMenuClass
 {
-	private $menus = ['account' , 'nodes' , 'settings' , 'app' , 'posts' , 'insights' , 'schedule' , 'schedule' , 'share'];
+	private $menus = ['account' , 'settings' , 'app' , 'posts' , 'insights' , 'schedule' , 'schedule' , 'share'];
 
 	public function __construct()
 	{
@@ -50,7 +50,7 @@ class AdminMenuClass
 				});
 				return;
 			}
-			else if( $plgnVer != getVersion() )
+			else if( $plgnVer != FSgetVersion() )
 			{
 				$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
 				if( $fsPurchaseKey != '' )
@@ -109,16 +109,13 @@ class AdminMenuClass
 				add_submenu_page( 'fs-poster', esc_html__('Accounts' , 'fs-poster'), esc_html__('Accounts' , 'fs-poster'),
 					'read', 'fs-poster' , array( $this, 'app_base' ));
 
-				add_submenu_page( 'fs-poster', esc_html__('Nodes' , 'fs-poster'), esc_html__('Nodes' , 'fs-poster'),
-					'read', 'fs-poster-nodes' , array( $this, 'app_base' ));
-
-				add_submenu_page( 'fs-poster', esc_html__('Schedule' , 'fs-poster'), esc_html__('Schedule' , 'fs-poster'),
+				add_submenu_page( 'fs-poster', esc_html__('Schedules' , 'fs-poster'), esc_html__('Schedule' , 'fs-poster'),
 					'read', 'fs-poster-schedule' , array( $this, 'app_base' ));
 
 				add_submenu_page( 'fs-poster', esc_html__('Share' , 'fs-poster'), esc_html__('Share' , 'fs-poster'),
 					'read', 'fs-poster-share' , array( $this, 'app_base' ));
 
-				add_submenu_page( 'fs-poster', esc_html__('Posts' , 'fs-poster'), esc_html__('Posts' , 'fs-poster'),
+				add_submenu_page( 'fs-poster', esc_html__('Logs' , 'fs-poster'), esc_html__('Posts' , 'fs-poster'),
 					'read', 'fs-poster-posts' , array( $this, 'app_base' ));
 
 				add_submenu_page( 'fs-poster', esc_html__('Insights' , 'fs-poster'), esc_html__('Insights' , 'fs-poster'),
@@ -139,29 +136,29 @@ class AdminMenuClass
 
 	public function app_base()
 	{
-		$menuKey = _get('page' , reset($this->menus) , 'string');
+		$menuKey = FS_get('page' , reset($this->menus) , 'string');
 		$menuKey = str_replace('fs-poster-' , '' , $menuKey);
 		if( !in_array($menuKey , $this->menus) )
 		{
 			$menuKey = reset($this->menus);
 		}
 
-		require_once VIEWS_DIR . "app_base.php";
+		require_once FS_VIEWS_DIR . "app_base.php";
 	}
 
 	public function app_install()
 	{
-		require_once VIEWS_DIR . "app_install.php";
+		require_once FS_VIEWS_DIR . "app_install.php";
 	}
 
 	public function app_disable()
 	{
-		require_once VIEWS_DIR . "app_disable.php";
+		require_once FS_VIEWS_DIR . "app_disable.php";
 	}
 
 	public function app_update()
 	{
-		require_once VIEWS_DIR . "app_update.php";
+		require_once FS_VIEWS_DIR . "app_update.php";
 	}
 
 	public function getNotifications()
@@ -173,8 +170,8 @@ class AdminMenuClass
 
 		$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
 
-		//$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
-		//$result2 = file_get_contents($checkPurchaseCodeURL);
+		$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
+		$result2 = file_get_contents($checkPurchaseCodeURL);
 		$result = json_decode($result2 , true);
 
 		if( $result['action'] == 'empty' )

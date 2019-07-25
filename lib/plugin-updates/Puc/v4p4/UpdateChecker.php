@@ -209,7 +209,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 * @return Puc_v4p4_Update|null
 		 */
 		public function checkForUpdates() {
-			$installedVersion = $this->getInstalledVersion();
+			$installedVersion = $this->FSgetInstalledVersion();
 			//Fail silently if we can't find the plugin/theme or read its header.
 			if ( $installedVersion === null ) {
 				$this->triggerError(
@@ -268,12 +268,12 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 * @return Puc_v4p4_Update|null
 		 */
 		public function getUpdate() {
-			//$update = $this->updateState->getUpdate();
+			$update = $this->updateState->getUpdate();
 
 			//Is there an update available?
 			if ( isset($update) ) {
 				//Check if the update is actually newer than the currently installed version.
-				$installedVersion = $this->getInstalledVersion();
+				$installedVersion = $this->FSgetInstalledVersion();
 				if ( ($installedVersion !== null) && version_compare($update->version, $installedVersion, '>') ){
 					return $update;
 				}
@@ -314,7 +314,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 *
 		 * @return string|null Version number.
 		 */
-		abstract public function getInstalledVersion();
+		abstract public function FSgetInstalledVersion();
 
 		/**
 		 * Get the full path of the plugin or theme directory.
@@ -500,7 +500,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 			//Query args to append to the URL. Plugins can add their own by using a filter callback (see addQueryArgFilter()).
 			$queryArgs = array_merge(
 				array(
-					'installed_version' => strval($this->getInstalledVersion()),
+					'installed_version' => strval($this->FSgetInstalledVersion()),
 					'php' => phpversion(),
 					'locale' => get_locale(),
 				),
@@ -685,7 +685,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 * @return array
 		 */
 		public function getTranslationUpdates() {
-			//return $this->updateState->getTranslations();
+			return $this->updateState->getTranslations();
 		}
 
 		/**

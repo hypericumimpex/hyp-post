@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-$appsCount = wpDB()->get_results("SELECT driver, COUNT(0) AS _count FROM ".wpTable('apps')." GROUP BY driver" , ARRAY_A);
+$appsCount = FSwpDB()->get_results("SELECT driver, COUNT(0) AS _count FROM ".FSwpTable('apps')." GROUP BY driver" , ARRAY_A);
 $appCounts = [
 	'fb'        =>  [0 , ['app_id' , 'app_key']],
 	'twitter'   =>  [0 , ['app_key' , 'app_secret']],
@@ -11,7 +11,8 @@ $appCounts = [
 	'pinterest' =>  [0 , ['app_id' , 'app_secret']],
 	'reddit'    =>  [0 , ['app_id' , 'app_secret']],
 	'tumblr'    =>  [0 , ['app_key' , 'app_secret']],
-	'ok'	    =>  [0 , ['app_id' , 'app_key' , 'app_secret']]
+	'ok'	    =>  [0 , ['app_id' , 'app_key' , 'app_secret']],
+	'medium'    =>  [0 , ['app_id' , 'app_secret']],
 ];
 foreach( $appsCount AS $aInf )
 {
@@ -21,17 +22,17 @@ foreach( $appsCount AS $aInf )
 	}
 }
 
-$tab = _get('tab' , 'fb' , 'string');
+$tab = FS_get('tab' , 'fb' , 'string');
 if( !key_exists($tab , $appCounts) )
 {
 	$tab = 'fb';
 }
 
-$appList = wpFetchAll('apps' , ['driver' => $tab]);
+$appList = FSwpFetchAll('apps' , ['driver' => $tab]);
 
 ?>
 <style>
-	.social_network_div
+	.fs_social_network_div
 	{
 		width: 100%;
 		height: 35px;
@@ -56,16 +57,16 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 
 		text-decoration: none;
 	}
-	.social_network_div:hover
+	.fs_social_network_div:hover
 	{
 		background: #f9f9f9;
 	}
-	.social_network_div i
+	.fs_social_network_div i
 	{
 		margin-right: 5px;
 		color: #74b9ff;
 	}
-	.snd_badge
+	.fs_snd_badge
 	{
 		margin-right: 10px;
 		background: #fd79a8;
@@ -83,12 +84,12 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 		box-shadow: 2px 2px 2px 0px #EEE;
 	}
 
-	.snd_active
+	.fs_snd_active
 	{
 		border-left: 3px solid #fd79a8 !important;
 		background: #f9f9f9 !important;
 	}
-	.snd_active .snd_badge
+	.fs_snd_active .fs_snd_badge
 	{
 		margin-right: 12px;
 	}
@@ -115,37 +116,41 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 
 <div style="display: flex;">
 	<div id="app_supports">
-		<a href="?page=fs-poster-app&tab=fb" class="social_network_div<?=$tab=='fb'?' snd_active':''?>" data-setting="fb">
+		<a href="?page=fs-poster-app&tab=fb" class="fs_social_network_div<?=$tab=='fb'?' fs_snd_active':''?>" data-setting="fb">
 			<div><i class="fab fa-facebook-square"></i> Facebook</div>
-			<div class="snd_badge"><?=$appCounts['fb'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['fb'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=twitter" class="social_network_div<?=$tab=='twitter'?' snd_active':''?>" data-setting="twitter">
+		<a href="?page=fs-poster-app&tab=twitter" class="fs_social_network_div<?=$tab=='twitter'?' fs_snd_active':''?>" data-setting="twitter">
 			<div><i class="fab fa-twitter-square"></i> Twitter</div>
-			<div class="snd_badge"><?=$appCounts['twitter'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['twitter'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=linkedin" class="social_network_div<?=$tab=='linkedin'?' snd_active':''?>" data-setting="linkedin">
+		<a href="?page=fs-poster-app&tab=linkedin" class="fs_social_network_div<?=$tab=='linkedin'?' fs_snd_active':''?>" data-setting="linkedin">
 			<div><i class="fab fa-linkedin"></i> Linkedin</div>
-			<div class="snd_badge"><?=$appCounts['linkedin'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['linkedin'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=vk" class="social_network_div<?=$tab=='vk'?' snd_active':''?>" data-setting="vk">
+		<a href="?page=fs-poster-app&tab=vk" class="fs_social_network_div<?=$tab=='vk'?' fs_snd_active':''?>" data-setting="vk">
 			<div><i class="fab fa-vk"></i> VK</div>
-			<div class="snd_badge"><?=$appCounts['vk'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['vk'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=pinterest" class="social_network_div<?=$tab=='pinterest'?' snd_active':''?>" data-setting="pinterest">
+		<a href="?page=fs-poster-app&tab=pinterest" class="fs_social_network_div<?=$tab=='pinterest'?' fs_snd_active':''?>" data-setting="pinterest">
 			<div><i class="fab fa-pinterest"></i> Pinterest</div>
-			<div class="snd_badge"><?=$appCounts['pinterest'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['pinterest'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=reddit" class="social_network_div<?=$tab=='reddit'?' snd_active':''?>" data-setting="reddit">
+		<a href="?page=fs-poster-app&tab=reddit" class="fs_social_network_div<?=$tab=='reddit'?' fs_snd_active':''?>" data-setting="reddit">
 			<div><i class="fab fa-reddit"></i> Reddit</div>
-			<div class="snd_badge"><?=$appCounts['reddit'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['reddit'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=tumblr" class="social_network_div<?=$tab=='tumblr'?' snd_active':''?>" data-setting="tumblr">
+		<a href="?page=fs-poster-app&tab=tumblr" class="fs_social_network_div<?=$tab=='tumblr'?' fs_snd_active':''?>" data-setting="tumblr">
 			<div><i class="fab fa-tumblr-square"></i> Tumblr</div>
-			<div class="snd_badge"><?=$appCounts['tumblr'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['tumblr'][0]?></div>
 		</a>
-		<a href="?page=fs-poster-app&tab=ok" class="social_network_div<?=$tab=='ok'?' snd_active':''?>" data-setting="ok">
+		<a href="?page=fs-poster-app&tab=ok" class="fs_social_network_div<?=$tab=='ok'?' fs_snd_active':''?>" data-setting="ok">
 			<div><i class="fab fa-odnoklassniki"></i> OK.ru</div>
-			<div class="snd_badge"><?=$appCounts['ok'][0]?></div>
+			<div class="fs_snd_badge"><?=$appCounts['ok'][0]?></div>
+		</a>
+		<a href="?page=fs-poster-app&tab=medium" class="fs_social_network_div<?=$tab=='medium'?' fs_snd_active':''?>" data-setting="medium">
+			<div><i class="fab fa-medium"></i> Medium</div>
+			<div class="fs_snd_badge"><?=$appCounts['medium'][0]?></div>
 		</a>
 	</div>
 	<div style="width: 90%; margin: 40px;" id="app_content">
@@ -168,7 +173,7 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 					?>
 					<tr data-id="<?=$appInf['id']?>">
 						<td>
-							<img class="ws_img_style" src="<?=appIcon($appInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');">
+							<img class="ws_img_style" src="<?=FSappIcon($appInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');">
 							<span style="vertical-align: middle;"><?php print esc_html($appInf['name']);?></span>
 						</td>
 						<td>
@@ -245,8 +250,8 @@ $appList = wpFetchAll('apps' , ['driver' => $tab]);
 							$(".ws_table>tbody").append('<tr><td colspan="100%" style="color: #999;">No accound found</td></tr>').children('tr').hide().fadeIn(200);
 						}
 						$("#apps_count").text(parseInt($("#apps_count").text()) - 1);
-						var oldCount = $('#app_supports .social_network_div[data-setting="<?=esc_html($tab)?>"] .snd_badge').text().trim();
-						$('#app_supports .social_network_div[data-setting="<?=esc_html($tab)?>"] .snd_badge').text(parseInt(oldCount) - 1);
+						var oldCount = $('#app_supports .fs_social_network_div[data-setting="<?=esc_html($tab)?>"] .fs_snd_badge').text().trim();
+						$('#app_supports .fs_social_network_div[data-setting="<?=esc_html($tab)?>"] .fs_snd_badge').text(parseInt(oldCount) - 1);
 					});
 				});
 			}, true);

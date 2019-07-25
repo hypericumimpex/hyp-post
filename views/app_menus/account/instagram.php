@@ -3,11 +3,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$accountsList = wpDB()->get_results(wpDB()->prepare("
+$accountsList = FSwpDB()->get_results(FSwpDB()->prepare("
 	SELECT 
 		*,
-		(SELECT filter_type FROM ".wpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active 
-	FROM ".wpTable('accounts')." tb1 
+		(SELECT filter_type FROM ".FSwpTable('account_status')." WHERE account_id=tb1.id AND user_id=%d) is_active 
+	FROM ".FSwpTable('accounts')." tb1 
 	WHERE (user_id=%d OR is_public=1) AND driver='instagram'",  [get_current_user_id(), get_current_user_id()]) , ARRAY_A);
 
 if( version_compare(PHP_VERSION, '5.6.0') < 0 )
@@ -43,7 +43,7 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 			?>
 			<tr data-id="<?=$accountInf['id']?>">
 				<td>
-					<img class="ws_img_style" src="<?=profilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
+					<img class="ws_img_style" src="<?=FSprofilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
 					<span style="vertical-align: middle;"><?php print esc_html($accountInf['name']);?></span>
 					<?php
 					if( !empty($accountInf['proxy']) )
@@ -53,16 +53,16 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 						<?php
 					}
 					?>
-					<a href="<?=profileLink($accountInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+					<a href="<?=FSprofileLink($accountInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 				</td>
 				<td><?=esc_html($accountInf['username']);?></td>
 				<td>
-					<div class="account_checkbox_public<?=$accountInf['is_public']?' account_checked':''?><?=$accountInf['user_id']==get_current_user_id()?' my_account':''?> ws_tooltip" data-title="<?=esc_html__('Activate for making this profile public/private for other WordPress users' , 'fs-poster')?>" data-float="left">
+					<div class="fs_account_checkbox_public<?=$accountInf['is_public']?' fs_account_checked':''?><?=$accountInf['user_id']==get_current_user_id()?' my_account':''?> ws_tooltip" data-title="<?=esc_html__('Activate for making this profile public/private for other WordPress users' , 'fs-poster')?>" data-float="left">
 						<i class="fa fa-check"></i>
 					</div>
 				</td>
 				<td>
-					<div class="account_checkbox<?=$accountInf['is_active'] == '' ? '' : ' account_checked' . ($accountInf['is_active']=='no'?'':'2') ?> ws_tooltip" data-title="<?=esc_html__('Click to change status', 'fs-poster')?>">
+					<div class="fs_account_checkbox<?=$accountInf['is_active'] == '' ? '' : ' fs_account_checked' . ($accountInf['is_active']=='no'?'':'2') ?> ws_tooltip" data-title="<?=esc_html__('Click to change status', 'fs-poster')?>">
 						<i class="fa fa-check"></i>
 					</div>
 					<button class="delete_account_btn delete_btn_desing ws_tooltip" data-title="<?=esc_html__('Delete account', 'fs-poster')?>" data-float="left"><i class="fa fa-trash"></i></button>

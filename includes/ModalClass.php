@@ -25,142 +25,132 @@ class ModalClass
 
 	public function modal_add_fb_account()
 	{
-		modalView('add_fb_account');
+		FSmodalView('add_fb_account');
 	}
 
 	public function modal_add_twitter_account()
 	{
-		modalView('add_twitter_account');
+		FSmodalView('add_twitter_account');
 	}
 
 	public function modal_add_linkedin_account()
 	{
-		modalView('add_linkedin_account');
+		FSmodalView('add_linkedin_account');
 	}
 
 	public function modal_add_ok_account()
 	{
-		modalView('add_ok_account');
+		FSmodalView('add_ok_account');
 	}
 
 	public function modal_add_google_account_methods()
 	{
-		modalView('add_google_account_methods');
+		FSmodalView('add_google_account_methods');
 	}
 
 	public function modal_add_google_account()
 	{
-		modalView('add_google_account');
+		FSmodalView('add_google_account');
 	}
 
 	public function modal_add_google_account_cookies_method()
 	{
-		modalView('add_google_account_cookies_method');
+		FSmodalView('add_google_account_cookies_method');
 	}
 
 	public function modal_add_pinterest_account()
 	{
-		modalView('add_pinterest_account');
+		FSmodalView('add_pinterest_account');
 	}
 
 	public function modal_add_reddit_account()
 	{
-		modalView('add_reddit_account');
+		FSmodalView('add_reddit_account');
 	}
 
 	public function modal_add_tumblr_account()
 	{
-		modalView('add_tumblr_account');
-	}
-
-	public function modal_edit_reddit_account_subreddit()
-	{
-		modalView('edit_reddit_account_subreddit');
-	}
-
-	public function modal_reddit_show_subreddits()
-	{
-		modalView('reddit_show_subreddits');
+		FSmodalView('add_tumblr_account');
 	}
 
 	public function modal_reddit_add_subreddit()
 	{
-		modalView('reddit_add_subreddit');
+		FSmodalView('reddit_add_subreddit');
 	}
 
 
 	public function modal_edit_pinterest_account_board()
 	{
-		modalView('edit_pinterest_account_board');
+		FSmodalView('edit_pinterest_account_board');
 	}
 
 	public function modal_posts_list()
 	{
-		modalView('posts_list');
+		FSmodalView('posts_list');
 	}
 
 	public function modal_add_vk_account()
 	{
-		modalView('add_vk_account');
+		FSmodalView('add_vk_account');
 	}
 
 	public function modal_add_instagram_account()
 	{
-		modalView('add_instagram_account');
+		FSmodalView('add_instagram_account');
 	}
 
 	public function modal_add_instagram_account_case()
 	{
-		modalView('add_instagram_account_case');
+		FSmodalView('add_instagram_account_case');
 	}
 
 	public function modal_add_instagram_account_cookies_method()
 	{
-		modalView('add_instagram_account_cookies_method');
+		FSmodalView('add_instagram_account_cookies_method');
 	}
 
 	public function modal_add_app()
 	{
-		modalView('add_app');
+		FSmodalView('add_app');
 	}
 
 	public function modal_add_node_to_list()
 	{
-		modalView('add_node_to_list');
+		FSmodalView('add_node_to_list');
 	}
 
 	public function modal_share_feeds()
 	{
-		$postId = _post('post_id' , '0' , 'num');
+		$postId = FS_post('post_id' , '0' , 'num');
 		if( !($postId > 0) )
 		{
 			exit();
 		}
 
-		$feeds = wpFetchAll('feeds' , ['post_id' => $postId , 'is_sended' => 0]);
+		$feeds = FSwpFetchAll('feeds' , ['post_id' => $postId , 'is_sended' => 0]);
 
-		modalView('share_feeds' , [
+		FSmodalView('share_feeds' , [
 			'feeds' =>  $feeds
 		]);
 	}
 
 	public function modal_share_saved_post()
 	{
-		$postId = _post('post_id' , '0' , 'num');
+		$postId = FS_post('post_id' , '0' , 'num');
 
 		if( !($postId > 0) )
 		{
 			exit();
 		}
 
-		modalView('share_saved_post' , [
+		FSmodalView('share_saved_post' , [
 			'postId'    =>  $postId
 		]);
 	}
 
 	public function modal_plan_saved_post()
 	{
-		$postId1 = _post('post_id' , '0' , 'num');
+		$postId1 = FS_post('post_id' , '0' , 'num');
 
 		if( $postId1 > 0 )
 		{
@@ -168,7 +158,7 @@ class ModalClass
 		}
 		else
 		{
-			$postIds = _post('post_id' , [] , 'array');
+			$postIds = FS_post('post_id' , [] , 'array');
 			$posts = [];
 			foreach( $postIds AS $postId )
 			{
@@ -184,7 +174,7 @@ class ModalClass
 			exit();
 		}
 
-		modalView('plan_post' , [
+		FSmodalView('plan_post' , [
 			'postIds'    =>  $posts
 		]);
 	}
@@ -192,34 +182,59 @@ class ModalClass
 	public function modal_show_nodes_list()
 	{
 
-		modalView('show_nodes_list');
+		FSmodalView('show_nodes_list');
 	}
 
 	public function modal_add_schedule()
 	{
 
-		modalView('add_schedule');
+		FSmodalView('add_schedule');
 	}
 
 	public function modal_activate_with_condition()
 	{
-		$id = _post('id' , '0' , 'num');
-		$type = _post('type' , '' , 'string');
+		$id = FS_post('id' , '0' , 'num');
+		$type = FS_post('type' , '' , 'string');
 
 		$ajaxUrl = $type == 'node' ? 'settings_node_activity_change' : 'account_activity_change';
 
-		modalView('activate_with_condition' , ['id' => $id , 'ajaxUrl' => $ajaxUrl]);
+		FSmodalView('activate_with_condition' , ['id' => $id , 'ajaxUrl' => $ajaxUrl]);
 	}
 
 	public function modal_google_show_communities_list()
 	{
 
-		modalView('google_show_communities_list' , []);
+		FSmodalView('google_show_communities_list' , []);
 	}
 
 	public function modal_google_add_community()
 	{
-		modalView('google_add_community' , []);
+		FSmodalView('google_add_community' , []);
+	}
+
+	public function modal_add_google_b_account()
+	{
+		FSmodalView('add_google_b_account' , []);
+	}
+
+	public function modal_add_telegram_bot()
+	{
+		FSmodalView('add_telegram_bot' , []);
+	}
+
+	public function modal_show_telegram_chats()
+	{
+		FSmodalView('show_telegram_chats', []);
+	}
+
+	public function modal_telegram_add_chat()
+	{
+		FSmodalView('telegram_add_chat', []);
+	}
+
+	public function modal_add_medium_account()
+	{
+		FSmodalView('add_medium_account', []);
 	}
 
 }

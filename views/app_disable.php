@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
 
-	<div style="margin: 50px;"><img src="<?=PLUGIN_URL?>images/logo.svg" style="width: 400px;"></div>
+	<div style="margin: 50px;"><img src="<?=FS_PLUGIN_URL?>images/logo.svg" style="width: 400px;"></div>
 
 	<div style="background: #FFF; padding: 20px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px; margin-right: 30px; -webkit-box-shadow: 0 0 20px 0 #DDD;-moz-box-shadow: 0 0 20px 0 #DDD;box-shadow: 0 0 20px 0 #DDD;">
 		<div style="font-weight: 600; font-size: 18px; color: #fb7171;">Your plugin disabled!</div>

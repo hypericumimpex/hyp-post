@@ -1,13 +1,13 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$accountId = (int)_post('account_id' , '0' , 'num');
+$accountId = (int)FS_post('account_id' , '0' , 'num');
 
-$nodeList = wpDB()->get_results(wpDB()->prepare("
+$nodeList = FSwpDB()->get_results(FSwpDB()->prepare("
 	SELECT 
 		*,
-		(SELECT filter_type FROM ".wpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=tb1.user_id) is_active
-	FROM ".wpTable('account_nodes')." tb1
+		(SELECT filter_type FROM ".FSwpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=tb1.user_id) is_active
+	FROM ".FSwpTable('account_nodes')." tb1
 	WHERE (user_id=%d OR is_public=1) AND driver='google' AND account_id=%d",  [get_current_user_id() , $accountId]) , ARRAY_A);
 
 ?>

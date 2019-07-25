@@ -1,4 +1,5 @@
 <?php defined('MODAL') or exit();?>
+
 <style>
 	.select2-search__field::placeholder
 	{
@@ -42,7 +43,7 @@
 </style>
 <div style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center; position: absolute;">
 	<div style="margin-bottom: 20px; text-align: center;font-size: 17px;color: #888;font-weight: 600;">
-		Construct your <b>conditions</b> and <b>activate</b> account:
+		Construct your conditions and activate account:
 	</div>
 
 	<div style="width: 300px;">
@@ -81,9 +82,10 @@
 
 		fsCode.ajax( '<?=$parameters['ajaxUrl']?>' , {'id': '<?=(int)$parameters['id']?>', 'checked': 1 , 'categories': cats, 'filter_type': filter_type}, function()
 		{
-			$("<?=($parameters['ajaxUrl']=='account_activity_change'?'tr':'.node_div')?>[data-id=\"<?=(int)$parameters['id']?>\"] .<?=($parameters['ajaxUrl']=='account_activity_change'?'account_checkbox':'node_chckbx')?>")
-				.removeClass('<?=($parameters['ajaxUrl']=='account_activity_change'?'account_checked':'node_checked')?>')
-				.addClass('<?=($parameters['ajaxUrl']=='account_activity_change'?'account_checked':'node_checked')?>2');
+			$("tr[data-id=\"<?=(int)$parameters['id']?>\"][data-type=\"<?=($parameters['ajaxUrl'] == 'account_activity_change' ? 'account' : 'community')?>\"] .fs_account_checkbox")
+				.removeClass('fs_account_checked')
+				.addClass('fs_account_checked2');
+
 
 			fsCode.modalHide( $("#proModal<?=$mn?>") );
 		});

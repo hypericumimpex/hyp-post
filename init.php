@@ -2,7 +2,7 @@
 /*
  * Plugin Name: HYP Poster
  * Description: Facebook, Twitter , Instagram, Google+, Linkedin, Reddit, Tumblr, VK, Pinterest Auto Poster Plugin. Post WooCommerce products. Schedule your posts i.e
- * Version: 2.8.21
+ * Version: 3.0
  * Author: HYP
  * Author URI: https://github.com/hypericumimpex/hyp-post
  * License: GNU General Public License v3 or later
@@ -10,7 +10,7 @@
  * Text Domain: fs-poster
  */
 
- 
+
 if ( !defined( 'ABSPATH' ) )
 {
 	exit;
@@ -19,11 +19,11 @@ if ( !defined( 'ABSPATH' ) )
 define('FS_ROOT_DIR', __DIR__);
 
 require_once "includes/Config.php";
-require_once INCLUDES_DIR . 'CronJob.php';
+require_once FS_INCLUDES_DIR . 'CronJob.php';
 
 $fsPosterDisabled = get_option('fs_plugin_disabled', '0');
 
-add_action('registerSession', 'registerSession');
+add_action('FSregisterSession', 'FSregisterSession');
 
 if( $fsPosterDisabled != '1' && $fsPosterDisabled != '2' && get_option('fs_poster_plugin_installed' , '0') )
 {
@@ -42,10 +42,10 @@ if( is_admin() )
 
 	add_action('admin_enqueue_scripts' , function()
 	{
-		wp_register_script('fs-code.js', plugins_url( 'js/fs-code.js', __FILE__ ) , array( 'jquery' ) , '2.8.16');
+		wp_register_script('fs-code.js', plugins_url( 'js/fs-code.js', __FILE__ ) , array( 'jquery' ) , '3.0.0');
 		wp_enqueue_script( 'fs-code.js' );
 
-		wp_enqueue_style( 'fs-code.css', plugins_url('css/fs-code.css', __FILE__) , [] , '2.8.16' );
+		wp_enqueue_style( 'fs-code.css', plugins_url('css/fs-code.css', __FILE__) , [] , '3.0.0' );
 		wp_enqueue_style( 'font_aweasome', '//use.fontawesome.com/releases/v5.0.13/css/all.css' );
 	});
 
@@ -53,7 +53,7 @@ if( is_admin() )
 
 	if( !empty($activationKey) )
 	{
-		require_once LIB_DIR . 'plugin-updates/plugin-update-checker.php';
+		require_once FS_LIB_DIR . 'plugin-updates/plugin-update-checker.php';
 		$updater = Puc_v4_Factory::buildUpdateChecker(FS_API_URL . 'api.php', __FILE__ , 'fs-poster' );
 
 		$updater->addQueryArgFilter(function( $query ) use( $activationKey )
@@ -71,12 +71,10 @@ else if( $fsPosterDisabled != '1' && $fsPosterDisabled != '2' )
 	require_once "includes/SiteController.php";
 }
 
-function my_plugin_load_plugin_textdomain()
+add_action( 'plugins_loaded', function()
 {
 	load_plugin_textdomain( 'fs-poster', FALSE, basename( dirname( __FILE__ ) ) . '/languages/' );
-}
-
-add_action( 'plugins_loaded', 'my_plugin_load_plugin_textdomain' );
+});
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 {

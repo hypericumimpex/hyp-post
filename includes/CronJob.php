@@ -5,128 +5,22 @@ class CronJob
 
 	public static function initCronJobs()
 	{
-		if( !get_option('fs_use_wp_cron_jobs', '1') )
+		if ( defined( 'DOING_CRON' ) )
 		{
-			if( _get('fs-poster-cron-job' , '' , 'string') == '1' )
-			{
-				add_action( 'init', function ()
-				{
-					set_time_limit(0);
-
-					self::checkBackgroundPosts();
-
-					self::checkScheduledPosts();
-
-					exit();
-				});
-
-			}
+			set_time_limit(0);
 		}
-		else
-		{
-			if ( defined( 'DOING_CRON' ) )
-			{
-				set_time_limit(0);
-			}
 
-			self::createScheduleTime();
-
-			add_action( 'check_scheduled_posts' , [self::class , 'scheduledPost'] );
-			add_action( 'check_background_shared_posts' , [self::class , 'sendPostBackground'] );
-		}
+		add_action( 'fs_check_scheduled_posts' , [self::class , 'scheduledPost'] );
+		add_action( 'fs_check_background_shared_posts' , [self::class , 'sendPostBackground'] );
 	}
 
-	public static function checkBackgroundPosts()
+	public static function setScheduleTask( $scheduleId , $startTime )
 	{
-		$backgroundShare = (int)get_option('fs_share_on_background' , '1');
-
-		if( !$backgroundShare )
-			return;
-
-		$sendPosts = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('feeds') . " WHERE send_time<=%s AND is_sended=0", [ current_time('Y-m-d H:i:s') ]) , ARRAY_A );
-
-		require_once LIB_DIR . 'SocialNetworkPost.php';
-
-		foreach ($sendPosts AS $postInf)
-		{
-			if( get_post_status( $postInf['post_id'] ) != 'publish' )
-			{
-				continue;
-			}
-
-			// prevent dublicates...
-			$checkIsSended = wpDB()->get_row( wpDB()->prepare("SELECT is_sended FROM " . wpTable('feeds') . " WHERE id=%d", [ $postInf['id'] ]) , ARRAY_A );
-			if( $checkIsSended['is_sended'] != 0 )
-			{
-				continue;
-			}
-
-			wpDB()->update(wpTable('feeds') , [ 'is_sended' => '2' ] , [ 'id' => $postInf['id'] ]);
-
-			SocialNetworkPost::post( $postInf['id'] );
-
-			if( is_numeric($postInf['interval']) && $postInf['interval'] > 0 )
-			{
-				sleep( (int)$postInf['interval'] );
-			}
-		}
-	}
-
-	public static function checkScheduledPosts()
-	{
-		$getSchedules = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('schedules') . " WHERE status='active' AND next_execute_time<=%s", [ current_time('Y-m-d H:i:s') ]) , ARRAY_A );
-
-		foreach ( $getSchedules AS $key => $scheduleInf )
-		{
-			$currentDate = current_time('Y-m-d H:i:s');
-
-			if( $key )
-			{
-				// check if not sened yet
-				$checkSchedule = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('schedules') . " WHERE id=%d AND status='active' AND next_execute_time<=%s", [ (int)$scheduleInf['id'] , current_time('Y-m-d H:i:s') ]) , ARRAY_A );
-
-				if( !$checkSchedule )
-				{
-					continue;
-				}
-			}
-
-			wpDB()->query("UPDATE " . wpTable('schedules') . " SET next_execute_time=(next_execute_time + INTERVAL IF( ( TIMESTAMPDIFF( HOUR, next_execute_time, '{$currentDate}' ) / `interval` > 1 ) , (CEIL(TIMESTAMPDIFF( HOUR, next_execute_time, '{$currentDate}' ) / `interval`) * `interval` + 1) , `interval` ) HOUR) WHERE id='" . (int)$scheduleInf['id'] . "'");
-
-			self::scheduledPost( $scheduleInf['id'] );
-		}
-	}
-
-	public static function setScheduleTask( $scheduleId , $interval , $startTime )
-	{
-		CronJob::createScheduleTime();
-
-		$timezone_string = get_option( 'timezone_string' );
-		if ( ! empty( $timezone_string ) )
-		{
-			$wpTimezoneStr = $timezone_string;
-		}
-		else
-		{
-			$offset  = get_option( 'gmt_offset' );
-			$hours   = (int) $offset;
-			$minutes = abs( ( $offset - (int) $offset ) * 60 );
-			$offset  = sprintf( '%+03d:%02d', $hours, $minutes );
-
-			$wpTimezoneStr = $offset;
-		}
-
-		$startTime = new DateTime( $startTime, new DateTimeZone( $wpTimezoneStr ) );
-		$startTime->setTimezone( new DateTimeZone( date_default_timezone_get( ) ) );
-
-		wp_schedule_event( $startTime->getTimestamp(), $interval . 'hour', 'check_scheduled_posts' , [ $scheduleId ] );
+		wp_schedule_single_event( FSLocalTime2UTC( $startTime ) , 'fs_check_scheduled_posts' , [ $scheduleId ] );
 	}
 
 	public static function setbackgroundTask( $postId , $shareOn = null )
 	{
-		if( !get_option('fs_use_wp_cron_jobs', '1') )
-			return;
-
 		if( is_null( $shareOn ) )
 		{
 			$shareOn = time();
@@ -136,77 +30,54 @@ class CronJob
 			}
 		}
 
-		wp_schedule_single_event( $shareOn ,  'check_background_shared_posts' , [ $postId ] );
+		wp_schedule_single_event( $shareOn ,  'fs_check_background_shared_posts' , [ $postId ] );
 	}
 
 	public static function clearSchedule($scheduleId)
 	{
-		wp_clear_scheduled_hook( 'check_scheduled_posts' , [ $scheduleId ] );
-	}
-
-	public static function createScheduleTime( )
-	{
-		add_filter('cron_schedules', function($schedules)
-		{
-			for($h = 1; $h <= 10; $h++)
-			{
-				$schedules[$h . "hour"] = array(
-					'interval'  => 3600 * $h,
-					'display'   => 'Once every ' . $h . ' hour'
-				);
-
-				$schedules[($h * 24) . "hour"] = array(
-					'interval'  => 3600 * $h * 24,
-					'display'   => 'Once every ' . ($h*24) . ' hour'
-				);
-			}
-
-			return $schedules;
-		});
+		wp_clear_scheduled_hook( 'fs_check_scheduled_posts' , [ $scheduleId ] );
 	}
 
 	public static function scheduledPost( $scheduleId )
 	{
 		set_time_limit(0);
 
-		$scheduleInf = wpFetch('schedules' , $scheduleId);
+		$scheduleInf = FSwpFetch('schedules' , $scheduleId);
 
-		// if deleted ...
-		if( !$scheduleInf )
-		{
-			return;
-		}
-
-		$userId = $scheduleInf['user_id'];
-
-		$interval = $scheduleInf['interval'];
-		$endDate = strtotime($scheduleInf['end_date']);
-
-		if( strtotime(date('Y-m-d' , ( current_time('timestamp') + $interval * 3600 ))) > $endDate )
-		{
-			wp_clear_scheduled_hook( 'check_scheduled_posts' , [$scheduleId] );
-			wpDB()->update(wpTable('schedules') , ['status' => 'finished'] , ['id' => $scheduleId]);
-		}
-
-		$filterQuery = scheduleNextPostFilters( $scheduleInf );
-
-		if( $scheduleInf['status'] != 'active' )
+		if( !$scheduleInf || $scheduleInf['status'] != 'active' )
 		{
 			return false;
 		}
 
+		$userId = $scheduleInf['user_id'];
+
+		$interval = (int)$scheduleInf['interval'];
+
+		$nextScheduleTime = time() + $interval * 60;
+
+		wp_schedule_single_event( $nextScheduleTime, 'fs_check_scheduled_posts' , [ $scheduleId ] );
+
+		$nextScheduleLocalTime = current_time('timestamp') + $interval * 60;
+
+		FSwpDB()->update(FSwpTable('schedules') , ['next_execute_time' => date('Y-m-d H:i', $nextScheduleLocalTime)] , ['id' => $scheduleId]);
+
+		$filterQuery = FSscheduleNextPostFilters( $scheduleInf );
+
 		/* End post_sort */
-		$getRandomPost = wpDB()->get_row("SELECT * FROM ".wpDB()->base_prefix."posts WHERE (post_status='publish' OR post_type='attachment') {$filterQuery} LIMIT 1" , ARRAY_A);
+		$getRandomPost = FSwpDB()->get_row("SELECT * FROM ".FSwpDB()->base_prefix."posts WHERE (post_status='publish' OR post_type='attachment') {$filterQuery} LIMIT 1" , ARRAY_A);
 		$postId = $getRandomPost['ID'];
 
 		if( !($postId > 0) )
 		{
+			wp_clear_scheduled_hook( 'fs_check_scheduled_posts' , [$scheduleId] );
+			FSwpDB()->update(FSwpTable('schedules') , ['status' => 'finished'] , ['id' => $scheduleId]);
+
 			return;
 		}
 
 		if( !empty($scheduleInf['post_ids']) )
 		{
-			wpDB()->query(wpDB()->prepare("UPDATE ".wpTable('schedules')." SET post_ids=TRIM(BOTH ',' FROM replace(concat(',',post_ids,','), ',%d,',',')), status=IF( post_ids='' , 'finished', status) WHERE id=%d" , [$postId, $scheduleId]));
+			FSwpDB()->query(FSwpDB()->prepare("UPDATE ".FSwpTable('schedules')." SET post_ids=TRIM(BOTH ',' FROM replace(concat(',',post_ids,','), ',%d,',',')), status=IF( post_ids='' , 'finished', status) WHERE id=%d" , [$postId, $scheduleId]));
 		}
 
 		$accountsList	= explode(',', $scheduleInf['share_on_accounts']);
@@ -231,11 +102,11 @@ class CronJob
 
 			if( !empty($_accountsList) )
 			{
-				$getActiveAccounts = wpDB()->get_results(
-					wpDB()->prepare("
+				$getActiveAccounts = FSwpDB()->get_results(
+					FSwpDB()->prepare("
 						SELECT tb1.*, IFNULL(filter_type,'no') AS filter_type, categories
-						FROM ".wpTable('accounts')." tb1
-						LEFT JOIN ".wpTable('account_status')." tb2 ON tb1.id=tb2.account_id AND tb2.user_id=%d
+						FROM ".FSwpTable('accounts')." tb1
+						LEFT JOIN ".FSwpTable('account_status')." tb2 ON tb1.id=tb2.account_id AND tb2.user_id=%d
 						WHERE (tb1.is_public=1 OR tb1.user_id=%d) AND tb1.id in (".implode(',', $_accountsList).")" , [ $userId, $userId ])
 					, ARRAY_A
 				);
@@ -247,11 +118,11 @@ class CronJob
 
 			if( !empty($_nodeList) )
 			{
-				$getActiveNodes = wpDB()->get_results(
-					wpDB()->prepare("
+				$getActiveNodes = FSwpDB()->get_results(
+					FSwpDB()->prepare("
 						SELECT tb1.*, IFNULL(filter_type,'no') AS filter_type, categories
-						FROM ".wpTable('account_nodes')." tb1
-						LEFT JOIN ".wpTable('account_node_status')." tb2 ON tb1.id=tb2.node_id AND tb2.user_id=%d
+						FROM ".FSwpTable('account_nodes')." tb1
+						LEFT JOIN ".FSwpTable('account_node_status')." tb2 ON tb1.id=tb2.node_id AND tb2.user_id=%d
 						WHERE (tb1.is_public=1 OR tb1.user_id=%d) AND tb1.id in (".implode(',', $_nodeList).")" , [ $userId, $userId ])
 					, ARRAY_A
 				);
@@ -263,18 +134,18 @@ class CronJob
 		}
 		else
 		{
-			$getActiveAccounts = wpDB()->get_results(
-				wpDB()->prepare("
-				SELECT tb2.*, filter_type, categories FROM ".wpTable('account_status')." tb1
-				LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
+			$getActiveAccounts = FSwpDB()->get_results(
+				FSwpDB()->prepare("
+				SELECT tb2.*, filter_type, categories FROM ".FSwpTable('account_status')." tb1
+				LEFT JOIN ".FSwpTable('accounts')." tb2 ON tb2.id=tb1.account_id
 				WHERE tb1.user_id=%d" , [ $userId ])
 				, ARRAY_A
 			);
 
-			$getActiveNodes = wpDB()->get_results(
-				wpDB()->prepare("
-				SELECT tb2.*, filter_type, categories FROM ".wpTable('account_node_status')." tb1
-				LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
+			$getActiveNodes = FSwpDB()->get_results(
+				FSwpDB()->prepare("
+				SELECT tb2.*, filter_type, categories FROM ".FSwpTable('account_node_status')." tb1
+				LEFT JOIN ".FSwpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
 				WHERE tb1.user_id=%d" , [ $userId ])
 				, ARRAY_A
 			);
@@ -287,7 +158,7 @@ class CronJob
 
 		$postInterval = 1;
 
-		$postCats = getPostCatsArr( $postId );
+		$postCats = FSgetPostCatsArr( $postId );
 
 		foreach( $getActiveAccounts AS $accountInf )
 		{
@@ -346,9 +217,9 @@ class CronJob
 
 			if( !($accountInf['driver'] == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 			{
-				if( wpDB()->insert( wpTable('feeds'), $insertData) )
+				if( FSwpDB()->insert( FSwpTable('feeds'), $insertData) )
 				{
-					$feedsArr[wpDB()->insert_id] = true;
+					$feedsArr[FSwpDB()->insert_id] = true;
 				}
 			}
 
@@ -356,9 +227,9 @@ class CronJob
 			{
 				$insertData['feed_type'] = 'story';
 
-				if( wpDB()->insert( wpTable('feeds'), $insertData) )
+				if( FSwpDB()->insert( FSwpTable('feeds'), $insertData) )
 				{
-					$feedsArr[wpDB()->insert_id] = true;
+					$feedsArr[FSwpDB()->insert_id] = true;
 				}
 			}
 		}
@@ -418,13 +289,13 @@ class CronJob
 				$insertData['custom_post_message'] = (string)$customPostMessages[ $nodeInf['driver'] ];
 			}
 
-			if( wpDB()->insert( wpTable('feeds'), $insertData) )
+			if( FSwpDB()->insert( FSwpTable('feeds'), $insertData) )
 			{
-				$feedsArr[wpDB()->insert_id] = true;
+				$feedsArr[FSwpDB()->insert_id] = true;
 			}
 		}
 
-		require_once LIB_DIR . 'SocialNetworkPost.php';
+		require_once FS_LIB_DIR . 'SocialNetworkPost.php';
 
 		foreach ($feedsArr AS $feedId => $true)
 		{
@@ -436,20 +307,27 @@ class CronJob
 	public static function sendPostBackground( $postId )
 	{
 		set_time_limit(0);
-		$getFeeds = wpFetchAll('feeds' , ['post_id' => $postId , 'is_sended' => '0']);
-		require_once LIB_DIR . 'SocialNetworkPost.php';
+
+		$getFeeds = FSwpFetchAll('feeds' , ['post_id' => $postId , 'is_sended' => '0']);
+		require_once FS_LIB_DIR . 'SocialNetworkPost.php';
 
 		// for preventing dublicat shares...
-		wpDB()->update(wpTable('feeds') , ['is_sended' => '2'] , ['post_id' => $postId , 'is_sended' => '0']);
+		FSwpDB()->update(FSwpTable('feeds') , ['is_sended' => '2'] , ['post_id' => $postId , 'is_sended' => '0']);
 
-		foreach ($getFeeds AS $feedInf)
+		$fs_post_interval_type = (int)get_option('fs_post_interval_type' , '1');
+
+		$collectDrivers = [];
+		foreach ( $getFeeds AS $feedInf )
 		{
 			SocialNetworkPost::post( $feedInf['id'] );
 
-			if( is_numeric($feedInf['interval']) && $feedInf['interval'] > 0 )
+			if( is_numeric($feedInf['interval']) && $feedInf['interval'] > 0 && ( $fs_post_interval_type == 0 || ( $fs_post_interval_type == 1 && !isset( $collectDrivers[ $feedInf['driver'] ] ) ) ) )
 			{
-				sleep($feedInf['interval']);
+				wp_schedule_single_event( time() + (int)$feedInf['interval'] ,  'fs_check_background_shared_posts' , [ $postId ] );
+				break;
 			}
+
+			$collectDrivers[ $feedInf['driver'] ] = true;
 		}
 	}
 

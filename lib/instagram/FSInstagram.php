@@ -1,7 +1,7 @@
 <?php
 
-require_once LIB_DIR . "vendor/autoload.php";
-require_once LIB_DIR . 'instagram/CustomHandler.php';
+require_once FS_LIB_DIR . "vendor/autoload.php";
+require_once FS_LIB_DIR . 'instagram/CustomHandler.php';
 
 class FSInstagram
 {
@@ -172,9 +172,9 @@ class FSInstagram
 		/* account added with cookie method */
 		if( $accountInfo['password'] == '*****' )
 		{
-			require_once LIB_DIR . 'instagram/FSInstagramApi.php';
+			require_once FS_LIB_DIR . 'instagram/FSInstagramApi.php';
 
-			$cookies = wpFetch('account_sessions' , ['driver' => 'instagram' , 'username' => $accountInfo['username']]);
+			$cookies = FSwpFetch('account_sessions' , ['driver' => 'instagram' , 'username' => $accountInfo['username']]);
 
 			$api = new FSInstagramApi(json_decode($cookies['cookies'] , true) , $accountInfo['proxy']);
 			if( $type == 'image' )
@@ -287,9 +287,9 @@ class FSInstagram
 		/* account added with cookie method */
 		if( $accountInfo['password'] == '*****' )
 		{
-			require_once LIB_DIR . 'instagram/FSInstagramApi.php';
+			require_once FS_LIB_DIR . 'instagram/FSInstagramApi.php';
 
-			$cookies = wpFetch('account_sessions' , ['driver' => 'instagram' , 'username' => $accountInfo['username']]);
+			$cookies = FSwpFetch('account_sessions' , ['driver' => 'instagram' , 'username' => $accountInfo['username']]);
 
 			$api = new FSInstagramApi(json_decode($cookies['cookies'] , true) , $accountInfo['proxy']);
 			if( $type == 'image' )
@@ -393,7 +393,7 @@ class FSInstagram
 				];
 			}
 
-			require_once LIB_DIR . 'instagram/FSInstagramApi.php';
+			require_once FS_LIB_DIR . 'instagram/FSInstagramApi.php';
 
 			$api = new FSInstagramApi(json_decode($cookies['cookies'] , true) , $accountInfo['proxy']);
 			$commentsLikes = $api->getPostInfo( $postId2 );
@@ -451,7 +451,7 @@ class FSInstagram
 		$storyW = 1080 / 1.5;
 		$storyH = 1920 / 1.5;
 
-		require_once LIB_DIR . 'PHPImage/PHPImage.php';
+		require_once FS_LIB_DIR . 'PHPImage/PHPImage.php';
 
 		$imageInf = new PHPImage($imageURL);
 		$imageWidth = $imageInf->getWidth();
@@ -500,7 +500,7 @@ class FSInstagram
 		$iX = floor(($storyW - $textWidth) / 2);
 		$iY = 125;
 
-		$image->setFont(LIB_DIR . 'PHPImage/font/Exo2-Regular.ttf');
+		$image->setFont(FS_LIB_DIR . 'PHPImage/font/Exo2-Regular.ttf');
 		$image->rectangle($iX, $iY, $textWidth + $textPadding, $textHeight - $textPadding, array(0, 0, 0), 0.3);
 
 		$image->textBox( $title , array(

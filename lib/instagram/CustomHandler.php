@@ -11,7 +11,7 @@ class CustomHandler implements StorageInterface
 
 	private function getAccountInf( $userName )
 	{
-		$accountInf = wpFetch('account_sessions' , ['driver'=>'instagram' , 'username' => $userName]);
+		$accountInf = FSwpFetch('account_sessions' , ['driver'=>'instagram' , 'username' => $userName]);
 		return $accountInf;
 	}
 
@@ -48,14 +48,14 @@ class CustomHandler implements StorageInterface
 		// Update if the user row already exists, otherwise insert.
 		if ($this->_cache['id'] !== null)
 		{
-			wpDB()->update(wpTable('account_sessions') , [$column => $data] , ['id' => $this->_cache['id']]);
+			FSwpDB()->update(FSwpTable('account_sessions') , [$column => $data] , ['id' => $this->_cache['id']]);
 		}
 		else
 		{
 			if( !is_null($this->_username) )
 			{
-				wpDB()->insert(wpTable('account_sessions') , ['driver'=>'instagram' , 'username' => $this->_username, $column => $data] );
-				$this->_cache['id'] = wpDB()->insert_id;
+				FSwpDB()->insert(FSwpTable('account_sessions') , ['driver'=>'instagram' , 'username' => $this->_username, $column => $data] );
+				$this->_cache['id'] = FSwpDB()->insert_id;
 			}
 		}
 
@@ -101,7 +101,7 @@ class CustomHandler implements StorageInterface
 			}
 
 			// Now attempt to rename the old username column to the new name.
-			wpDB()->update(wpTable('account_sessions') , ['username' => $oldUsername] , ['driver'=>'instagram' , 'username' => $newUsername]);
+			FSwpDB()->update(FSwpTable('account_sessions') , ['username' => $oldUsername] , ['driver'=>'instagram' , 'username' => $newUsername]);
 		} catch (SettingsException $e) {
 			throw $e; // Ugly but necessary to re-throw only our own messages.
 		} catch (\Exception $e) {
@@ -117,7 +117,7 @@ class CustomHandler implements StorageInterface
 	public function deleteUser(
 		$username)
 	{
-		wpDB()->delete( wpTable('account_sessions') , [ 'driver'=>'instagram' , 'username' => $username ] );
+		FSwpDB()->delete( FSwpTable('account_sessions') , [ 'driver'=>'instagram' , 'username' => $username ] );
 	}
 
 	/**

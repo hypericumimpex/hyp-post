@@ -3,25 +3,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// fix...
-wpDB()->query("DELETE FROM ".wpTable("accounts")." WHERE driver='google'");
-wpDB()->query("DELETE FROM ".wpTable("account_nodes")." WHERE driver='google'");
-wpDB()->query('DELETE FROM '.wpTable('account_node_status').' WHERE (SELECT COUNT(0) FROM '.wpTable('account_nodes').' WHERE id='.wpTable('account_node_status').'.node_id)=0');
-wpDB()->query('DELETE FROM '.wpTable('account_status').' WHERE (SELECT COUNT(0) FROM '.wpTable('accounts').' WHERE id='.wpTable('account_status').'.account_id)=0');
-/////////
-
-$accountsList = wpDB()->get_results(wpDB()->prepare("SELECT driver, COUNT(0) AS _count FROM ".wpTable('accounts')." WHERE (user_id=%d OR is_public=1) GROUP BY driver",  [get_current_user_id()]) , ARRAY_A);
+$accountsList = FSwpDB()->get_results(FSwpDB()->prepare("SELECT driver, COUNT(0) AS _count FROM ".FSwpTable('accounts')." WHERE (user_id=%d OR is_public=1) GROUP BY driver",  [get_current_user_id()]) , ARRAY_A);
 $accountsCount = [
-	'fb'        =>  0,
-	'twitter'   =>  0,
-	'instagram' =>  0,
-	'linkedin'  =>  0,
-	'vk'        =>  0,
-	'pinterest' =>  0,
-	'reddit'    =>  0,
-	'tumblr'    =>  0,
-	'google'    =>  0,
-	'ok'	    =>  0
+	'fb'		=>  0,
+	'twitter'	=>  0,
+	'instagram'	=>  0,
+	'linkedin'	=>  0,
+	'vk'		=>  0,
+	'pinterest'	=>  0,
+	'reddit'	=>  0,
+	'tumblr'	=>  0,
+	'google_b'	=>  0,
+	'ok'		=>  0,
+	'telegram'	=>	0,
+	'medium'	=>	0
 ];
 foreach( $accountsList AS $aInf )
 {
@@ -31,187 +26,68 @@ foreach( $accountsList AS $aInf )
 	}
 }
 
+$activeTab = FS_get('tab', 'fb', 'string');
+
 ?>
-
-<style>
-	.social_network_div
-	{
-		width: 100%;
-		height: 35px;
-		background: #FFF;
-		border: 1px solid #DDD;
-		margin-top: 3px;
-		padding-left: 15px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-size: 14px;
-		color: #666 !important;
-		-webkit-border-radius: 3px;
-		-moz-border-radius: 3px;
-		border-radius: 3px;
-
-		-webkit-box-shadow: 2px 2px 2px 0px #DDD;
-		-moz-box-shadow: 2px 2px 2px 0px #DDD;
-		box-shadow: 2px 2px 2px 0px #DDD;
-
-		cursor: pointer;
-	}
-	.social_network_div:hover
-	{
-		background: #f9f9f9;
-	}
-	.social_network_div i
-	{
-		margin-right: 5px;
-		color: #74b9ff;
-	}
-	.snd_badge
-	{
-		margin-right: 10px;
-		background: #fd79a8;
-		color: #FFF;
-		width: 18px;
-		height: 18px;
-		-webkit-border-radius: 18px;
-		-moz-border-radius: 18px;
-		border-radius: 18px;
-		text-align: center;
-		font-size: 11px;
-		font-weight: 700;
-		-webkit-box-shadow: 2px 2px 2px 0px #EEE;
-		-moz-box-shadow: 2px 2px 2px 0px #EEE;
-		box-shadow: 2px 2px 2px 0px #EEE;
-	}
-
-	.snd_active
-	{
-		border-left: 3px solid #fd79a8 !important;
-		background: #f9f9f9 !important;
-	}
-	.snd_active .snd_badge
-	{
-		margin-right: 12px;
-	}
-	#account_supports
-	{
-		width: 200px;
-		margin-top: 70px;
-		margin-left: 20px;
-	}
-
-	.account_checkbox, .account_checkbox_public
-	{
-		margin-left: 15px;
-	}
-	.account_checkbox>i , .account_checkbox_public>i
-	{
-		background: #DDD;
-		padding: 5px;
-		border-radius: 50%;
-		color: #FFF;
-		cursor: pointer;
-		font-size: 13px !important;
-	}
-	.account_checked>i
-	{
-		background: #86d4ea;
-	}
-	.account_checked2>i
-	{
-		background: #fdcb6e;
-	}
-	td.ws_tooltip
-	{
-		cursor: pointer;
-	}
-
-	#sub_menu
-	{
-		position: fixed;
-		background: #FFF;
-		border-top: 2px solid #ffb8b8;
-		display: none;
-		z-index: 999;
-		width: 190px;
-		margin-top: 10px;
-	}
-
-	#sub_menu:before
-	{
-		content: '';
-		border: 10px solid transparent;
-		border-bottom-color: #ffb8b8;
-		position: absolute;
-		top: -20px;
-		left: calc(50% - 9px);
-	}
-
-	#sub_menu > div
-	{
-		padding: 8px 20px;
-		font-size: 14px;
-		font-weight: 500;
-		color: #777;
-	}
-
-	#sub_menu > div:hover
-	{
-		background: #f5f5f5;
-		cursor: pointer;
-	}
-</style>
 
 <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
-<div id="sub_menu">
+<div id="fs_sub_menu">
 	<div class="activate_btn">Activate</div>
 	<div class="activate_with_condition_btn">Activate with condition</div>
 	<div class="deactivate_btn">Deactivate</div>
 </div>
 
 <div style="display: flex;">
-	<div id="account_supports">
-		<div class="social_network_div snd_active" data-setting="fb">
+	<div id="fs_account_supports">
+		<div class="fs_social_network_div" data-setting="fb">
 			<div><i class="fab fa-facebook-square"></i> Facebook</div>
-			<div class="snd_badge"><?=$accountsCount['fb']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['fb']?></div>
 		</div>
-		<div class="social_network_div" data-setting="twitter">
+		<div class="fs_social_network_div" data-setting="twitter">
 			<div><i class="fab fa-twitter-square"></i> Twitter</div>
-			<div class="snd_badge"><?=$accountsCount['twitter']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['twitter']?></div>
 		</div>
-		<div class="social_network_div" data-setting="instagram">
+		<div class="fs_social_network_div" data-setting="instagram">
 			<div><i class="fab fa-instagram"></i> Instagram</div>
-			<div class="snd_badge"><?=$accountsCount['instagram']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['instagram']?></div>
 		</div>
-		<div class="social_network_div" data-setting="linkedin">
+		<div class="fs_social_network_div" data-setting="linkedin">
 			<div><i class="fab fa-linkedin"></i> Linkedin</div>
-			<div class="snd_badge"><?=$accountsCount['linkedin']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['linkedin']?></div>
 		</div>
-		<div class="social_network_div" data-setting="vk">
+		<div class="fs_social_network_div" data-setting="vk">
 			<div><i class="fab fa-vk"></i> VK</div>
-			<div class="snd_badge"><?=$accountsCount['vk']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['vk']?></div>
 		</div>
-		<div class="social_network_div" data-setting="pinterest">
+		<div class="fs_social_network_div" data-setting="pinterest">
 			<div><i class="fab fa-pinterest"></i> Pinterest</div>
-			<div class="snd_badge"><?=$accountsCount['pinterest']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['pinterest']?></div>
 		</div>
-		<div class="social_network_div" data-setting="reddit">
+		<div class="fs_social_network_div" data-setting="reddit">
 			<div><i class="fab fa-reddit"></i> Reddit</div>
-			<div class="snd_badge"><?=$accountsCount['reddit']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['reddit']?></div>
 		</div>
-		<div class="social_network_div" data-setting="tumblr">
+		<div class="fs_social_network_div" data-setting="tumblr">
 			<div><i class="fab fa-tumblr-square"></i> Tumblr</div>
-			<div class="snd_badge"><?=$accountsCount['tumblr']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['tumblr']?></div>
 		</div>
-		<!--<div class="social_network_div" data-setting="google">
-			<div><i class="fab fa-google"></i> Google+</div>
-			<div class="snd_badge"><?/*=$accountsCount['google']*/?></div>
-		</div>-->
-		<div class="social_network_div" data-setting="ok">
+		<div class="fs_social_network_div" data-setting="ok">
 			<div><i class="fab fa-odnoklassniki"></i> OK.ru</div>
-			<div class="snd_badge"><?=$accountsCount['ok']?></div>
+			<div class="fs_snd_badge"><?=$accountsCount['ok']?></div>
+		</div>
+		<div class="fs_social_network_div" data-setting="google_b">
+			<div><i class="fab fa-google"></i> Google MyBusiness</div>
+			<div class="fs_snd_badge"><?=$accountsCount['google_b']?></div>
+		</div>
+		<div class="fs_social_network_div" data-setting="telegram">
+			<div><i class="fab fa-telegram"></i> Telegram</div>
+			<div class="fs_snd_badge"><?=$accountsCount['telegram']?></div>
+		</div>
+		<div class="fs_social_network_div" data-setting="medium">
+			<div><i class="fab fa-medium"></i> Medium</div>
+			<div class="fs_snd_badge"><?=$accountsCount['medium']?></div>
 		</div>
 	</div>
 	<div style="width: 100%;" id="account_content">
@@ -222,109 +98,160 @@ foreach( $accountsList AS $aInf )
 <script>
 	jQuery(document).ready(function()
 	{
+
 		var currentSettings;
-		$("#account_supports>[data-setting]").click(function()
+		$("#fs_account_supports>[data-setting]").click(function()
 		{
 			currentSettings = $(this).attr('data-setting');
-			$("#account_supports .snd_active").removeClass('snd_active');
-			$(this).addClass('snd_active');
+			$("#fs_account_supports .fs_snd_active").removeClass('fs_snd_active');
+			$(this).addClass('fs_snd_active');
 
 			fsCode.ajax('get_accounts' , {'name': currentSettings}, function(result)
 			{
 				$("#account_content").html(fsCode.htmlspecialchars_decode(result['html']));
 
-				$('#account_supports .social_network_div[data-setting="'+currentSettings+'"] .snd_badge').text( $("#accounts_count").text() );
+				$('#fs_account_supports .fs_social_network_div[data-setting="'+currentSettings+'"] .fs_snd_badge').text( $("#accounts_count").text() );
 			});
-		}).eq(0).trigger('click');
+
+			window.history.pushState({},"", '?page=fs-poster&tab=' + currentSettings);
+		});
+
+		$('#fs_account_supports>[data-setting="<?=htmlspecialchars($activeTab)?>"]').click();
 
 		$("#account_content").on('click' , '.delete_account_btn' , function()
 		{
-			var tr = $(this).closest('tr'),
-				aId = tr.attr('data-id');
+			var tr      = $(this).closest('tr'),
+				aId     = tr.data('id'),
+				type    = tr.data('type');
 
 			fsCode.confirm("<?=esc_html__('Are you sure you want to delete?' , 'fs-poster')?>" , 'danger' , function ()
 			{
-				fsCode.ajax('delete_account' , {'id': aId} , function(result)
+				var ajaxAction = type == 'community' ? 'settings_node_delete' : 'delete_account';
+
+				fsCode.ajax(ajaxAction , {'id': aId} , function(result)
 				{
-					tr.fadeOut(300, function()
+					if( type == 'community' )
 					{
-						$(this).remove();
-						if( $(".ws_table>tbody>tr").length == 0 )
+						tr.fadeOut(300, function()
 						{
-							$(".ws_table>tbody").append('<tr><td colspan="100%" style="color: #999;">No accound found</td></tr>').children('tr').hide().fadeIn(200);
-						}
-						$("#accounts_count").text(parseInt($("#accounts_count").text()) - 1);
-						var oldCount = $('#account_supports .social_network_div[data-setting="'+currentSettings+'"] .snd_badge').text().trim();
-						$('#account_supports .social_network_div[data-setting="'+currentSettings+'"] .snd_badge').text(parseInt(oldCount) - 1);
-					});
+							$(this).remove();
+						});
+					}
+					else
+					{
+						tr.closest('table').fadeOut(300, function()
+						{
+							$(this).remove();
+
+							if( $(".ws_table>tbody>tr").length == 0 )
+							{
+								$("#account_content .ws_table_wraper").append('<table class="ws_table"><tbody><tr><td colspan="100%" style="color: #999;">No accound found</td></tr></tbody></table>').children('tr').hide().fadeIn(200);
+							}
+							$("#accounts_count").text(parseInt($("#accounts_count").text()) - 1);
+							var oldCount = $('#fs_account_supports .fs_social_network_div[data-setting="'+currentSettings+'"] .fs_snd_badge').text().trim();
+							$('#fs_account_supports .fs_social_network_div[data-setting="'+currentSettings+'"] .fs_snd_badge').text(parseInt(oldCount) - 1);
+						});
+
+						tr.closest('table').next('.fs_communities_area').fadeOut(200, function()
+						{
+							$(this).remove();
+						});
+					}
+
 				});
 			}, true);
-		}).on('click' , '.account_checkbox' , function()
+		}).on('click' , '.fs_account_checkbox' , function()
 		{
-			var checked = $(this).hasClass("account_checked"),
-				dataId = $(this).closest('tr').attr('data-id');
+			var checked     = $(this).hasClass("fs_account_checked"),
+				dataId      = $(this).closest('tr').data('id'),
+				dataType    = $(this).closest('tr').data('type');
 
-			$("#sub_menu")
+			$("#fs_sub_menu")
 				.show()
 				.css('top' , $(this).offset().top + 25 - $(window).scrollTop())
-				.css('left' , $(this).offset().left - ($("#sub_menu").width()/2) + 10)
-				.data('id' , dataId);
-		}).on('click' , '.account_checkbox_public' , function()
+				.css('left' , $(this).offset().left - ($("#fs_sub_menu").width()/2) + 10)
+				.data('id' , dataId)
+				.data('type' , dataType);
+		}).on('click' , '.fs_account_checkbox_public' , function()
 		{
-			var checked			= $(this).hasClass("account_checked"),
+			var checked			= $(this).hasClass("fs_account_checked"),
 				is_my_account	= $(this).hasClass('my_account'),
-				dataId			= $(this).closest('tr').attr('data-id');
+				dataId			= $(this).closest('tr').data('id'),
+				dataType        = $(this).closest('tr').data('type');
 
 			if( !is_my_account )
 			{
-				fsCode.alert("<?=esc_html__('This is not one of you added account, therefore you do not have a permission for make this profile public or private.' , 'fs-poster')?>");
+				fsCode.alert("<?=esc_html__('This is not one of you added account/community, therefore you do not have a permission for make this profile/community public or private.' , 'fs-poster')?>");
 				return;
 			}
 
 			if( checked )
 			{
-				$(this).removeClass('account_checked');
+				$(this).removeClass('fs_account_checked');
 			}
 			else
 			{
-				$(this).addClass('account_checked');
+				$(this).addClass('fs_account_checked');
 			}
 
-			fsCode.ajax('make_account_public' , {'id': dataId, 'checked': checked?0:1});
+			var ajaxAction = dataType == 'community' ? 'settings_node_make_public' : 'make_account_public';
+
+			fsCode.ajax(ajaxAction , {'id': dataId, 'checked': checked?0:1});
+		}).on('click', '.fs_expand_all_btn', function()
+		{
+			$('.fs_communities_area').slideDown(400, function()
+			{
+				$(this).prev('table').find('.fs_expand_icon > .fa-angle-right').attr('class', 'fa fa-angle-down');
+			});
+		}).on('click', '.fs_collapse_all_btn', function()
+		{
+			$('.fs_communities_area').slideUp(400, function()
+			{
+				$(this).prev('table').find('.fs_expand_icon > .fa-angle-down').attr('class', 'fa fa-angle-right');
+			});
+		}).on('click', '.fs_expand_icon', function()
+		{
+			var arrow = $(this).children('i');
+
+			$(this).closest('table').next('.fs_communities_area').slideToggle(400, function()
+			{
+				arrow.attr('class', arrow.hasClass('fa-angle-down') ? 'fa fa-angle-right' : 'fa fa-angle-down');
+			});
 		});
 
 		$(document).click(function(e)
 		{
-			if( !$(e.target).is('.account_checkbox , .account_checkbox > i') )
+			if( !$(e.target).is('.fs_account_checkbox , .fs_account_checkbox > i') )
 			{
-				$("#sub_menu").hide();
+				$("#fs_sub_menu").hide();
 			}
 		});
 
-		$("#sub_menu > .activate_with_condition_btn").click(function()
+		$("#fs_sub_menu > .activate_with_condition_btn").click(function()
 		{
-			var dataId = $('#sub_menu').data('id');
+			var dataId      = $('#fs_sub_menu').data('id'),
+				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'node' : 'account';
 
-			fsCode.loadModal('activate_with_condition' , {'id': dataId});
+			fsCode.loadModal('activate_with_condition' , {'id': dataId, 'type': dataType});
 		});
 
-		$("#sub_menu > .activate_btn").click(function()
+		$("#fs_sub_menu > .activate_btn").click(function()
 		{
-			var dataId = $('#sub_menu').data('id');
+			var dataId      = $('#fs_sub_menu').data('id'),
+				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
 
-			fsCode.ajax('account_activity_change' , {'id': dataId, 'checked': 1});
-			$("tr[data-id=\"" + dataId + "\"] .account_checkbox").addClass('account_checked').removeClass('account_checked2');
+			fsCode.ajax(dataType , {'id': dataId, 'checked': 1});
+			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").addClass('fs_account_checked').removeClass('fs_account_checked2');
 		});
 
-		$("#sub_menu > .deactivate_btn").click(function()
+		$("#fs_sub_menu > .deactivate_btn").click(function()
 		{
-			var dataId = $('#sub_menu').data('id');
+			var dataId = $('#fs_sub_menu').data('id'),
+				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
 
-			fsCode.ajax('account_activity_change' , {'id': dataId, 'checked': 0} );
-			$("tr[data-id=\"" + dataId + "\"] .account_checkbox").removeClass('account_checked').removeClass('account_checked2');
+			fsCode.ajax(dataType , {'id': dataId, 'checked': 0} );
+			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").removeClass('fs_account_checked').removeClass('fs_account_checked2');
 		});
-
 
 	});
-
 </script>

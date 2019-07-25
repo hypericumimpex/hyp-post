@@ -1,6 +1,6 @@
 <?php
 
-require_once LIB_DIR . 'FSCurl.php';
+require_once FS_LIB_DIR . 'FSCurl.php';
 
 class OdnoKlassniki
 {
@@ -25,12 +25,12 @@ class OdnoKlassniki
 
 		if( isset($me['error_msg']) )
 		{
-			response(false , $me['error_msg'] );
+			FSresponse(false , $me['error_msg'] );
 		}
 
 		$meId = $me['uid'];
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'ok', 'profile_id' => $meId]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'ok', 'profile_id' => $meId]);
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -43,23 +43,23 @@ class OdnoKlassniki
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $accId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $accId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$accId,
 			'app_id'		=>	$appId,
 			'expires_on'	=>	$scExpireIn,
@@ -82,7 +82,7 @@ class OdnoKlassniki
 
 		foreach($groupsList AS $groupInf)
 		{
-			wpDB()->insert(wpTable('account_nodes') , [
+			FSwpDB()->insert(FSwpTable('account_nodes') , [
 				'user_id'			=>	get_current_user_id(),
 				'driver'			=>	'ok',
 				'account_id'		=>	$accId,
@@ -307,11 +307,11 @@ class OdnoKlassniki
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'ok']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'ok']);
 		$appId = $appInf['app_id'];
 
 		$permissions = self::getScope();
@@ -326,13 +326,13 @@ class OdnoKlassniki
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		if( !isset($_SESSION['save_app_id']) )
 		{
 			return false;
 		}
 
-		$code = _get('code' , '' , 'string');
+		$code = FS_get('code' , '' , 'string');
 
 		if( empty($code) )
 		{
@@ -357,7 +357,7 @@ class OdnoKlassniki
 			unset($_SESSION['fs_proxy_save']);
 		}
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'ok']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'ok']);
 		$appSecret = $appInf['app_secret'];
 		$appId2 = $appInf['app_id'];
 
@@ -398,10 +398,10 @@ class OdnoKlassniki
 	{
 		$appId = $tokenInfo['app_id'];
 
-		$accountInf = wpFetch('accounts' , $tokenInfo['account_id']);
+		$accountInf = FSwpFetch('accounts' , $tokenInfo['account_id']);
 		$proxy = $accountInf['proxy'];
 
-		$appInf			= wpFetch('apps' , $appId);
+		$appInf			= FSwpFetch('apps' , $appId);
 		$appId2			= $appInf['app_id'];
 		$appSecret		= $appInf['app_secret'];
 		$refreshToken	= $tokenInfo['refresh_token'];
@@ -426,7 +426,7 @@ class OdnoKlassniki
 		$access_token = esc_html($params['access_token']);
 		$expiresIn = date('Y-m-d H:i:s' , time() + (int)$params['expires_in']);
 
-		wpDB()->update(wpTable('account_access_tokens') , [
+		FSwpDB()->update(FSwpTable('account_access_tokens') , [
 			'access_token'  =>  $access_token,
 			'expires_on'    =>  $expiresIn
 		] , ['id' => $tokenInfo['id']]);

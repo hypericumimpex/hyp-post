@@ -1,22 +1,22 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$accountId = _post('account_id' , '0' , 'num');
+$accountId = FS_post('account_id' , '0' , 'num');
 if( empty($accountId) )
 {
 	return false;
 }
 
-$accauntInf = wpFetch('accounts' , $accountId);
+$accauntInf = FSwpFetch('accounts' , $accountId);
 
-$accessToken = wpFetch('account_access_tokens' , ['account_id' => $accountId]);
+$accessToken = FSwpFetch('account_access_tokens' , ['account_id' => $accountId]);
 $accessToken = $accessToken['access_token'];
 if( empty($accessToken) )
 {
 	return false;
 }
 
-require_once LIB_DIR . 'pinterest/Pinterest.php';
+require_once FS_LIB_DIR . 'pinterest/Pinterest.php';
 
 $boards = Pinterest::cmd('me/boards' , 'GET' , $accessToken , ['fields' => 'id,name'] , $accauntInf['proxy']);
 if( isset( $boards['error']['message'] ) )
@@ -80,7 +80,7 @@ if( isset( $boards['error']['message'] ) )
 			{
 				fsCode.toast("<?=esc_html__('Board saved!' , 'fs-poster')?>" , 'success');
 				fsCode.modalHide($("#proModal<?=$mn?>"));
-				$('#account_supports .social_network_div[data-setting="pinterest"]').click();
+				$('#fs_account_supports .fs_social_network_div[data-setting="pinterest"]').click();
 			});
 		});
 	});

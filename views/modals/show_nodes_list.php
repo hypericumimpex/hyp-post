@@ -1,26 +1,26 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$accountId = _post('account_id' , '0' , 'num');
-$nodeType = _post('type' , '' , 'string');
+$accountId = FS_post('account_id' , '0' , 'num');
+$nodeType = FS_post('type' , '' , 'string');
 
 if( empty($nodeType) )
 {
-	$nodeList = wpDB()->get_results(wpDB()->prepare("
+	$nodeList = FSwpDB()->get_results(FSwpDB()->prepare("
 		SELECT 
 			*,
-			(SELECT filter_type FROM ".wpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active 
-		FROM ".wpTable('account_nodes')." tb1 
+			(SELECT filter_type FROM ".FSwpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active 
+		FROM ".FSwpTable('account_nodes')." tb1 
 		WHERE (user_id=%d OR is_public=1) AND account_id=%d",  [get_current_user_id(), get_current_user_id(), $accountId ]
 	) , ARRAY_A);
 }
 else
 {
-	$nodeList = wpDB()->get_results(wpDB()->prepare("
+	$nodeList = FSwpDB()->get_results(FSwpDB()->prepare("
 		SELECT 
 			*, 
-			(SELECT filter_type FROM ".wpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active 
-		FROM ".wpTable('account_nodes')." tb1 
+			(SELECT filter_type FROM ".FSwpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active 
+		FROM ".FSwpTable('account_nodes')." tb1 
 		WHERE (user_id=%d OR is_public=1) AND account_id=%d AND node_type=%s",  [get_current_user_id(), get_current_user_id(), $accountId , $nodeType]
 	) , ARRAY_A);
 }
@@ -325,11 +325,11 @@ else
 				$count++;
 				?>
 				<div class="node_div" data-id="<?=(int)$node['id']?>" data-public="<?=(int)$node['is_public']?>">
-					<div class="node_img"><img src="<?=profilePic($node)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
+					<div class="node_img"><img src="<?=FSprofilePic($node)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 					<div class="node_label">
 						<div>
 							<div class="node_label_title">
-								<a href="<?=profileLink($node)?>" target="_blank" title="Profile link"><?=esc_html($node['name']);?></a>
+								<a href="<?=FSprofileLink($node)?>" target="_blank" title="Profile link"><?=esc_html($node['name']);?></a>
 							</div>
 							<span class="node_public_icon ws_tooltip" data-title="Make public for use this community by other WordPress users"><i class="fa fa-globe"></i></span>
 						</div>

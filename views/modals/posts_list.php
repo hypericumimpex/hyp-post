@@ -4,7 +4,7 @@
 
 <div style="margin: 10px;">
 	<?php
-	require_once VIEWS_DIR . 'app_menus/posts.php';
+	require_once FS_VIEWS_DIR . 'app_menus/posts.php';
 	?>
 </div>
 

@@ -2,10 +2,10 @@
 
 <div style="display: flex;">
 	<div style="width: 50%;">
-		<div class="setting_item">
-			<div class="setting_item_label">
+		<div class="fs_setting_item">
+			<div class="fs_setting_item_label">
 				<div><?=esc_html__('Share instagram posts in:' , 'fs-poster');?></div>
-				<div class="s_help"><?=esc_html__('Instagram posts together with the profile will be shared in the story.' , 'fs-poster');?></div>
+				<div class="fs_s_help"><?=esc_html__('Instagram posts together with the profile will be shared in the story.' , 'fs-poster');?></div>
 			</div>
 			<div style="width: 200px;">
 				<select name="fs_instagram_post_in_type" class="ws_form_element" style="width: 150px;">
@@ -20,15 +20,15 @@
 
 <div style="display: flex;">
 	<div style="width: 50%;">
-		<div class="setting_item">
-			<div class="setting_item_label">
+		<div class="fs_setting_item">
+			<div class="fs_setting_item_label">
 				<div><?=esc_html__('Add link in story:' , 'fs-poster');?></div>
-				<div class="s_help"><?=__('The post link shared within the story will be automatically added ( ONLY if you have a business account with >= 10k followers. <b style="color: #9e6a6d; font-weight: 700;">Not:</b> Cookie method not allowed this. ).', 'fs-poster');?></div>
+				<div class="fs_s_help"><?=__('The post link shared within the story will be automatically added ( ONLY if you have a business account with >= 10k followers. <b style="color: #9e6a6d; font-weight: 700;">Note:</b> Cookie method not allowed this. ).', 'fs-poster');?></div>
 			</div>
-			<div class="s_input">
-				<div class="onoffswitch">
-					<input type="checkbox" name="fs_instagram_story_link" class="onoffswitch-checkbox" id="fs_instagram_story_link"<?=get_option('fs_instagram_story_link', '1')?' checked':''?>>
-					<label class="onoffswitch-label" for="fs_instagram_story_link"></label>
+			<div class="fs_s_input">
+				<div class="fs_onoffswitch">
+					<input type="checkbox" name="fs_instagram_story_link" class="fs_onoffswitch-checkbox" id="fs_instagram_story_link"<?=get_option('fs_instagram_story_link', '1')?' checked':''?>>
+					<label class="fs_onoffswitch-label" for="fs_instagram_story_link"></label>
 				</div>
 			</div>
 		</div>
@@ -36,68 +36,76 @@
 </div>
 
 
-<div class="setting_item">
-	<div class="setting_item_label" style="width: 55%;">
+<div class="fs_setting_item">
+	<div class="fs_setting_item_label" style="width: 55%;">
 		<div><?=esc_html__('Custom text:' , 'fs-poster')?></div>
-		<div class="s_help">
+		<div class="fs_s_help">
 			<div><?=esc_html__('Text of shared post. Using keywords, you can create your wanted text. Keywords:' , 'fs-poster')?></div>
 			<div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post ID' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{id}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post title' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{title}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post excerpt' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{excerpt}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post author name' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{author}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post content (first 40 symbols)' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_short_40}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post content Full' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{content_full}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post link' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{link}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post short link' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{short_link}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Featured image URL' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{featured_image_url}</div>
+				</div>
+				<div class="fs_text_codes">
 					<div><?=esc_html__('WooCommerce - product price' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{product_regular_price}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('WooCommerce - product sale price' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{product_sale_price}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Unique ID' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{uniq_id}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post Tags' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{tags}</div>
 				</div>
-				<div class="text_codes">
+				<div class="fs_text_codes">
 					<div><?=esc_html__('Post Categories' , 'fs-poster')?></div>
 					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{categories}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Custom fields' , 'fs-poster')?></div>
+					<div class="ws_tooltip ws_color_info append_to_text" data-title="<?=esc_html__('Click to append in text' , 'fs-poster')?>">{cf_KEY}</div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class="s_input" style="width: 45%;">
+	<div class="fs_s_input" style="width: 45%;">
 		<textarea class="ws_form_element2" name="fs_post_text_message_instagram" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
 	</div>
 </div>
@@ -105,15 +113,15 @@
 <!--
 <div style="display: flex;">
 	<div style="width: 50%;">
-		<div class="setting_item">
-			<div class="setting_item_label">
+		<div class="fs_setting_item">
+			<div class="fs_setting_item_label">
 				<div>Hashtag for story:</div>
-				<div class="s_help">Paylashilan story-e hashtag elave etmek isteyirsizse aktiv edin</div>
+				<div class="fs_s_help">Paylashilan story-e hashtag elave etmek isteyirsizse aktiv edin</div>
 			</div>
-			<div class="s_input">
-				<div class="onoffswitch">
-					<input type="checkbox" name="instagram_story_hashtag" class="onoffswitch-checkbox" id="instagram_story_hashtag"<?/*=get_option('fs_instagram_story_hashtag', '0')?' checked':''*/?> onchange="if($(this).is(':checked')){$('#hashtag_details').show(fadeSpeed);}else{$('#hashtag_details').hide(fadeSpeed);}">
-					<label class="onoffswitch-label" for="instagram_story_hashtag"></label>
+			<div class="fs_s_input">
+				<div class="fs_onoffswitch">
+					<input type="checkbox" name="instagram_story_hashtag" class="fs_onoffswitch-checkbox" id="instagram_story_hashtag"<?/*=get_option('fs_instagram_story_hashtag', '0')?' checked':''*/?> onchange="if($(this).is(':checked')){$('#hashtag_details').show(fadeSpeed);}else{$('#hashtag_details').hide(fadeSpeed);}">
+					<label class="fs_onoffswitch-label" for="instagram_story_hashtag"></label>
 				</div>
 			</div>
 		</div>
@@ -123,20 +131,20 @@
 
 <div style="display: flex;" id="hashtag_details">
 	<div style="width: 35%;">
-		<div class="setting_item">
-			<div class="setting_item_label">
+		<div class="fs_setting_item">
+			<div class="fs_setting_item_label">
 				<div>Hashtag:</div>
-				<div class="s_help">Hashtagi buraya daxil edin</div>
+				<div class="fs_s_help">Hashtagi buraya daxil edin</div>
 			</div>
 			<input type="text" name="instagram_story_hashtag_name" value="<?/*=esc_html(get_option('fs_instagram_story_hashtag_name'))*/?>" class="ws_form_element" placeholder="#example" style="max-width: 150px;">
 		</div>
 	</div>
 	<div style="width: 100px;"></div>
 	<div style="width: 35%;">
-		<div class="setting_item">
-			<div class="setting_item_label">
+		<div class="fs_setting_item">
+			<div class="fs_setting_item_label">
 				<div>Hashtag Position:</div>
-				<div class="s_help">Hashtagin yerlesheceyi yeri sechin</div>
+				<div class="fs_s_help">Hashtagin yerlesheceyi yeri sechin</div>
 			</div>
 			<select class="ws_form_element" name="instagram_story_hashtag_position" style="max-width: 120px;">
 				<option value="top">Top</option>

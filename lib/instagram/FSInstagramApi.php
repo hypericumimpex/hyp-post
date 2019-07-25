@@ -96,7 +96,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$response = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$response = json_decode($response , true);
@@ -136,7 +139,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$result = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$result = json_decode($result , true);
@@ -210,7 +216,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$response = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$response = json_decode($response , true);
@@ -248,7 +257,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$response = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		try
@@ -270,7 +282,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$result = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$result = json_decode($result , true);
@@ -331,7 +346,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$response = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$response = json_decode($response , true);
@@ -369,7 +387,10 @@ class FSInstagramApi
 		}
 		catch( Exception $e )
 		{
-			$result = '[]';
+			return [
+				'status'		=> 'error',
+				'error_msg'		=> 'Error! ' . $e->getMessage()
+			];
 		}
 
 		$result = json_decode($result , true);

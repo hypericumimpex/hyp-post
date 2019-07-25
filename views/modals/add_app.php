@@ -1,8 +1,8 @@
 <?php defined('MODAL') or exit();?>
 <?php
-$fields = _post('fields' , '' , 'string');
+$fields = FS_post('fields' , '' , 'string');
 $fields = explode(',' , $fields);
-$driver = _post('driver' , '' , 'string');
+$driver = FS_post('driver' , '' , 'string');
 ?>
 
 <div style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center; position: absolute;">

@@ -12,20 +12,20 @@ if( $accountFilter > 0 )
 }
 
 $drivers = [
-	'fb'        =>  ['ownpage' , 'group' , 'page'],
-	'vk'        =>  ['page' , 'group' , 'event' ] ,
-	'linkedin'  =>  ['company'] ,
-	'tumblr'    =>  ['blog'] ,
-	'google'    =>  ['community']
+	'fb'		=>  ['ownpage' , 'group' , 'page'],
+	'vk'		=>  ['page' , 'group' , 'event' ] ,
+	'linkedin'	=>  ['company'] ,
+	'tumblr'	=>  ['blog'] ,
+	'google_b'	=>  ['location']
 ];
 
 $tab = isset($_GET['tab']) && is_string($_GET['tab']) && key_exists($_GET['tab'] , $drivers) ? (string)$_GET['tab'] : 'fb';
 
-$nodeList = wpDB()->get_results(wpDB()->prepare("
+$nodeList = FSwpDB()->get_results(FSwpDB()->prepare("
 	SELECT 
 		*,
-		(SELECT filter_type FROM ".wpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active
-	FROM ".wpTable('account_nodes')." tb1
+		(SELECT filter_type FROM ".FSwpTable('account_node_status')." WHERE node_id=tb1.id AND user_id=%d) is_active
+	FROM ".FSwpTable('account_nodes')." tb1
 	WHERE (user_id=%d OR is_public=1) AND driver=%s{$queryAdd}",  [get_current_user_id() , get_current_user_id() , $tab]) , ARRAY_A);
 
 ?>
@@ -288,9 +288,9 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 		cursor: pointer;
 	}
 
-	.social_network_div
+	.fs_social_network_div
 	{
-		width: 140px;
+		width: 160px;
 		height: 35px;
 		background: #FFF;
 		border: 1px solid #DDD;
@@ -318,16 +318,16 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 		-ms-user-select: none;
 		-webkit-user-select: none;
 	}
-	.social_network_div:hover
+	.fs_social_network_div:hover
 	{
 		background: #f9f9f9;
 	}
-	.social_network_div i
+	.fs_social_network_div i
 	{
 		margin-right: 5px;
 		color: #74b9ff;
 	}
-	.snd_badge
+	.fs_snd_badge
 	{
 		margin-right: 10px;
 		background: #fd79a8;
@@ -345,17 +345,17 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 		box-shadow: 2px 2px 2px 0px #EEE;
 	}
 
-	.snd_active
+	.fs_snd_active
 	{
 		border-top: 3px solid #fd79a8 !important;
 		background: #f9f9f9 !important;
 		margin-top: -2px;
 	}
-	.snd_active .snd_badge
+	.fs_snd_active .fs_snd_badge
 	{
 		margin-right: 12px;
 	}
-	#account_supports
+	#fs_account_supports
 	{
 		width: 100%;
 		margin-top: 25px;
@@ -396,22 +396,22 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
 <div>
-	<div id="account_supports">
-		<a href="?page=fs-poster-nodes&tab=fb" class="social_network_div<?=$tab=='fb'?' snd_active':''?>">
+	<div id="fs_account_supports">
+		<a href="?page=fs-poster-nodes&tab=fb" class="fs_social_network_div<?=$tab=='fb'?' fs_snd_active':''?>">
 			<div><i class="fab fa-facebook-square"></i> Facebook</div>
 		</a>
-		<a href="?page=fs-poster-nodes&tab=linkedin" class="social_network_div<?=$tab=='linkedin'?' snd_active':''?>">
+		<a href="?page=fs-poster-nodes&tab=linkedin" class="fs_social_network_div<?=$tab=='linkedin'?' fs_snd_active':''?>">
 			<div><i class="fab fa-linkedin"></i> Linkedin</div>
 		</a>
-		<a href="?page=fs-poster-nodes&tab=vk" class="social_network_div<?=$tab=='vk'?' snd_active':''?>">
+		<a href="?page=fs-poster-nodes&tab=vk" class="fs_social_network_div<?=$tab=='vk'?' fs_snd_active':''?>">
 			<div><i class="fab fa-vk"></i> VK</div>
 		</a>
-		<a href="?page=fs-poster-nodes&tab=tumblr" class="social_network_div<?=$tab=='tumblr'?' snd_active':''?>">
+		<a href="?page=fs-poster-nodes&tab=tumblr" class="fs_social_network_div<?=$tab=='tumblr'?' fs_snd_active':''?>">
 			<div><i class="fab fa-tumblr"></i> Tumblr</div>
 		</a>
-		<!--<a href="?page=fs-poster-nodes&tab=google" class="social_network_div<?/*=$tab=='google'?' snd_active':''*/?>">
-			<div><i class="fab fa-google"></i> Google+</div>
-		</a>-->
+		<a href="?page=fs-poster-nodes&tab=google_b" class="fs_social_network_div<?=$tab=='google_b'?' fs_snd_active':''?>">
+			<div><i class="fab fa-google"></i> Google My Business</div>
+		</a>
 	</div>
 </div>
 
@@ -421,7 +421,7 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 		<select class="ws_form_element" id="accountFilterSelect">
 			<option><?=esc_html__('All' , 'fs-poster');?></option>
 			<?php
-			$accounts = wpDB()->get_results( wpDB()->prepare("SELECT * FROM " . wpTable('accounts') . " WHERE user_id=%d AND driver=%s" , [get_current_user_id() , $tab]) , ARRAY_A );
+			$accounts = FSwpDB()->get_results( FSwpDB()->prepare("SELECT * FROM " . FSwpTable('accounts') . " WHERE user_id=%d AND driver=%s" , [get_current_user_id() , $tab]) , ARRAY_A );
 
 			foreach( $accounts AS $account )
 			{
@@ -456,11 +456,11 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 					$count++;
 					?>
 					<div class="node_div" data-id="<?=(int)$node['id']?>" data-public="<?=(int)$node['is_public']?>">
-						<div class="node_img"><img src="<?=profilePic($node)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
+						<div class="node_img"><img src="<?=FSprofilePic($node)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 						<div class="node_label">
 							<div>
 								<div class="node_label_title">
-									<a href="<?=profileLink($node)?>" target="_blank" title="<?=esc_html__('Profile link' , 'fs-poster');?>"><?=esc_html($node['name']);?></a>
+									<a href="<?=FSprofileLink($node)?>" target="_blank" title="<?=esc_html__('Profile link' , 'fs-poster');?>"><?=esc_html($node['name']);?></a>
 								</div>
 								<span class="node_public_icon ws_tooltip" data-title="Make public for use this community by other WordPress users"><i class="fa fa-globe"></i></span>
 							</div>
@@ -471,7 +471,7 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 						<div class="node_chckbx ws_tooltip<?=$node['is_active'] == '' ? '' : ' node_checked' . ($node['is_active']=='no'?'':'2') ?>" data-title="<?=esc_html__('Click to change status' , 'fs-poster');?>" data-float="left" style="float: right;">
 							<i class="fa fa-check"></i>
 						</div>
-						<div class="node_delete ws_tooltip" data-title="<?=esc_html__('Delete' , 'fs-poster');?>" data-float="left">
+						<div class="node_delete" title="<?=esc_html__('Delete' , 'fs-poster');?>">
 							<i class="fa fa-trash"></i>
 						</div>
 					</div>
@@ -561,7 +561,7 @@ $nodeList = wpDB()->get_results(wpDB()->prepare("
 			{
 				fsCode.ajax('settings_node_delete' , {'id': dataId} , function()
 				{
-					fsCode.toast('\'Community\' has been deleted!');
+					fsCode.toast('Community has been deleted!');
 					nodeDiv.hide(500, function()
 					{
 						$(this).remove();

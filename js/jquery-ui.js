@@ -5949,7 +5949,7 @@ $.widget( "ui.autocomplete", {
 		if ( $.isArray( this.options.source ) ) {
 			array = this.options.source;
 			this.source = function( request, response ) {
-				response( $.ui.autocomplete.filter( array, request.term ) );
+				FSresponse( $.ui.autocomplete.filter( array, request.term ) );
 			};
 		} else if ( typeof this.options.source === "string" ) {
 			url = this.options.source;
@@ -5962,10 +5962,10 @@ $.widget( "ui.autocomplete", {
 					data: request,
 					dataType: "json",
 					success: function( data ) {
-						response( data );
+						FSresponse( data );
 					},
 					error: function() {
-						response( [] );
+						FSresponse( [] );
 					}
 				} );
 			};

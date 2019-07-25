@@ -94,20 +94,27 @@
 			{
 				$nodeInfTable = $feedInf['node_type'] == 'account' ? 'accounts' : 'account_nodes';
 				$nodeIdKey = $feedInf['node_type'] == 'account' ? 'profile_id' : 'node_id';
-				$nodeInf = wpFetch($nodeInfTable , $feedInf['node_id']);
+				$nodeInf = FSwpFetch($nodeInfTable , $feedInf['node_id']);
 
 				if( !$nodeInf )
 					continue;
 
-				$username = isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username']) ? $nodeInf['username'] : ' - ');
+				if( $nodeInf['driver'] == 'google_b' )
+				{
+					$username = isset($nodeInf['node_id']) ? $nodeInf['node_id'] : '';
+				}
+				else
+				{
+					$username = isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username']) ? $nodeInf['username'] : ' - ');
+				}
 				?>
 				<tr data-id="<?=(int)$feedInf['id']?>" data-interval="<?=(int)$feedInf['interval']?>" data-status="<?=(int)$feedInf['is_sended']?>">
 					<td class="node_name">
-						<div><img class="ws_img_style" src="<?=profilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
+						<div><img class="ws_img_style" src="<?=FSprofilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 						<div>
 							<div style="color: #888;">
 								<?=esc_html($nodeInf['name'])?>
-								<a href="<?=profileLink($nodeInf)?>" target="_blank" class="ws_btn" title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+								<a href="<?=FSprofileLink($nodeInf)?>" target="_blank" class="ws_btn" title="Profile link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 							</div>
 							<div style="font-size: 11px;color: #999;">
 								<?=esc_html(isset($nodeInf['driver'])?ucfirst(esc_html($nodeInf['driver'])):'Fb') .
@@ -122,7 +129,7 @@
 						if( !empty($feedInf['driver_post_id']) )
 						{
 							?>
-							<a href="<?=postLink($nodeInf['driver_post_id'] , (isset($nodeInf['driver']) ? $nodeInf['driver'] : 'fb') , $username)?>" target="_blank"><i class="fa fa-external-link fa-external-link-alt"></i> <?=esc_html__('Post link' , 'fs-poster')?></a>
+							<a href="<?=FSpostLink($nodeInf['driver_post_id'] , (isset($nodeInf['driver']) ? $nodeInf['driver'] : 'fb') , $username, $feedInf['feed_type'])?>" target="_blank"><i class="fa fa-external-link fa-external-link-alt"></i> <?=esc_html__('Post link' , 'fs-poster')?></a>
 						<?php
 						}
 						?>

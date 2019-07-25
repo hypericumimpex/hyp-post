@@ -19,11 +19,11 @@ if( isset($_GET['share']) && !empty($_GET['share']) && $_GET['share'] == '1' )
 	}
 	else
 	{
-		$chechNotSendedFeeds = wpDB()->get_row(wpDB()->prepare("SELECT count(0) AS cc FROM ".wpTable('feeds')." WHERE post_id=%d AND is_sended=0" , [(int)$post->ID]) , ARRAY_A);
+		$chechNotSendedFeeds = FSwpDB()->get_row(FSwpDB()->prepare("SELECT count(0) AS cc FROM ".FSwpTable('feeds')." WHERE post_id=%d AND is_sended=0" , [(int)$post->ID]) , ARRAY_A);
 	}
 }
 
-$feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
+$feeds = FSwpFetchAll('feeds' , ['post_id' => $post->ID]);
 ?>
 
 <style>
@@ -118,7 +118,7 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 			{
 				$nodeInfTable = $feedInf['node_type'] == 'account' ? 'accounts' : 'account_nodes';
 
-				$nodeInf = wpFetch($nodeInfTable , $feedInf['node_id']);
+				$nodeInf = FSwpFetch($nodeInfTable , $feedInf['node_id']);
 
 				if( empty($nodeInf) )
 				{
@@ -132,20 +132,28 @@ $feeds = wpFetchAll('feeds' , ['post_id' => $post->ID]);
 
 				?>
 				<div class="share_box_node_edit">
-					<div class="node_img"><img src="<?=profilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../images/no-photo.png'?>');"></div>
+					<div class="node_img"><img src="<?=FSprofilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../images/no-photo.png'?>');"></div>
 					<div class="node_label" style="width: 100%;">
-						<div><a href="<?=profileLink($nodeInf)?>" target="_blank"><?=esc_html($nodeInf['name']);?></a></div>
+						<div><a href="<?=FSprofileLink($nodeInf)?>" target="_blank"><?=esc_html($nodeInf['name']);?></a></div>
 						<div class="node_label_help"><?=esc_html(ucfirst($nodeInf['driver']) . ' > ' . $nodeInf['node_type']);?></div>
 					</div>
 					<div class="node_actions">
 						<?php
 						if( $feedInf['status'] == 'ok' )
 						{
+							if( $nodeInf['driver'] == 'google_b' )
+							{
+								$username = isset( $nodeInf['node_id'] ) ? $nodeInf['node_id'] : '';
+							}
+							else
+							{
+								$username = (isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : '');
+							}
 							?>
 							<span class="ws_bg_success status_action ws_tooltip" data-title="<?=esc_html__('Posted successfully' , 'fs-poster')?>">
 								<i class="fa fa-check"></i>
 							</span>
-							<a href="<?=postLink($feedInf['driver_post_id'] , $feedInf['driver'] , (isset($nodeInf['screen_name'])?$nodeInf['screen_name']:''))?>" target="_blank" class="post_link" title="<?=esc_html__('Open post in facebook!' , 'fs-poster')?>"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+							<a href="<?=FSpostLink($feedInf['driver_post_id'] , $feedInf['driver'] , $username , $feedInf['feed_type'])?>" target="_blank" class="post_link" title="<?=esc_html__('Open post in facebook!' , 'fs-poster')?>"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 							<?php
 						}
 						else if( $feedInf['is_sended'] == '0' && get_post_status($post->ID) == 'future' )

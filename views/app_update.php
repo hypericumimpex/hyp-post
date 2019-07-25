@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 
-<div class="ws_bg_info" style="margin-left: -20px; font-size: 15px; margin-bottom: 50px; font-weight: 600; padding: 10px 20px; -webkit-border-radius: 2px;-moz-border-radius: 2px;border-radius: 2px;">Please update the plugin! New version: <?=esc_html(getVersion())?></div>
+<div class="ws_bg_info" style="margin-left: -20px; font-size: 15px; margin-bottom: 50px; font-weight: 600; padding: 10px 20px; -webkit-border-radius: 2px;-moz-border-radius: 2px;border-radius: 2px;">Please update the plugin! New version: <?=esc_html(FSgetVersion())?></div>
 
 <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
 
-	<div style="margin: 50px;"><img src="<?=PLUGIN_URL?>images/logo.svg" style="width: 400px;"></div>
+	<div style="margin: 50px;"><img src="<?=FS_PLUGIN_URL?>images/logo.svg" style="width: 400px;"></div>
 
 	<div style="display: flex; align-items: center;">
 		<div style="font-weight: 600; font-size: 14px; color: #777;"><?=__('Purchase key' , 'fs-poster')?>:</div>

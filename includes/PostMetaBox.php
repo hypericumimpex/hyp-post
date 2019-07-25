@@ -108,7 +108,7 @@ class PostMetaBox
 					}
 				}
 
-				print '<script>$(document).ready(function(){ fsCode.loadModal("plan_saved_post" , {"post_id": '.json_encode($postIds).'}) });</script>';
+				print '<script>jQuery(document).ready(function(){ fsCode.loadModal("plan_saved_post" , {"post_id": '.json_encode($postIds).'}) });</script>';
 			});
 
 		}
@@ -121,19 +121,19 @@ class PostMetaBox
 		{
 			$postId = $post->ID;
 			$postType = 'post';
-			require_once VIEWS_DIR . "post_meta_box.php";
+			require_once FS_VIEWS_DIR . "post_meta_box.php";
 		}
 		else // post edit panel
 		{
-			require_once VIEWS_DIR . "post_meta_box_edit.php";
+			require_once FS_VIEWS_DIR . "post_meta_box_edit.php";
 		}
 	}
 
 	function onSave( $new_status, $old_status, $post )
 	{
 		// For WordPress 5 (Gutenberg)...
-		$metaBoxLoader = (int)_get('meta-box-loader', 0, 'num', ['1']);
-		if( $metaBoxLoader === 1 && _post('original_post_status', '', 'string') == 'publish' )
+		$metaBoxLoader = (int)FS_get('meta-box-loader', 0, 'num', ['1']);
+		if( $metaBoxLoader === 1 && FS_post('original_post_status', '', 'string') == 'publish' )
 		{
 			$metaBoxLoader = 0;
 		}
@@ -153,12 +153,12 @@ class PostMetaBox
 		$userId		= $post->post_author;
 
 		// if not checked the 'Share' checkbox exit the function
-		$share_checked_inpt = _post('share_checked' , ( get_option('fs_auto_share_new_posts', '1') ? 'on' : 'off' ) , 'string' , ['on' , 'off']);
+		$share_checked_inpt = FS_post('share_checked' , ( get_option('fs_auto_share_new_posts', '1') ? 'on' : 'off' ) , 'string' , ['on' , 'off']);
 		$share_checked = $share_checked_inpt === 'on' ? 1 : 0;
 
 		if( !$share_checked )
 		{
-			wpDB()->delete(wpTable('feeds') , [
+			FSwpDB()->delete(FSwpTable('feeds') , [
 				'post_id'       =>  $post_id,
 				'is_sended'     =>  '0'
 			]);
@@ -169,7 +169,7 @@ class PostMetaBox
 		// if scheduled post, publish it using cron and exit the function
 		if( $new_status == 'publish' && $old_status == 'future' )
 		{
-			$checkFeedsExist = wpFetch('feeds' , [
+			$checkFeedsExist = FSwpFetch('feeds' , [
 				'post_id'       =>  $post_id,
 				'is_sended'     =>  '0'
 			]);
@@ -183,31 +183,31 @@ class PostMetaBox
 		}
 
 		// interval for each publication
-		$postInterval = (int)get_option('fs_post_interval' , '1');
+		$postInterval = (int)get_option('fs_post_interval' , '0');
 
 		// run share process on background
 		$backgroundShare = (int)get_option('fs_share_on_background' , '1');
 
 		// social networks lists
-		$nodesList = _post('share_on_nodes' , false , 'array' );
+		$nodesList = FS_post('share_on_nodes' , false , 'array' );
 
 		// if false, may be from xmlrpc, external application or etc... then load ol active nodes
 		if( $nodesList === false && !isset($_POST['share_checked']) && $new_status != 'draft' )
 		{
 			$nodesList = [];
 
-			$accounts = wpDB()->get_results(
-				wpDB()->prepare("
-					SELECT tb2.id, tb2.driver, tb1.filter_type, tb1.categories, 'account' AS node_type FROM ".wpTable('account_status')." tb1
-					LEFT JOIN ".wpTable('accounts')." tb2 ON tb2.id=tb1.account_id
+			$accounts = FSwpDB()->get_results(
+				FSwpDB()->prepare("
+					SELECT tb2.id, tb2.driver, tb1.filter_type, tb1.categories, 'account' AS node_type FROM ".FSwpTable('account_status')." tb1
+					LEFT JOIN ".FSwpTable('accounts')." tb2 ON tb2.id=tb1.account_id
 					WHERE tb1.user_id=%d" , [ $userId ])
 				, ARRAY_A
 			);
 
-			$activeNodes = wpDB()->get_results(
-				wpDB()->prepare("
-					SELECT tb2.id, tb2.driver, tb2.node_type, tb1.filter_type, tb1.categories FROM ".wpTable('account_node_status')." tb1
-					LEFT JOIN ".wpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
+			$activeNodes = FSwpDB()->get_results(
+				FSwpDB()->prepare("
+					SELECT tb2.id, tb2.driver, tb2.node_type, tb1.filter_type, tb1.categories FROM ".FSwpTable('account_node_status')." tb1
+					LEFT JOIN ".FSwpTable('account_nodes')." tb2 ON tb2.id=tb1.node_id
 					WHERE tb1.user_id=%d" , [ $userId ])
 				, ARRAY_A
 			);
@@ -222,7 +222,7 @@ class PostMetaBox
 
 		if( !empty( $nodesList ) || $metaBoxLoader === 1 )
 		{
-			wpDB()->delete(wpTable('feeds') , [
+			FSwpDB()->delete(FSwpTable('feeds') , [
 				'post_id'       =>  $post_id,
 				'is_sended'     =>  '0'
 			]);
@@ -230,15 +230,18 @@ class PostMetaBox
 
 		$post_text_message = [];
 
-		$post_text_message['fb']        = _post('fs_post_text_message_fb' , '' , 'string');
-		$post_text_message['twitter']   = _post('fs_post_text_message_twitter' , '' , 'string');
-		$post_text_message['instagram'] = _post('fs_post_text_message_instagram' , '' , 'string');
-		$post_text_message['linkedin']  = _post('fs_post_text_message_linkedin' , '' , 'string');
-		$post_text_message['vk']        = _post('fs_post_text_message_vk' , '' , 'string');
-		$post_text_message['pinterest'] = _post('fs_post_text_message_pinterest' , '' , 'string');
-		$post_text_message['reddit']    = _post('fs_post_text_message_reddit' , '' , 'string');
-		$post_text_message['thumblr']   = _post('fs_post_text_message_thumblr' , '' , 'string');
-		$post_text_message['ok'] 		= _post('fs_post_text_message_ok' , '' , 'string');
+		$post_text_message['fb']		= FS_post('fs_post_text_message_fb' , '' , 'string');
+		$post_text_message['twitter']	= FS_post('fs_post_text_message_twitter' , '' , 'string');
+		$post_text_message['instagram']	= FS_post('fs_post_text_message_instagram' , '' , 'string');
+		$post_text_message['linkedin']	= FS_post('fs_post_text_message_linkedin' , '' , 'string');
+		$post_text_message['vk']		= FS_post('fs_post_text_message_vk' , '' , 'string');
+		$post_text_message['pinterest']	= FS_post('fs_post_text_message_pinterest' , '' , 'string');
+		$post_text_message['reddit']	= FS_post('fs_post_text_message_reddit' , '' , 'string');
+		$post_text_message['tumblr']	= FS_post('fs_post_text_message_tumblr' , '' , 'string');
+		$post_text_message['ok']		= FS_post('fs_post_text_message_ok' , '' , 'string');
+		$post_text_message['google_b']	= FS_post('fs_post_text_message_google_b' , '' , 'string');
+		$post_text_message['telegram']	= FS_post('fs_post_text_message_telegram' , '' , 'string');
+		$post_text_message['medium']	= FS_post('fs_post_text_message_medium' , '' , 'string');
 
 		if( $old_status == 'draft' )
 		{
@@ -251,8 +254,11 @@ class PostMetaBox
 			delete_post_meta( $post_id, '_fs_poster_cm_vk' );
 			delete_post_meta( $post_id, '_fs_poster_cm_pinterest' );
 			delete_post_meta( $post_id, '_fs_poster_cm_reddit' );
-			delete_post_meta( $post_id, '_fs_poster_cm_thumblr' );
+			delete_post_meta( $post_id, '_fs_poster_cm_tumblr' );
 			delete_post_meta( $post_id, '_fs_poster_cm_ok' );
+			delete_post_meta( $post_id, '_fs_poster_cm_google_b' );
+			delete_post_meta( $post_id, '_fs_poster_cm_telegram' );
+			delete_post_meta( $post_id, '_fs_poster_cm_medium' );
 		}
 
 		if( $new_status == 'draft' )
@@ -268,13 +274,16 @@ class PostMetaBox
 			add_post_meta( $post_id, '_fs_poster_cm_vk', $post_text_message['vk'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_pinterest', $post_text_message['pinterest'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_reddit', $post_text_message['reddit'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_thumblr', $post_text_message['thumblr'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_tumblr', $post_text_message['tumblr'], true );
 			add_post_meta( $post_id, '_fs_poster_cm_ok', $post_text_message['ok'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_google_b', $post_text_message['google_b'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_telegram', $post_text_message['telegram'], true );
+			add_post_meta( $post_id, '_fs_poster_cm_medium', $post_text_message['medium'], true );
 
 			return;
 		}
 
-		$postCats = getPostCatsArr( $post_id );
+		$postCats = FSgetPostCatsArr( $post_id );
 
 		if( !is_array( $nodesList ) )
 		{
@@ -344,12 +353,12 @@ class PostMetaBox
 					}
 				}
 
-				if( $driver == 'tumblr' && $nodeType == 'account' )
+				if( ( $driver == 'tumblr' || $driver == 'google_b' || $driver == 'telegram' ) && $nodeType == 'account' )
 				{
 					continue;
 				}
 
-				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company', 'subreddit'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
+				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company' , 'community', 'subreddit', 'location', 'chat', 'board', 'publication'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
 				{
 					continue;
 				}
@@ -363,20 +372,20 @@ class PostMetaBox
 
 				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
-					wpDB()->insert( wpTable('feeds'), [
+					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $post_id,
 						'node_type'             =>  $nodeType,
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
 						'custom_post_message'   =>  $customMessage,
-						'send_time'				=>	sendTime()
+						'send_time'				=>	FSsendTime()
 					]);
 				}
 
 				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
-					wpDB()->insert( wpTable('feeds'), [
+					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $post_id,
 						'node_type'             =>  $nodeType,
@@ -384,7 +393,7 @@ class PostMetaBox
 						'interval'              =>  $postInterval,
 						'feed_type'             =>  'story',
 						'custom_post_message'   =>  $customMessage,
-						'send_time'				=>	sendTime()
+						'send_time'				=>	FSsendTime()
 					]);
 				}
 			}

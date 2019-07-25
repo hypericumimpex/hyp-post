@@ -13,28 +13,28 @@ trait FSPShare
 
 		$feedId = (int)$_POST['id'];
 
-		require_once LIB_DIR . 'SocialNetworkPost.php';
+		require_once FS_LIB_DIR . 'SocialNetworkPost.php';
 
 		$res = SocialNetworkPost::post($feedId);
 
-		response(true, ['result' => $res]);
+		FSresponse(true, ['result' => $res]);
 	}
 
 	public function share_saved_post()
 	{
-		$postId = _post('post_id' , '0' , 'num');
-		$nodes = _post('nodes' , [] , 'array');
-		$background = !(_post('background' , '0' , 'string')) ? 0 : 1;
-		$custom_messages = _post('custom_messages' , [] , 'array');
+		$postId = FS_post('post_id' , '0' , 'num');
+		$nodes = FS_post('nodes' , [] , 'array');
+		$background = !(FS_post('background' , '0' , 'string')) ? 0 : 1;
+		$custom_messages = FS_post('custom_messages' , [] , 'array');
 
 		if( empty($postId) || empty($nodes) || $postId <= 0 )
 		{
-			response(false);
+			FSresponse(false);
 		}
 
-		$postInterval = (int)get_option('fs_post_interval' , '3');
+		$postInterval = (int)get_option('fs_post_interval' , '0');
 
-		$postCats = getPostCatsArr( $postId );
+		$postCats = FSgetPostCatsArr( $postId );
 		$insertedCount = 0;
 
 		foreach( $nodes AS $nodeId )
@@ -100,12 +100,12 @@ trait FSPShare
 					}
 				}
 
-				if( $driver == 'tumblr' && $nodeType == 'account' )
+				if( ( $driver == 'tumblr' || $driver == 'google_b' || $driver == 'telegram' ) && $nodeType == 'account' )
 				{
 					continue;
 				}
 
-				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company' , 'community', 'subreddit'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
+				if( !( in_array( $nodeType , ['account' , 'ownpage' , 'page' , 'group' , 'event' , 'blog' , 'company' , 'community', 'subreddit', 'location', 'chat', 'board', 'publication'] ) && is_numeric($nodeId) && $nodeId > 0 ) )
 				{
 					continue;
 				}
@@ -121,20 +121,20 @@ trait FSPShare
 
 				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
-					wpDB()->insert( wpTable('feeds'), [
+					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $postId,
 						'node_type'             =>  $nodeType,
 						'node_id'               =>  (int)$nodeId,
 						'interval'              =>  $postInterval,
 						'custom_post_message'   =>  $customMessage,
-						'send_time'				=>	sendTime()
+						'send_time'				=>	FSsendTime()
 					]);
 				}
 
 				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
-					wpDB()->insert( wpTable('feeds'), [
+					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $postId,
 						'node_type'             =>  $nodeType,
@@ -142,7 +142,7 @@ trait FSPShare
 						'interval'              =>  $postInterval,
 						'feed_type'             =>  'story',
 						'custom_post_message'   =>  $customMessage,
-						'send_time'				=>	sendTime()
+						'send_time'				=>	FSsendTime()
 					]);
 				}
 			}
@@ -150,7 +150,7 @@ trait FSPShare
 
 		if( !$insertedCount )
 		{
-			response(false, 'Not found active account or cammunity for shareing this post!');
+			FSresponse(false, 'Not found active account or cammunity for shareing this post!');
 		}
 
 		if( $background )
@@ -158,7 +158,7 @@ trait FSPShare
 			CronJob::setbackgroundTask( $postId );
 		}
 
-		response(true);
+		FSresponse(true);
 	}
 
 

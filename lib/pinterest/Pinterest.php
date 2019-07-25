@@ -24,18 +24,18 @@ class Pinterest
 
 		if( isset($me['error']) && isset($me['error']['message']) )
 		{
-			response(false , $me['error']['message'] );
+			FSresponse(false , $me['error']['message'] );
 		}
 
 		if( !isset($me['data']) )
 		{
-			response(false);
+			FSresponse(false);
 		}
 		$me = $me['data'];
 
 		$meId = $me['id'];
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'pinterest', 'profile_id' => $meId]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'pinterest', 'profile_id' => $meId]);
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -51,37 +51,52 @@ class Pinterest
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$accId,
 			'app_id'		=>	$appId,
 			'access_token'	=>	$accessToken
 		]);
 
 		// set default board
-		$boards = self::cmd('me/boards' , 'GET' , $accessToken , ['fields' => 'id,name'] , $proxy);
+		$boards = self::cmd('me/boards' , 'GET' , $accessToken , ['fields' => 'id,name,url,image'] , $proxy);
+
 		if( is_array($boards['data']) && !empty($boards['data']) )
 		{
-			$firstBoard = reset($boards['data']);
-			$boardId = $firstBoard['id'];
-			$boardName = $firstBoard['name'];
+			foreach ( $boards['data'] AS $board )
+			{
+				$boardId	= $board['id'];
+				$boardName	= $board['name'];
+				$screenName	= str_replace('https://www.pinterest.com/', '', $board['url']);
+				$image		= $board['image'];
 
-			wpDB()->update(wpTable('accounts') , [
-				'options'   =>  json_encode(['board' => ['id' => $boardId , 'name' => $boardName]])
-			] , ['id' => $accId]);
+				$image		= reset($image);
+				$image		= isset($image['url']) ? $image['url'] : '';
+
+				FSwpDB()->insert(FSwpTable('account_nodes') , [
+					'user_id'			=>	get_current_user_id(),
+					'driver'			=>	'pinterest',
+					'account_id'		=>	$accId,
+					'node_type'			=>	'board',
+					'node_id'			=>	$boardId,
+					'name'				=>	$boardName,
+					'cover'				=>	$image,
+					'screen_name'		=>	$screenName
+				]);
+			}
 		}
 	}
 
@@ -125,20 +140,10 @@ class Pinterest
 	 * @param string $proxy
 	 * @return array
 	 */
-	public static function sendPost( $accountInfo , $type , $message , $link , $images , $video , $accessToken , $proxy )
+	public static function sendPost( $boardId , $type , $message , $link , $images , $video , $accessToken , $proxy )
 	{
-		$options = json_decode($accountInfo['options'] , true);
-
-		if( !is_array($options) || !isset($options['board']['name']) )
-		{
-			return [
-				'status'	=>	'error',
-				'error_msg'	=>	'Default board for Pinterest account not selected (Settings > Accounts > Edit default Board)!'
-			];
-		}
-
 		$sendData = [
-			'board'   =>    $options['board']['id'],//$accountInfo['username'] . '/' . $options['board']['name'],
+			'board'   =>    $boardId,
 			'note'    =>    $message,
 			'link'    =>    $link
 		];
@@ -190,11 +195,11 @@ class Pinterest
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'pinterest']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'pinterest']);
 		if( !$appInf )
 		{
 			print 'Error! App not found!';
@@ -212,13 +217,13 @@ class Pinterest
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		if( !isset($_SESSION['save_app_id']) )
 		{
 			return false;
 		}
 
-		$code = _get('code' , '' , 'string');
+		$code = FS_get('code' , '' , 'string');
 
 		if( empty($code) )
 		{
@@ -243,7 +248,7 @@ class Pinterest
 			unset($_SESSION['fs_proxy_save']);
 		}
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'pinterest']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'pinterest']);
 		$appSecret = urlencode($appInf['app_secret']);
 		$appId2 = urlencode($appInf['app_id']);
 

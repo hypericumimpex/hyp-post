@@ -26,12 +26,12 @@ class Reddit
 
 		if( isset($me['error']) && isset($me['error']['message']) )
 		{
-			response(false , $me['error']['message'] );
+			FSresponse(false , $me['error']['message'] );
 		}
 
 		$meId = $me['id'];
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'reddit', 'profile_id' => $meId]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'reddit', 'profile_id' => $meId]);
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -45,21 +45,21 @@ class Reddit
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$accId,
 			'app_id'		=>	$appId,
 			'access_token'	=>	$accessToken,
@@ -193,12 +193,12 @@ class Reddit
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
 		$_SESSION['_state'] = md5(rand(111111111, 911111111));
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'reddit']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'reddit']);
 		if( !$appInf )
 		{
 			print 'Error! App not found!';
@@ -216,14 +216,14 @@ class Reddit
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		if( !isset($_SESSION['save_app_id']) || !isset($_SESSION['_state']) )
 		{
 			return false;
 		}
 
-		$code = _get('code' , '' , 'string');
-		$state = _get('state' , '' , 'string');
+		$code = FS_get('code' , '' , 'string');
+		$state = FS_get('state' , '' , 'string');
 
 		if( empty($code) || $state != $_SESSION['_state']  )
 		{
@@ -249,7 +249,7 @@ class Reddit
 			unset($_SESSION['fs_proxy_save']);
 		}
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'reddit']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'reddit']);
 		$appSecret = urlencode($appInf['app_secret']);
 		$appId2 = urlencode($appInf['app_id']);
 
@@ -292,10 +292,10 @@ class Reddit
 	{
 		$appId = $tokenInfo['app_id'];
 
-		$accountInf = wpFetch('accounts' , $tokenInfo['account_id']);
+		$accountInf = FSwpFetch('accounts' , $tokenInfo['account_id']);
 		$proxy = $accountInf['proxy'];
 
-		$appInf = wpFetch('apps' , $appId);
+		$appInf = FSwpFetch('apps' , $appId);
 		$appId2 = urlencode($appInf['app_id']);
 		$appSecret = urlencode($appInf['app_secret']);
 
@@ -318,7 +318,7 @@ class Reddit
 		$access_token = esc_html($params['access_token']);
 		$expiresIn = date('Y-m-d H:i:s' , time() + (int)$params['expires_in']);
 
-		wpDB()->update(wpTable('account_access_tokens') , [
+		FSwpDB()->update(FSwpTable('account_access_tokens') , [
 			'access_token'  =>  $access_token,
 			'expires_on'    =>  $expiresIn
 		] , ['id' => $tokenInfo['id']]);

@@ -1,14 +1,14 @@
 <?php defined('MODAL') or exit();?>
 <?php
 
-$accountsList = wpDB()->get_results(
-	wpDB()->prepare('SELECT *, \'account\' AS node_type, \'account\' AS category FROM ' . wpTable('accounts') . " WHERE (user_id=%d OR is_public=1) AND driver<>'tumblr' ORDER BY driver", [get_current_user_id()])
+$accountsList = FSwpDB()->get_results(
+	FSwpDB()->prepare('SELECT *, \'account\' AS node_type, \'account\' AS category FROM ' . FSwpTable('accounts') . " WHERE (user_id=%d OR is_public=1) AND driver<>'tumblr' ORDER BY driver", [get_current_user_id()])
 	, ARRAY_A
 );
 
 
-$pagesList = wpDB()->get_results(
-	wpDB()->prepare('SELECT * FROM ' . wpTable('account_nodes') . " WHERE (user_id=%d OR is_public=1) ORDER BY node_type", [get_current_user_id()])
+$pagesList = FSwpDB()->get_results(
+	FSwpDB()->prepare('SELECT * FROM ' . FSwpTable('account_nodes') . " WHERE (user_id=%d OR is_public=1) ORDER BY node_type", [get_current_user_id()])
 	, ARRAY_A
 );
 
@@ -249,7 +249,7 @@ foreach ( $nodesAll AS $nodeInf2 )
 
 		function dontShowNodesArr()
 		{
-			$notShowList = _post('dont_show' , [] , 'array');
+			$notShowList = FS_post('dont_show' , [] , 'array');
 
 			$listArr = [];
 			foreach ( $notShowList AS $nodeKey )
@@ -278,7 +278,7 @@ foreach ( $nodesAll AS $nodeInf2 )
 
 			?>
 			<div class="node_div<?=$isSub?>" data-id="<?=$val?>">
-				<div class="node_img"><img src="<?=profilePic($node);?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
+				<div class="node_img"><img src="<?=FSprofilePic($node);?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../images/no-photo.png'?>');"></div>
 				<div class="node_label">
 					<div class="node_label_title"><?=esc_html($node['name']);?></div>
 					<div class="node_category"><i class="far fa-paper-plane"></i> <?=esc_html(ucfirst($node['driver']) ) . ' <i class="fa fa-chevron-right " style="font-size: 10px; color: #CCC;"></i> ' . esc_html( $node['node_type'] );?></div>

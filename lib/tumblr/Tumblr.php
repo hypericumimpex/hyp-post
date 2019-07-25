@@ -1,5 +1,6 @@
 <?php
 
+
 class Tumblr
 {
 	private static $apps = [];
@@ -36,12 +37,12 @@ class Tumblr
 		}
 		catch (Exception $e)
 		{
-			response(false , esc_html($e->getMessage()));
+			FSresponse(false , esc_html($e->getMessage()));
 		}
 
 		$username = $me->user->name;
 
-		$checkLoginRegistered = wpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'tumblr', 'username' => $username]);
+		$checkLoginRegistered = FSwpFetch('accounts' , ['user_id' => get_current_user_id() , 'driver' => 'tumblr', 'username' => $username]);
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -53,23 +54,23 @@ class Tumblr
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$accId = wpDB()->insert_id;
+			$accId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$accId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $accId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $accId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $accId , 'app_id' => $appId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $accId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $accId] );
 		}
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	        =>	$accId,
 			'app_id'		        =>	$appId,
 			'access_token'	        =>	$accessToken,
@@ -78,7 +79,7 @@ class Tumblr
 
 		foreach($me->user->blogs AS $blogInf)
 		{
-			wpDB()->insert(wpTable('account_nodes') , [
+			FSwpDB()->insert(FSwpTable('account_nodes') , [
 				'user_id'			=>	get_current_user_id(),
 				'driver'			=>	'tumblr',
 				'screen_name'		=>	$blogInf->name,
@@ -101,7 +102,7 @@ class Tumblr
 	{
 		if( !isset(self::$apps[$appId]) )
 		{
-			self::$apps[$appId] = wpFetch('apps' , $appId);
+			self::$apps[$appId] = FSwpFetch('apps' , $appId);
 		}
 
 		return self::$apps[$appId];
@@ -123,7 +124,7 @@ class Tumblr
 	 */
 	public static function sendPost( $blogInfo , $type , $title , $message , $link , $images , $video , $accessToken , $accessTokenSecret , $appId , $proxy )
 	{
-		require_once LIB_DIR . 'vendor/autoload.php';
+		require_once FS_LIB_DIR . 'vendor/autoload.php';
 
 		$appInf = self::getAppInf($appId);
 
@@ -194,11 +195,11 @@ class Tumblr
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'tumblr']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'tumblr']);
 		if( !$appInf )
 		{
 			print 'Error! App not found!';
@@ -209,7 +210,7 @@ class Tumblr
 
 		$callbackUrl = self::callbackUrl();
 
-		require_once LIB_DIR . 'vendor/autoload.php';
+		require_once FS_LIB_DIR . 'vendor/autoload.php';
 
 		$client = new Tumblr\API\Client($consumerKey, $consumerSecret , null, null , $_SESSION['fs_proxy_save']);
 
@@ -244,13 +245,13 @@ class Tumblr
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		if( !isset($_SESSION['save_app_id']) || !isset($_SESSION['tmp_oauth_token']) || !isset($_SESSION['tmp_oauth_token_secret']) )
 		{
 			return false;
 		}
 
-		$code = _get('oauth_verifier' , '' , 'string');
+		$code = FS_get('oauth_verifier' , '' , 'string');
 
 		if( empty($code) )
 		{
@@ -265,7 +266,7 @@ class Tumblr
 
 		$appId = (int)$_SESSION['save_app_id'];
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'tumblr']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'tumblr']);
 		$consumerKey = urlencode($appInf['app_key']);
 		$consumerSecret = urlencode($appInf['app_secret']);
 
@@ -277,7 +278,7 @@ class Tumblr
 			unset($_SESSION['fs_proxy_save']);
 		}
 
-		require_once LIB_DIR . 'vendor/autoload.php';
+		require_once FS_LIB_DIR . 'vendor/autoload.php';
 
 		$client = new Tumblr\API\Client($consumerKey, $consumerSecret , $_SESSION['tmp_oauth_token'] , $_SESSION['tmp_oauth_token_secret'] , $proxy);
 

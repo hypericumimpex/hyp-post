@@ -1,10 +1,10 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$accountId = (int)_post('account_id' , '0' , 'num');
+$accountId = (int)FS_post('account_id' , '0' , 'num');
 $userId = (int)get_current_user_id();
 
-$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+$accountInf = FSwpDB()->get_row("SELECT * FROM ".FSwpTable('accounts')." WHERE id='{$accountId}' AND driver='reddit' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
 
 if( !$accountInf )
 {
@@ -53,6 +53,10 @@ if( !$accountInf )
 		width: 350px;
 		margin-top: 10px;
 	}
+
+
+
+
 </style>
 
 <span class="close" data-modal-close="true" >&times;</span>
@@ -61,14 +65,14 @@ if( !$accountInf )
 	<div style="text-align: center; margin-top: 30px; font-size: 18px; color: #999; font-weight: 600;">Add new subreddit</div>
 
 	<div style="width: 350px; margin-top: 20px;">
-		<div style="text-align: center;">Select subreddit:</div>
+		<div class="fs_label_c">Select subreddit:</div>
 		<div>
 			<select class="ws_form_element subreddit_select select2-init2">
 				<option></option>
 			</select>
 		</div>
 		<div class="categories_area" style="display: none;">
-			<div style="text-align: center;">Pick a category</div>
+			<div class="fs_label_c">Select flair</div>
 			<div>
 				<select class="ws_form_element flairs_select">
 
@@ -77,7 +81,7 @@ if( !$accountInf )
 		</div>
 		<div style="border-top: 1px solid #DDD; margin-top: 15px; padding-top: 15px;">
 
-			<div style="margin-bottom: 10px;"><label><input type="checkbox" class="categ_filter"> Post categories filter</label></div>
+			<div style="margin-bottom: 10px;"><label><input type="checkbox" class="categ_filter"> Filter by WP Post categories</label></div>
 
 			<div style="display: none;" class="post_categs_filter_area">
 				<div style="width: 350px;">
@@ -157,11 +161,11 @@ if( !$accountInf )
 	});
 
 	$("#proModal<?=$mn?> .select2-init").select2({
-		'placeholder': 'Select flairs...'
+		'placeholder': 'WP Post categ.'
 	});
 
 	$("#proModal<?=$mn?> .select2-init2").select2({
-		'placeholder': 'Select...',
+		'placeholder': 'Search subreddit... ( type minimum 1 char. for search )',
 		ajax: {
 			url: ajaxurl,
 			type: "POST",
@@ -202,9 +206,8 @@ if( !$accountInf )
 
 		fsCode.ajax( 'reddit_subreddit_save' , {'account_id': '<?=$accountId?>', 'subreddit': subreddit, 'flair': flair, 'flair_name': flairName , 'categories': cats, 'filter_type': filter_type}, function(result)
 		{
-			$("#subreddits-list-tbl > tbody").append('<tr data-id="'+result['id']+'"><td><span style="vertical-align: middle;">'+subreddit+'</span><a href="https://www.reddit.com/r/'+subreddit+'" target="_blank" class="ws_btn ws_tooltip" data-title="Subreddit link" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a></td><td>'+flairName+'</td><td style="padding-right: 44px;"><div class="node_chckbx ws_tooltip node_checked'+(categ_filter==1?'2':'')+'" data-title="<?=esc_html__('Click to change status' , 'fs-poster');?>" data-float="left" style="float: right;"><i class="fa fa-check"></i></div><button class="delete_btn delete_btn_desing ws_tooltip" data-title="Delete account" data-float="left"><i class="fa fa-trash"></i></button></td></tr>');
-
 			fsCode.modalHide( $("#proModal<?=$mn?>") );
+			$('#fs_account_supports .fs_social_network_div[data-setting="reddit"]').click();
 		});
 
 	});

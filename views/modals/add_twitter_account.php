@@ -1,7 +1,7 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$applications = wpFetchAll('apps' , ['driver' => 'twitter']);
+$applications = FSwpFetchAll('apps' , ['driver' => 'twitter']);
 ?>
 <style>
 	.twitter_logo > img
@@ -69,7 +69,7 @@ $applications = wpFetchAll('apps' , ['driver' => 'twitter']);
 		{
 			fsCode.toast("<?=esc_html__('Account added successfully!' , 'fs-poster')?>" , 'success');
 			fsCode.modalHide($("#proModal<?=$mn?>"));
-			$('#account_supports .social_network_div[data-setting="twitter"]').click();
+			$('#fs_account_supports .fs_social_network_div[data-setting="twitter"]').click();
 		}
 		else
 		{

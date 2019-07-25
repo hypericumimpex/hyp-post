@@ -4,10 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 wp_enqueue_media();
 
-wpDB()->query("DELETE FROM " . wpDB()->base_prefix . "posts WHERE post_type='fs_post_tmp' AND CAST(post_date AS DATE)<CAST(NOW() AS DATE)");
+$postId = (int)FS_get('post_id' , '0' , 'num');
 
-
-$postId = _get('post_id' , '0' , 'num');
+FSwpDB()->query("DELETE FROM " . FSwpDB()->base_prefix . "posts WHERE post_type='fs_post_tmp' AND id<>'{$postId}' AND CAST(post_date AS DATE)<CAST(NOW() AS DATE)");
 
 $postInf = get_post($postId , ARRAY_A);
 if( !in_array( $postInf['post_type'] , ['fs_post', 'fs_post_tmp'] ) || $postInf['post_author'] != get_current_user_id() )
@@ -150,7 +149,7 @@ else
 		<div class="accounts_list_panel">
 			<div style="position: relative;">
 				<?php
-				require_once VIEWS_DIR . 'post_meta_box.php';
+				require_once FS_VIEWS_DIR . 'post_meta_box.php';
 				?>
 			</div>
 		</div>
@@ -176,13 +175,13 @@ else
 						<?php
 						$currentUserId = (int)get_current_user_id();
 
-						$posts = wpDB()->get_results('SELECT * FROM ' . wpDB()->base_prefix . "posts WHERE post_type='fs_post' AND post_author='" . $currentUserId ."' ORDER BY ID DESC", ARRAY_A);
+						$posts = FSwpDB()->get_results('SELECT * FROM ' . FSwpDB()->base_prefix . "posts WHERE post_type='fs_post' AND post_author='" . $currentUserId ."' ORDER BY ID DESC", ARRAY_A);
 
 						foreach( $posts AS $post )
 						{
 							print '<tr data-id="' . (int)$post['ID'] . '">';
 							print '<td>' . (int)$post['ID'] . '</td>';
-							print '<td><a href="?page=fs-poster-share&post_id=' . (int)$post['ID'] . '" style="text-decoration: none;">[ ' . htmlspecialchars(cutText($post['post_content'])) . ' ]</a></td>';
+							print '<td><a href="?page=fs-poster-share&post_id=' . (int)$post['ID'] . '" style="text-decoration: none;">[ ' . htmlspecialchars(FScutText($post['post_content'])) . ' ]</a></td>';
 							print '<td>
 								' . date('Y-m-d H:i', strtotime($post['post_date'])) . '
 								<button class="delete_post_btn delete_btn_desing ws_tooltip" data-title="Delete saved post" data-float="left"><i class="fa fa-trash"></i></button>

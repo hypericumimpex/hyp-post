@@ -176,7 +176,7 @@ if ( !class_exists('Puc_v4p4_Plugin_UpdateChecker', false) ):
 		 *
 		 * @return string Version number.
 		 */
-		public function getInstalledVersion(){
+		public function FSgetInstalledVersion(){
 			if ( isset($this->cachedInstalledVersion) ) {
 				return $this->cachedInstalledVersion;
 			}
@@ -638,7 +638,7 @@ if ( !class_exists('Puc_v4p4_Plugin_UpdateChecker', false) ):
 				$muPluginDir = realpath(WPMU_PLUGIN_DIR);
 				$pluginPath  = realpath($this->pluginAbsolutePath);
 
-				$cachedResult = (strpos($pluginPath, $muPluginDir) === 0);
+				$cachedResult = false;//(strpos($pluginPath, (string)$muPluginDir) === 0);
 			}
 
 			return $cachedResult;

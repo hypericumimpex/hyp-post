@@ -1,6 +1,6 @@
 <?php
 
-require_once LIB_DIR . 'FSCurl.php';
+require_once FS_LIB_DIR . 'FSCurl.php';
 
 class FacebookLib
 {
@@ -174,7 +174,7 @@ class FacebookLib
 
 		if( isset($me['error']) )
 		{
-			response(false , isset($me['error']['message']) ? $me['error']['message'] : 'Error!');
+			FSresponse(false , isset($me['error']['message']) ? $me['error']['message'] : 'Error!');
 		}
 
 		if( !isset($me['id']) )
@@ -191,7 +191,7 @@ class FacebookLib
 
 		$meId = isset($me['id']) ? $me['id'] : 0;
 
-		$checkLoginRegistered = wpDB()->get_row( wpDB()->prepare( "SELECT * FROM ".wpTable('accounts')." WHERE user_id=%d AND driver='fb' AND profile_id=%s" , [get_current_user_id() ,$meId] ) , ARRAY_A );
+		$checkLoginRegistered = FSwpDB()->get_row( FSwpDB()->prepare( "SELECT * FROM ".FSwpTable('accounts')." WHERE user_id=%d AND driver='fb' AND profile_id=%s" , [get_current_user_id() ,$meId] ) , ARRAY_A );
 
 		$dataSQL = [
 			'user_id'			=>	get_current_user_id(),
@@ -206,25 +206,25 @@ class FacebookLib
 
 		if( !$checkLoginRegistered )
 		{
-			wpDB()->insert(wpTable('accounts') , $dataSQL);
+			FSwpDB()->insert(FSwpTable('accounts') , $dataSQL);
 
-			$fbAccId = wpDB()->insert_id;
+			$fbAccId = FSwpDB()->insert_id;
 		}
 		else
 		{
 			$fbAccId = $checkLoginRegistered['id'];
 
-			wpDB()->update(wpTable('accounts') , $dataSQL , ['id' => $fbAccId]);
+			FSwpDB()->update(FSwpTable('accounts') , $dataSQL , ['id' => $fbAccId]);
 
-			wpDB()->delete( wpTable('account_access_tokens')  , ['account_id' => $fbAccId , 'app_id' => $appId] );
+			FSwpDB()->delete( FSwpTable('account_access_tokens')  , ['account_id' => $fbAccId , 'app_id' => $appId] );
 
-			wpDB()->delete( wpTable('account_nodes')  , ['account_id' => $fbAccId] );
+			FSwpDB()->delete( FSwpTable('account_nodes')  , ['account_id' => $fbAccId] );
 		}
 
 		$expiresOn = self::getAccessTokenExpiresDate( $accessToken , $proxy );
 
 		// acccess token
-		wpDB()->insert( wpTable('account_access_tokens') ,  [
+		FSwpDB()->insert( FSwpTable('account_access_tokens') ,  [
 			'account_id'	=>	$fbAccId,
 			'app_id'		=>	$appId,
 			'expires_on'	=>	$expiresOn,
@@ -250,7 +250,7 @@ class FacebookLib
 				{
 					$returnStatisticsData['ownpages'][] = [$accountInfo['id'] , $accountInfo['name']];
 
-					wpDB()->insert(wpTable('account_nodes') , [
+					FSwpDB()->insert(FSwpTable('account_nodes') , [
 						'user_id'			=>	get_current_user_id(),
 						'driver'			=>	'fb',
 						'account_id'		=>	$fbAccId,
@@ -288,7 +288,7 @@ class FacebookLib
 
 					$returnStatisticsData['pages'][] = [$accountInfo['id'] , $accountInfo['name']];
 
-					wpDB()->insert(wpTable('account_nodes') , [
+					FSwpDB()->insert(FSwpTable('account_nodes') , [
 						'user_id'			=>	get_current_user_id(),
 						'driver'			=>	'fb',
 						'account_id'		=>	$fbAccId,
@@ -329,7 +329,7 @@ class FacebookLib
 					}
 					$returnStatisticsData['groups'][] = [$accountInfo['id'] , $accountInfo['name'] , $cover];
 
-					wpDB()->insert(wpTable('account_nodes') , [
+					FSwpDB()->insert(FSwpTable('account_nodes') , [
 						'user_id'			=>	get_current_user_id(),
 						'driver'			=>	'fb',
 						'account_id'		=>	$fbAccId,
@@ -398,7 +398,7 @@ class FacebookLib
 	public static function sendPost( $nodeFbId , $type , $message , $preset_id , $link , $images , $video , $accessToken , $proxy )
 	{
 		$sendData = [
-			'message'	=>	spintax( $message )
+			'message'	=>	$message
 		];
 
 		if( $preset_id > 0 && $type == 'status' )
@@ -407,7 +407,7 @@ class FacebookLib
 		}
 		else if( $type == 'link' )
 		{
-			$sendData['link'] = spintax( $link );
+			$sendData['link'] = $link;
 		}
 
 		$endPoint = 'feed';
@@ -420,7 +420,7 @@ class FacebookLib
 			foreach($images AS $imageURL)
 			{
 				$sendData2 = [
-					'url' 		=>	spintax( $imageURL ),
+					'url' 		=>	$imageURL,
 					'published'	=>	'false',
 					'caption'	=>	''
 				];
@@ -438,8 +438,8 @@ class FacebookLib
 		if( $type == 'video' )
 		{
 			$endPoint = 'videos';
-			$sendData['file_url']		= spintax( $video );
-			$sendData['description']	= spintax( $message );
+			$sendData['file_url']		= $video;
+			$sendData['description']	= $message;
 		}
 
 		$result = self::cmd('/' . $nodeFbId . '/' . $endPoint , 'POST' , $accessToken , $sendData , $proxy);
@@ -478,11 +478,11 @@ class FacebookLib
 	 */
 	public static function getLoginURL($appId)
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		$_SESSION['save_app_id'] = $appId;
-		$_SESSION['fs_proxy_save'] = _get('proxy' , '' , 'string');
+		$_SESSION['fs_proxy_save'] = FS_get('proxy' , '' , 'string');
 
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
 		$appId = $appInf['app_id'];
 
 		$permissions = ['email', 'public_profile', 'user_birthday',/* 'user_posts' , 'user_likes' , */'publish_actions' , 'manage_pages' , 'publish_pages' , 'user_managed_groups' , 'pages_show_list'];
@@ -498,13 +498,13 @@ class FacebookLib
 	 */
 	public static function getAccessToken( )
 	{
-		do_action('registerSession');
+		do_action('FSregisterSession');
 		if( !isset($_SESSION['save_app_id']) )
 		{
 			return false;
 		}
 
-		$code = _get('code' , '' , 'string');
+		$code = FS_get('code' , '' , 'string');
 
 		if( empty($code) )
 		{
@@ -526,7 +526,7 @@ class FacebookLib
 
 			unset($_SESSION['fs_proxy_save']);
 		}
-		$appInf = wpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
+		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
 		$appSecret = $appInf['app_secret'];
 		$appId = $appInf['app_id'];
 

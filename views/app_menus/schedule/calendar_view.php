@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<link rel="stylesheet" href="<?=PLUGIN_URL?>css/fullcalendar.min.css">
+<link rel="stylesheet" href="<?=FS_PLUGIN_URL?>css/fullcalendar.min.css">
 
 <style>
 	.monthPre{
@@ -257,8 +257,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 
-<script src="<?=PLUGIN_URL?>js/jquery-ui.js"></script>
-<link rel="stylesheet" href="<?=PLUGIN_URL?>css/jquery-ui.css">
+<script src="<?=FS_PLUGIN_URL?>js/jquery-ui.js"></script>
+<link rel="stylesheet" href="<?=FS_PLUGIN_URL?>css/jquery-ui.css">
 
 <script>
 	function displayCalendar(_year , _month)

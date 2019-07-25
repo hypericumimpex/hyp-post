@@ -3,7 +3,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
+$schedules = FSwpDB()->get_results(
+	FSwpDB()->prepare( 'SELECT *, (SELECT COUNT(0) FROM `' . FSwpTable('feeds') . '` WHERE `schedule_id`=tb1.id) AS `shares_count` FROM `' . FSwpTable('schedules') . '` tb1 WHERE `user_id`=%d', [get_current_user_id()] ),
+	ARRAY_A
+);
+
+
+
+$namesArray1 = [
+	'random2'	=>	'Randomly ( without dublicates )',
+	'random'	=>	'Randomly',
+	'old_first'	=>	'Old posts first',
+	'new_first'	=>	'New posts first'
+];
+
+$namesArray2 = [
+	'all'				=>	'All posts',
+	'this_week'			=>	'This week added posts',
+	'previously_week'	=>	'Previously week added posts',
+	'this_month'		=>	'This month added posts',
+	'previously_month'	=>	'Previously month added posts',
+	'this_year'			=>	'This year added posts',
+	'last_30_days'		=>	'Last 30 days',
+	'last_60_days'		=>	'Last 60 days',
+];
+
 ?>
 <style>
 	span>i
@@ -54,14 +78,12 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 		display: none;
 	}
 </style>
-<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
-<script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
 <div style="margin: 40px 80px;">
 	<span style="color: #888; font-size: 17px; font-weight: 600; line-height: 36px;"><span id="schedules_count"><?php print count($schedules);?></span> <?=esc_html__('schedule(s) added' , 'fs-poster');?></span>
 	<div style="float: right;">
 		<a href="?page=fs-poster-schedule&view=calendar" class="ws_btn ws_bg_info" style="margin-right: 10px;"><i class="fa fa-calendar-check"></i> <?=esc_html__('CALENDAR' , 'fs-poster');?></a>
-		<button type="button" class="ws_btn ws_bg_dark" data-load-modal="add_schedule" id="createNeScheduleBtn"><i class="fa fa-plus"></i> <?=esc_html__('SCHEDULE' , 'fs-poster');?></button>
+		<button type="button" class="ws_btn ws_bg_dark" data-load-modal="add_schedule" id="createNewScheduleBtn"><i class="fa fa-plus"></i> <?=esc_html__('SCHEDULE' , 'fs-poster');?></button>
 	</div>
 </div>
 
@@ -76,101 +98,66 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 		<thead>
 		<tr>
 			<th><?=esc_html__('TITLE' , 'fs-poster');?> <i class="fa fa-caret-down"></i></th>
-			<th style="width: 150px;"><?=esc_html__('DATE' , 'fs-poster');?></th>
-			<th style="width: 150px;"><?=esc_html__('INTERVAL' , 'fs-poster');?></th>
-			<th style="width: 250px;"><?=esc_html__('STATUS' , 'fs-poster');?></th>
+			<th style="width: 220px;"><?=esc_html__('DATE, TIME' , 'fs-poster');?></th>
+			<th style="width: 125px;"><?=esc_html__('INTERVAL' , 'fs-poster');?></th>
+			<th style="width: 200px;"><?=esc_html__('STATUS' , 'fs-poster');?></th>
 		</tr>
 		</thead>
 		<tbody>
 		<?php
 		foreach($schedules AS $scheduleInf)
 		{
-			$statusBtn = '';
+			$statusBtn = 'info';
 			if( $scheduleInf['status'] == 'finished' )
-			{
 				$statusBtn = 'success';
-			}
-			else if( $scheduleInf['status'] == 'paused' )
-			{
+
+			if( $scheduleInf['status'] == 'paused' )
 				$statusBtn = 'danger';
+
+			$categoryFilter = (int)$scheduleInf['category_filter'];
+
+			if( empty($categoryFilter) )
+			{
+				$categoryFiltersTxt = '';
 			}
 			else
 			{
-				$statusBtn = 'info';
+				$getCategNames = get_term($categoryFilter);
+				$categoryFiltersTxt = ' , Category filter: <u>' . htmlspecialchars($getCategNames->name) . '</u>';
 			}
 
-			$postTypesTxt = str_replace('|' , ', ' , $scheduleInf['post_type_filter']);
-			$postTypesTxt = $postTypesTxt == '' ? ' - ' : htmlspecialchars($postTypesTxt);
-
-			$categoryFilters = explode('|' , (string)$scheduleInf['category_filter']);
-			$categoryFiltersArr = [];
-			foreach ($categoryFilters AS $categId)
-			{
-				if( is_numeric($categId) && $categId > 0 )
-				{
-					$categoryFiltersArr[] = (int)$categId;
-				}
-			}
-
-			if( empty($categoryFiltersArr) )
-			{
-				$categoryFiltersTxt = ' none ';
-			}
-			else
-			{
-				$getCategNames = wpDB()->get_row("SELECT group_concat(name , ', ') AS categs_name FROM ".wpDB()->base_prefix."terms WHERE term_id IN ('" . implode("','" , $categoryFiltersArr) . "')", ARRAY_A);
-				$categoryFiltersTxt = htmlspecialchars($getCategNames['categs_name']);
-			}
-
-			$namesArray1 = [
-				'random'	=>	'Random',
-				'old_first'	=>	'Old posts first',
-				'new_first'	=>	'New posts first'
-			];
-
-			$namesArray2 = [
-				'all'				=>	'All posts',
-				'this_week'			=>	'This week added posts',
-				'previously_week'	=>	'Previously week added posts',
-				'this_month'		=>	'This month added posts',
-				'previously_month'	=>	'Previously month added posts',
-				'this_year'			=>	'This year added posts'
-			];
-
-			$addTxt = (isset($namesArray1[$scheduleInf['post_sort']]) ? $namesArray1[$scheduleInf['post_sort']] : '-') . ' ; ';
-			$addTxt .= (isset($namesArray2[$scheduleInf['post_date_filter']]) ? $namesArray2[$scheduleInf['post_date_filter']] : '-');
+			$addTxt = (isset($namesArray1[$scheduleInf['post_sort']]) ? ' , Order post by: ' . '<u>' . $namesArray1[$scheduleInf['post_sort']] . '</u>' : '');
+			$addTxt .= (isset($namesArray2[$scheduleInf['post_date_filter']]) ? ' , Select posts added in: ' . '<u>'.$namesArray2[$scheduleInf['post_date_filter']].'</u>' : '');
 
 			$postIds = $scheduleInf['post_ids'];
 			$postIds = empty($postIds) ? [] : explode(',', $postIds);
+
+			$nextPostDate = $scheduleInf['status'] == 'active' ? date('Y-m-d H:i' , strtotime($scheduleInf['next_execute_time'])) : '-';
 
 			?>
 			<tr data-id="<?=$scheduleInf['id']?>">
 				<td>
 					<span><input type="checkbox" class="tr_checkbox"></span>
 					<i class="fa fa-rocket ws_color_danger" style="padding-right: 8px; padding-left: 8px;"></i>
-					<?=cutText(esc_html($scheduleInf['title']))?>
-					<span style="padding: 5px;" class="ws_tooltip" data-title="Category filter: <?=$categoryFiltersTxt?> ; Post types: <?=$postTypesTxt?> ; <?=$addTxt?>"><i class="fa fa-info-circle"></i></span>
-				</td>
-				<td style="font-size: 14px; color: #888; width: 300px;">
-					<?php
-					if( $scheduleInf['start_date'] == $scheduleInf['end_date'] && !empty( $scheduleInf['share_time'] ) )
-					{
-						?>
-						<div style="margin-bottom: 5px;"><i class="far fa-calendar-alt"></i> <?=date('Y-m-d' , strtotime($scheduleInf['start_date']))?></div>
-						<div><i class="far fa-clock"></i> <?=date('H:i' , strtotime($scheduleInf['share_time']))?></div>
-						<?php
-					}
-					else
-					{
-						?>
-						<div style="margin-bottom: 5px;"><b>Start date:</b> <i class="far fa-calendar-alt"></i> <?=date('Y-m-d' , strtotime($scheduleInf['start_date']))?></div>
-						<div><b>End date:</b> <i class="far fa-calendar-alt"></i> <?=date('Y-m-d' , strtotime($scheduleInf['end_date']))?></div>
-						<?php
-					}
-					?>
 
+					<div style="display: inline-block; vertical-align: middle">
+						<div>
+							<?=esc_html(FScutText($scheduleInf['title'], 55))?>
+						</div>
+						<div style="font-size: 11px; font-weight: 500; color: #999; margin-right: 25px;">
+							Post type: <u><?=esc_html(ucfirst($scheduleInf['post_type_filter']))?></u><?=$categoryFiltersTxt?><?=$addTxt?>
+						</div>
+					</div>
 				</td>
-				<td style="font-size: 14px; color: #888;"><i class="fa fa-sync"></i> <?=( count( $postIds ) == 1 ? 'no interval' : ($scheduleInf['interval'] % 24 == 0 ? ($scheduleInf['interval'] / 24) . ' day(s)' : $scheduleInf['interval'] . ' hour(s)'))?></td>
+				<td style="font-size: 14px; color: #888;">
+					<div>
+						Start date: <i class="far fa-calendar-alt"></i> <?=date('Y-m-d H:i' , strtotime($scheduleInf['start_date'] . ' ' . $scheduleInf['share_time']))?>
+					</div>
+					<div>
+						Next post: <i class="far fa-calendar-alt"></i> <?=$nextPostDate?>
+					</div>
+				</td>
+				<td style="font-size: 14px; color: #888;"><i class="fa fa-sync"></i> <?=( count( $postIds ) == 1 ? 'no interval' : ($scheduleInf['interval'] % 1440 == 0 ? ($scheduleInf['interval'] / 1440) . ' day(s)' : ($scheduleInf['interval'] % 60 == 0 ? ($scheduleInf['interval'] / 60) . ' hour(s)' : $scheduleInf['interval'] . ' minute(s)')))?></td>
 				<td>
 					<button type="button" class="ws_btn ws_btn_small ws_bg_<?=$statusBtn?>"><?=esc_html($scheduleInf['status'])?></button>
 
@@ -178,20 +165,20 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 					if( $scheduleInf['status'] == 'active' )
 					{
 						?>
-						<button type="button" class="ws_btn ws_btn_small ws_bg_purple ws_tooltip changeStatus" data-title="<?=esc_html__('Pause schedule' , 'fs-poster');?>"><i class="fa fa-pause"></i></button>
+						<button type="button" class="ws_btn ws_btn_small ws_bg_purple ws_tooltip changeStatus" data-title="<?=esc_html__('Pause shares' , 'fs-poster');?>"><i class="fa fa-pause"></i></button>
 						<?php
 					}
 					else if($scheduleInf['status'] == 'paused')
 					{
 						?>
-						<button type="button" class="ws_btn ws_btn_small ws_bg_purple ws_tooltip changeStatus" data-title="<?=esc_html__('Play schedule' , 'fs-poster');?>"><i class="fa fa-play"></i></button>
+						<button type="button" class="ws_btn ws_btn_small ws_bg_purple ws_tooltip changeStatus" data-title="<?=esc_html__('Resume shares' , 'fs-poster');?>"><i class="fa fa-play"></i></button>
 						<?php
 					}
 					?>
 
-					<button type="button" class="ws_btn ws_btn_small ws_bg_warning ws_tooltip" data-title="<?=esc_html__('Show published posts list' , 'fs-poster');?>" data-load-modal="posts_list" data-parameter-schedule_id="<?=$scheduleInf['id']?>"><i class="fa fa-list"></i></button>
+					<button type="button" class="ws_btn ws_btn_small ws_bg_warning ws_tooltip" data-title="<?=esc_html__('Logs' , 'fs-poster');?>" data-load-modal="posts_list" data-parameter-schedule_id="<?=$scheduleInf['id']?>"><i class="fa fa-list"></i> <?=(int)$scheduleInf['shares_count']?></button>
 
-					<button class="delete_schedule_btn delete_btn_desing ws_tooltip" data-title="<?=esc_html__('Delete schedule' , 'fs-poster');?>" data-float="left"><i class="fa fa-trash"></i></button>
+					<button class="delete_schedule_btn delete_btn_desing"><i class="fa fa-trash"></i></button>
 				</td>
 			</tr>
 			<?php
@@ -206,8 +193,8 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 		</tbody>
 	</table>
 </div>
-<script src="<?=PLUGIN_URL?>js/jquery-ui.js"></script>
-<link rel="stylesheet" href="<?=PLUGIN_URL?>css/jquery-ui.css">
+<script src="<?=FS_PLUGIN_URL?>js/jquery-ui.js"></script>
+<link rel="stylesheet" href="<?=FS_PLUGIN_URL?>css/jquery-ui.css">
 <script>
 	jQuery(document).ready(function()
 	{
@@ -325,7 +312,7 @@ $schedules = wpFetchAll('schedules' , ['user_id' => get_current_user_id()]);
 		if( isset($_GET['add']) )
 		{
 		?>
-		$("#createNeScheduleBtn").click();
+		$("#createNewScheduleBtn").click();
 		<?php
 		}
 		?>

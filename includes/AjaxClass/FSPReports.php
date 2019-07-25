@@ -12,9 +12,9 @@ trait FSPReports
 		$type = (string)$_POST['type'];
 
 		$query = [
-			'dayly'     =>  "SELECT CAST(send_time AS DATE) AS date , COUNT(0) AS c FROM ".wpTable('feeds')." WHERE is_sended=1 GROUP BY CAST(send_time AS DATE)",
-			'monthly'   =>  "SELECT CONCAT(YEAR(send_time), '-', MONTH(send_time) , '-01') AS date , COUNT(0) AS c FROM ".wpTable('feeds')." WHERE is_sended=1 AND send_time > ADDDATE(now(),INTERVAL -1 YEAR) GROUP BY YEAR(send_time), MONTH(send_time)",
-			'yearly'    =>  "SELECT CONCAT(YEAR(send_time), '-01-01') AS date , COUNT(0) AS c FROM ".wpTable('feeds')." WHERE is_sended=1 GROUP BY YEAR(send_time)"
+			'dayly'     =>  "SELECT CAST(send_time AS DATE) AS date , COUNT(0) AS c FROM ".FSwpTable('feeds')." WHERE is_sended=1 GROUP BY CAST(send_time AS DATE)",
+			'monthly'   =>  "SELECT CONCAT(YEAR(send_time), '-', MONTH(send_time) , '-01') AS date , COUNT(0) AS c FROM ".FSwpTable('feeds')." WHERE is_sended=1 AND send_time > ADDDATE(now(),INTERVAL -1 YEAR) GROUP BY YEAR(send_time), MONTH(send_time)",
+			'yearly'    =>  "SELECT CONCAT(YEAR(send_time), '-01-01') AS date , COUNT(0) AS c FROM ".FSwpTable('feeds')." WHERE is_sended=1 GROUP BY YEAR(send_time)"
 		];
 
 		$dateFormat = [
@@ -23,7 +23,7 @@ trait FSPReports
 			'yearly'  => 'Y',
 		];
 
-		$dataSQL = wpDB()->get_results($query[$type] , ARRAY_A);
+		$dataSQL = FSwpDB()->get_results($query[$type] , ARRAY_A);
 
 		$labels = [];
 		$datas = [];
@@ -33,7 +33,7 @@ trait FSPReports
 			$labels[] = date( $dateFormat[$type] , strtotime($dInf['date']) );
 		}
 
-		response(true , [
+		FSresponse(true , [
 			'data' => $datas,
 			'labels' => $labels
 		]);
@@ -49,9 +49,9 @@ trait FSPReports
 		$type = (string)$_POST['type'];
 
 		$query = [
-			'dayly'     =>  "SELECT CAST(send_time AS DATE) AS date , SUM(visit_count) AS c FROM ".wpTable('feeds')." WHERE is_sended=1 GROUP BY CAST(send_time AS DATE)",
-			'monthly'   =>  "SELECT CONCAT(YEAR(send_time), '-', MONTH(send_time) , '-01') AS date , SUM(visit_count) AS c FROM ".wpTable('feeds')." WHERE send_time > ADDDATE(now(),INTERVAL -1 YEAR) AND is_sended=1 GROUP BY YEAR(send_time), MONTH(send_time)",
-			'yearly'    =>  "SELECT CONCAT(YEAR(send_time), '-01-01') AS date , SUM(visit_count) AS c FROM ".wpTable('feeds')." WHERE is_sended=1 GROUP BY YEAR(send_time)"
+			'dayly'     =>  "SELECT CAST(send_time AS DATE) AS date , SUM(visit_count) AS c FROM ".FSwpTable('feeds')." WHERE is_sended=1 GROUP BY CAST(send_time AS DATE)",
+			'monthly'   =>  "SELECT CONCAT(YEAR(send_time), '-', MONTH(send_time) , '-01') AS date , SUM(visit_count) AS c FROM ".FSwpTable('feeds')." WHERE send_time > ADDDATE(now(),INTERVAL -1 YEAR) AND is_sended=1 GROUP BY YEAR(send_time), MONTH(send_time)",
+			'yearly'    =>  "SELECT CONCAT(YEAR(send_time), '-01-01') AS date , SUM(visit_count) AS c FROM ".FSwpTable('feeds')." WHERE is_sended=1 GROUP BY YEAR(send_time)"
 		];
 
 		$dateFormat = [
@@ -60,7 +60,7 @@ trait FSPReports
 			'yearly'  => 'Y',
 		];
 
-		$dataSQL = wpDB()->get_results($query[$type] , ARRAY_A);
+		$dataSQL = FSwpDB()->get_results($query[$type] , ARRAY_A);
 
 		$labels = [];
 		$datas = [];
@@ -70,7 +70,7 @@ trait FSPReports
 			$labels[] = date( $dateFormat[$type] , strtotime($dInf['date']) );
 		}
 
-		response(true , [
+		FSresponse(true , [
 			'data' => $datas,
 			'labels' => $labels
 		]);
@@ -78,14 +78,14 @@ trait FSPReports
 
 	public function report3_data()
 	{
-		$page = _post('page' , '0' , 'num');
-		$schedule_id = _post('schedule_id' , '0' , 'num');
+		$page = FS_post('page' , '0' , 'num');
+		$schedule_id = FS_post('schedule_id' , '0' , 'num');
 
-		$rows_count2 = _post('rows_count' , '4' , 'int', ['4', '8', '15']);
+		$rows_count2 = FS_post('rows_count' , '4' , 'int', ['4', '8', '15']);
 
 		if( !($page > 0) )
 		{
-			response(false);
+			FSresponse(false);
 		}
 
 		$limit = $rows_count2;
@@ -99,8 +99,8 @@ trait FSPReports
 
 		$userId = (int)get_current_user_id();
 
-		$allCount = wpDB()->get_row("SELECT COUNT(0) AS c FROM " . wpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd , ARRAY_A);
-		$getData = wpDB()->get_results("SELECT * FROM " . wpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd . " ORDER BY id DESC LIMIT $offset , $limit" , ARRAY_A);
+		$allCount = FSwpDB()->get_row("SELECT COUNT(0) AS c FROM " . FSwpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd , ARRAY_A);
+		$getData = FSwpDB()->get_results("SELECT * FROM " . FSwpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd . " ORDER BY id DESC LIMIT $offset , $limit" , ARRAY_A);
 		$resultData = [];
 
 		foreach($getData AS $feedInf)
@@ -109,7 +109,7 @@ trait FSPReports
 
 			$nodeInfTable = $feedInf['node_type'] == 'account' ? 'accounts' : 'account_nodes';
 
-			$nodeInf = wpFetch($nodeInfTable , $feedInf['node_id']);
+			$nodeInf = FSwpFetch($nodeInfTable , $feedInf['node_id']);
 			if( $nodeInf && $feedInf['node_type'] == 'account' )
 			{
 				$nodeInf['node_type'] = 'account';
@@ -124,7 +124,7 @@ trait FSPReports
 
 			if( !empty($feedInf['driver_post_id']) )
 			{
-				$nInf = getAccessToken($feedInf['node_type'] , $feedInf['node_id']);
+				$nInf = FSgetAccessToken($feedInf['node_type'] , $feedInf['node_id']);
 
 				$proxy          = $nInf['info']['proxy'];
 				$accessToken    = $nInf['access_token'];
@@ -132,18 +132,18 @@ trait FSPReports
 				$accountId	    = $nInf['account_id'];
 				$appId			= $nInf['app_id'];
 
-				$appInf			= wpFetch('apps' , $appId);
+				$appInf			= FSwpFetch('apps' , $appId);
 
 				if( $feedInf['driver'] == 'fb' )
 				{
 					if( empty( $options ) )
 					{
-						require_once LIB_DIR . "fb/FacebookLib.php";
+						require_once FS_LIB_DIR . "fb/FacebookLib.php";
 						$insights = FacebookLib::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
 					}
 					else
 					{
-						require_once LIB_DIR . "fb/FacebookCookieMethod.php";
+						require_once FS_LIB_DIR . "fb/FacebookCookieMethod.php";
 						$fbDriver = new FacebookCookieMethod( $accountId, $options, $proxy );
 						$insights = $fbDriver->getStats( $feedInf['driver_post_id'] );
 					}
@@ -151,41 +151,50 @@ trait FSPReports
 				}
 				else if( $feedInf['driver'] == 'vk' )
 				{
-					require_once LIB_DIR . "vk/Vk.php";
+					require_once FS_LIB_DIR . "vk/Vk.php";
 					$insights = Vk::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
 				}
 				else if( $feedInf['driver'] == 'twitter' )
 				{
-					require_once LIB_DIR . "twitter/TwitterLib.php";
+					require_once FS_LIB_DIR . "twitter/TwitterLib.php";
 					$insights = TwitterLib::getStats($feedInf['driver_post_id'] , $accessToken , $nInf['access_token_secret'] , $appId , $proxy);
 				}
 				else if( $feedInf['driver'] == 'instagram' )
 				{
-					require_once LIB_DIR . "instagram/FSInstagram.php";
+					require_once FS_LIB_DIR . "instagram/FSInstagram.php";
 					$insights = FSInstagram::getStats($feedInf['driver_post_id2'], $feedInf['driver_post_id'] , $nInf['info'] , $proxy);
 				}
 				else if( $feedInf['driver'] == 'linkedin' )
 				{
-					require_once LIB_DIR . "linkedin/Linkedin.php";
+					require_once FS_LIB_DIR . "linkedin/Linkedin.php";
 					$insights = Linkedin::getStats(null , $proxy);
 				}
 				else if( $feedInf['driver'] == 'pinterest' )
 				{
-					require_once LIB_DIR . "pinterest/Pinterest.php";
+					require_once FS_LIB_DIR . "pinterest/Pinterest.php";
 					$insights = Pinterest::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
 				}
 				else if( $feedInf['driver'] == 'reddit' )
 				{
-					require_once LIB_DIR . "reddit/Reddit.php";
+					require_once FS_LIB_DIR . "reddit/Reddit.php";
 					$insights = Reddit::getStats($feedInf['driver_post_id'] , $accessToken , $proxy);
 				}
 				else if( $feedInf['driver'] == 'ok' )
 				{
-					require_once LIB_DIR . "ok/OdnoKlassniki.php";
+					require_once FS_LIB_DIR . "ok/OdnoKlassniki.php";
 					$postId2 = explode('/' , $feedInf['driver_post_id']);
 					$postId2 = end($postId2);
 					$insights = OdnoKlassniki::getStats($postId2 , $accessToken , $appInf['app_key'] , $appInf['app_secret'] , $proxy);
 				}
+			}
+
+			if( $feedInf['driver'] == 'google_b' )
+			{
+				$username = $nodeInf['node_id'];
+			}
+			else
+			{
+				$username = isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username']) ? $nodeInf['username'] : '-');
 			}
 
 			$resultData[] = [
@@ -193,10 +202,10 @@ trait FSPReports
 				'name'          =>  $nodeInf ? htmlspecialchars($nodeInf['name']) : ' - deleted',
 				'post_id'       =>  htmlspecialchars($feedInf['driver_post_id']),
 				'post_title'    =>  htmlspecialchars(isset($postInf->post_title) ? $postInf->post_title : 'Deleted'),
-				'cover'         =>  profilePic($nodeInf),
-				'profile_link'  =>  profileLink($nodeInf),
+				'cover'         =>  FSprofilePic($nodeInf),
+				'profile_link'  =>  FSprofileLink($nodeInf),
 				'is_sended'     =>  $feedInf['is_sended'],
-				'post_link'     =>  postLink($feedInf['driver_post_id'] , $feedInf['driver'] , isset($nodeInf['screen_name']) ? $nodeInf['screen_name'] : (isset($nodeInf['username'])?$nodeInf['username']:'-')),
+				'post_link'     =>  FSpostLink($feedInf['driver_post_id'] , $feedInf['driver'] , $username , $feedInf['feed_type']),
 				'status'        =>  $feedInf['status'],
 				'error_msg'     =>  $feedInf['error_msg'],
 				'hits'          =>  $feedInf['visit_count'],
@@ -210,7 +219,7 @@ trait FSPReports
 
 		$nextBtnDisable = ($page * $limit >= $allCount['c']);
 
-		response(true , ['data' => $resultData , 'disable_btn' => $nextBtnDisable]);
+		FSresponse(true , ['data' => $resultData , 'disable_btn' => $nextBtnDisable]);
 
 	}
 
@@ -218,8 +227,8 @@ trait FSPReports
 	{
 		$userId = (int)get_current_user_id();
 
-		wpDB()->query( "DELETE FROM " . wpTable('feeds') . ' WHERE (is_sended=1 OR (send_time+INTERVAL 1 DAY)<NOW()) AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.wpTable('accounts').' tb2 WHERE tb2.id='.wpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.wpTable('account_nodes').' tb2 WHERE tb2.id='.wpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) )');
+		FSwpDB()->query( "DELETE FROM " . FSwpTable('feeds') . ' WHERE (is_sended=1 OR (send_time+INTERVAL 1 DAY)<NOW()) AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id='.FSwpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id='.FSwpTable('feeds').'.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) )');
 
-		response(true);
+		FSresponse(true);
 	}
 }

@@ -1,10 +1,10 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$accountId = (int)_post('account_id' , '0' , 'num');
+$accountId = (int)FS_post('account_id' , '0' , 'num');
 $userId = (int)get_current_user_id();
 
-$accountInf = wpDB()->get_row("SELECT * FROM ".wpTable('accounts')." WHERE id='{$accountId}' AND driver='google' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
+$accountInf = FSwpDB()->get_row("SELECT * FROM ".FSwpTable('accounts')." WHERE id='{$accountId}' AND driver='google' AND (user_id='{$userId}' OR is_public=1) " , ARRAY_A);
 
 if( !$accountInf )
 {
@@ -12,7 +12,7 @@ if( !$accountInf )
 	return;
 }
 
-require_once LIB_DIR . '/google/GooglePlus.php';
+require_once FS_LIB_DIR . '/google/GooglePlus.php';
 $google = new GooglePlus($accountInf['username'] , $accountInf['password'] , $accountInf['proxy']);
 
 $communities = $google->getCommunities();

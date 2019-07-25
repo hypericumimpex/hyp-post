@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$scheudleId = _post('schedule_id' , '0' , 'int');
+$scheudleId = FS_post('schedule_id' , '0' , 'int');
 ?>
 
 <style>
@@ -228,7 +228,7 @@ $scheudleId = _post('schedule_id' , '0' , 'int');
 							'</td>' +
 							'<td class="status_lnk">'+statusBtn+'</td>' +
 							'<td>' +
-							( result['data'][i]['driver'] == 'linkedin' || result['data'][i]['driver'] == 'reddit' || result['data'][i]['driver'] == 'tumblr' ? '---' :
+							( result['data'][i]['driver'] == 'linkedin' || result['data'][i]['driver'] == 'reddit' || result['data'][i]['driver'] == 'tumblr' || result['data'][i]['driver'] == 'google_b' || result['data'][i]['driver'] == 'telegram' || result['data'][i]['driver'] == 'medium' ? '---' :
 								'<div><i class="far fa-eye"></i> Hits: <span class="stat_span1">' + result['data'][i]['hits'] + '</span></div>' +
 								'<div><i class="far fa-thumbs-up"></i> Likes: <span class="stat_span2">' + result['data'][i]['insights']['like'] + '</span> ' + ( result['data'][i]['insights']['details'] != '' ? '<span class="ws_tooltip" data-title="'+result['data'][i]['insights']['details']+'"><i class="fa fa-info-circle"></i></span></div>' : '') +
 								'<div><i class="far fa-comment-dots"></i> Comments: <span class="stat_span3">' + (typeof result['data'][i]['insights']['comments'] != 'undefined' ? result['data'][i]['insights']['comments'] : 0) + '</span></div>' +

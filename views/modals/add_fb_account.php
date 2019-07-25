@@ -1,9 +1,9 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$authURL = wpDB()->get_row("SELECT * FROM " . wpTable('apps') . " WHERE is_standart=3 AND driver='fb' LIMIT 1" , ARRAY_A);
+$authURL = FSwpDB()->get_row("SELECT * FROM " . FSwpTable('apps') . " WHERE is_standart=3 AND driver='fb' LIMIT 1" , ARRAY_A);
 $authURL = esc_html($authURL['app_authenticate_link']);
-$applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','user_id' => get_current_user_id()]);
+$applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','user_id' => get_current_user_id()]);
 ?>
 
 <style>
@@ -413,7 +413,7 @@ $applications = wpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','use
 		</div>
 		<div class="ws_method_box" data-type="3">
 			<div class="ws_method_box_img"><i class="fab fa-android"></i></div>
-			<div class="ws_method_box_label"><?=esc_html__('Own App', 'fs-poster')?></div>
+			<div class="ws_method_box_label"><?=esc_html__('Personal App', 'fs-poster')?></div>
 		</div>
 		<div style="clear: both;"></div>
 	</div>

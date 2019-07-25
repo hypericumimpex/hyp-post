@@ -1,7 +1,7 @@
 <?php defined('MODAL') or exit();?>
 
 <?php
-$application = wpFetchAll('apps' , ['driver' => 'vk']);
+$application = FSwpFetchAll('apps' , ['driver' => 'vk']);
 ?>
 
 <span class="close" data-modal-close="true">&times;</span>
@@ -145,7 +145,7 @@ $application = wpFetchAll('apps' , ['driver' => 'vk']);
 		{
 			fsCode.toast("<?=esc_html__('Account added successfully!' , 'fs-poster')?>" , 'success');
 			fsCode.modalHide($("#proModal<?=$mn?>"));
-			$('#account_supports .social_network_div[data-setting="vk"]').click();
+			$('#fs_account_supports .fs_social_network_div[data-setting="vk"]').click();
 		});
 	});
 

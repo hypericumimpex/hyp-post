@@ -6,19 +6,19 @@ trait FSPSchedule
 
 	public function schedule_save()
 	{
-		$title = _post('title' , '' , 'string');
-		$start_date = _post('start_date' , '' , 'string');
-		$end_date = _post('end_date' , '' , 'string');
-		$interval = _post('interval' , '0' , 'num');
-		$share_time = _post('share_time' , '' , 'string');
+		$title				= FS_post('title' , '' , 'string');
+		$start_date			= FS_post('start_date' , '' , 'string');
+		$start_time			= FS_post('start_time' , '' , 'string');
+		$interval 			= FS_post('interval' , '0' , 'num');
+		$share_time 		= FS_post('share_time' , '' , 'string');
 
-		$post_type_filter = _post('post_type_filter' , '' , 'string');
-		$category_filter = _post('category_filter' , [] , 'array');
-		$post_sort = _post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
-		$post_date_filter = _post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year']);
+		$post_type_filter = FS_post('post_type_filter' , '' , 'string');
+		$category_filter = FS_post('category_filter' , [] , 'array');
+		$post_sort = FS_post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
+		$post_date_filter = FS_post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year' , 'last_30_days' , 'last_60_days']);
 
-		$custom_messages = _post('custom_messages' , '' , 'string');
-		$accounts_list = _post('accounts_list' , '' , 'string');
+		$custom_messages = FS_post('custom_messages' , '' , 'string');
+		$accounts_list = FS_post('accounts_list' , '' , 'string');
 
 		$_custom_messages = [];
 		if( !empty( $custom_messages ) )
@@ -28,13 +28,13 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
 				{
-					$_custom_messages[$socialNetwork] = $message1;
+					$_custom_messages[ $socialNetwork ] = $message1;
 				}
 			}
 		}
-		$_custom_messages = empty($_custom_messages) ? null : json_encode($_custom_messages);
+		$_custom_messages = empty( $_custom_messages ) ? null : json_encode( $_custom_messages );
 
 		$_accounts_list = [];
 		if( !empty( $accounts_list ) )
@@ -76,89 +76,62 @@ trait FSPSchedule
 			$post_type_filter = '';
 		}
 
-		if( empty($title) || empty($start_date) || empty($end_date) || !in_array($interval , [1,2,3,4,5,6,7,8,9,10,1*24,2*24,3*24,4*24,5*24,6*24,7*24,8*24,9*24,10*24]) )
+		if( empty($title) || empty($start_date) || empty($start_time) || !( is_numeric($interval) && $interval > 0 ) )
 		{
-			response(false , ['error_msg' => esc_html__('Validation error' , 'fs-poster')]);
+			FSresponse(false , ['error_msg' => esc_html__('Validation error' , 'fs-poster')]);
 		}
 
 		$start_date = date('Y-m-d' , strtotime($start_date));
-		$end_date = date('Y-m-d' , strtotime($end_date));
-		$share_time = date('H:i' , strtotime($share_time));
+		$start_time = date('H:i' , strtotime($start_time));
 
-		if( strtotime($start_date) > strtotime($end_date) )
-		{
-			response(false , ['error_msg' => esc_html__('Start date is wrong!' , 'fs-poster')]);
-		}
+		$cronStartTime = $start_date . ' ' . $start_time;
 
-		if( strtotime( $start_date ) < strtotime(date('Y-m-d')) )
-		{
-			$cronStartTime = date('Y-m-d');
-			$cronStartTime2 = current_time('Y-m-d');
-		}
-		else
-		{
-			$cronStartTime = $start_date;
-			$cronStartTime2 = $start_date;
-		}
-
-		if( $interval % 24 == 0 )
-		{
-			$cronStartTime .= ' ' . date('H:i' , strtotime($share_time));
-			$cronStartTime2 .= ' ' . date('H:i' , strtotime($share_time));
-		}
-		else
-		{
-			$cronStartTime .= ' ' . date('H:i' );
-			$cronStartTime2 .= ' ' . current_time('H:i' );
-		}
-
-		wpDB()->insert(wpTable('schedules') , [
+		FSwpDB()->insert(FSwpTable('schedules') , [
 			'title'					=>	$title,
 			'start_date'			=>	$start_date,
-			'end_date'				=>	$end_date,
 			'interval'				=>	$interval,
 			'status'				=>	'active',
 			'insert_date'	 		=>	date('Y-m-d H:i:s'),
 			'user_id'				=>	get_current_user_id(),
-			'share_time'			=>	$share_time,
+			'share_time'			=>	$start_time,
+			'next_execute_time'		=>	$cronStartTime,
 
 			'post_type_filter'		=>	$post_type_filter,
 			'category_filter'		=>	$category_filter,
 			'post_sort'				=>	$post_sort,
 			'post_date_filter'		=>	$post_date_filter,
-			'next_execute_time'		=>	$cronStartTime2,
 
 			'custom_post_message'	=>	$_custom_messages,
 			'share_on_accounts'		=>	$_accounts_list
 		]);
 
-		CronJob::setScheduleTask( wpDB()->insert_id , $interval , $cronStartTime );
+		CronJob::setScheduleTask( FSwpDB()->insert_id , $cronStartTime );
 
-		response(true);
+		FSresponse(true);
 	}
 
 	public function schedule_posts()
 	{
-		$plan_date	= _post('plan_date' , '' , 'string');
-		$post_ids_p	= _post('post_ids', [], 'array');
-		$interval	= _post('interval' , '0' , 'num');
+		$plan_date			= FS_post('plan_date' , '' , 'string');
+		$post_ids_p			= FS_post('post_ids', [], 'array');
+		$interval			= FS_post('interval' , '0' , 'num');
 
 		if( !in_array($interval , [1,2,3,4,5,6,7,8,9,10,1*24,2*24,3*24,4*24,5*24,6*24,7*24,8*24,9*24,10*24]) )
 		{
-			response(false , esc_html__('Validation error' , 'fs-poster'));
+			FSresponse(false , esc_html__('Validation error' , 'fs-poster'));
 		}
 
 		if( empty($plan_date) )
 		{
-			response(false , 'Schedule date is empty!');
+			FSresponse(false , 'Schedule date is empty!');
 		}
 		else if( strtotime($plan_date) - (3600 * 24 * 30 * 24) > time() )
 		{
-			response(false , 'Plan date or time is not valid!');
+			FSresponse(false , 'Plan date or time is not valid!');
 		}
 		else if( strtotime($plan_date) < current_time('timestamp') )
 		{
-			response(false , 'Plan date or time is not valid!<br>Please select Schedule date/time according to your server time. <br>Your server time is: ' . current_time('Y-m-d g:i:s A'));
+			FSresponse(false , 'Plan date or time is not valid!<br>Please select Schedule date/time according to your server time. <br>Your server time is: ' . current_time('Y-m-d g:i:s A'));
 		}
 
 		$plan_date = date('Y-m-d H:i' , strtotime($plan_date));
@@ -175,15 +148,15 @@ trait FSPSchedule
 
 		if( empty($post_ids) )
 		{
-			response(false , 'Please select at least one post.');
+			FSresponse(false , 'Please select at least one post.');
 		}
 		else if( count( $post_ids ) > 75 )
 		{
-			response(false , 'Too many post selected! You can select maximum 75 posts!');
+			FSresponse(false , 'Too many post selected! You can select maximum 75 posts!');
 		}
 
-		$custom_messages = _post('custom_messages' , '' , 'string');
-		$accounts_list = _post('accounts_list' , '' , 'string');
+		$custom_messages = FS_post('custom_messages' , '' , 'string');
+		$accounts_list = FS_post('accounts_list' , '' , 'string');
 
 		$_custom_messages = [];
 		if( !empty( $custom_messages ) )
@@ -193,7 +166,7 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
 				{
 					$_custom_messages[$socialNetwork] = $message1;
 				}
@@ -223,7 +196,18 @@ trait FSPSchedule
 
 		$postsCount = count($post_ids);
 
-		$title = $postsCount == 1 ? 'Scheduled post: "' . cutText(get_the_title(reset($post_ids))) . '"' :  'Schedule ( '.$postsCount.' posts )';
+		if( $postsCount == 1 )
+		{
+			$onePostId = reset($post_ids);
+			$onePostInf = get_post( $onePostId, ARRAY_A );
+
+			$title = 'Scheduled post: "' . FScutText( !empty($onePostInf['post_title']) ? $onePostInf['post_title'] : $onePostInf['post_content'] ) . '"';
+		}
+		else
+		{
+			$title = 'Schedule ( '.$postsCount.' posts )';
+		}
+
 		$post_ids = implode(',' , $post_ids);
 
 		$start_date = date('Y-m-d', strtotime($plan_date));
@@ -232,10 +216,10 @@ trait FSPSchedule
 
 		$post_type_filter = '';
 		$category_filter = '';
-		$post_sort = $postsCount == 1 ? 'new_first' : _post('post_sort' , 'old_first' , 'string', ['old_first' , 'random' , 'new_first']);
+		$post_sort = $postsCount == 1 ? 'new_first' : FS_post('post_sort' , 'old_first' , 'string', ['old_first' , 'random' , 'new_first']);
 		$post_date_filter = 'all';
 
-		wpDB()->insert(wpTable('schedules') , [
+		FSwpDB()->insert(FSwpTable('schedules') , [
 			'title'					=>	$title,
 			'start_date'			=>	$start_date,
 			'end_date'				=>	$end_date,
@@ -257,107 +241,129 @@ trait FSPSchedule
 			'share_on_accounts'		=>	$_accounts_list
 		]);
 
-		CronJob::setScheduleTask( wpDB()->insert_id , $interval , $plan_date );
+		CronJob::setScheduleTask( FSwpDB()->insert_id , $plan_date );
 
-		response(true);
+		FSresponse(true);
 	}
 
 	public function delete_schedule()
 	{
-		$id = _post('id' , 0 , 'num');
+		$id = FS_post('id' , 0 , 'num');
 		if( $id <= 0 )
 		{
-			response(false);
+			FSresponse(false);
 		}
 
-		$checkSchedule = wpFetch('schedules' , $id);
+		$checkSchedule = FSwpFetch('schedules' , $id);
 		if( !$checkSchedule )
 		{
-			response(false , esc_html__('Schedule not found!' , 'fs-poster'));
+			FSresponse(false , esc_html__('Schedule not found!' , 'fs-poster'));
 		}
 		else if( $checkSchedule['user_id'] != get_current_user_id() )
 		{
-			response(false , esc_html__('You do not have a permission to delete this schedule!' , 'fs-poster'));
+			FSresponse(false , esc_html__('You do not have a permission to delete this schedule!' , 'fs-poster'));
 		}
 
-		wpDB()->delete(wpTable('schedules') , ['id' => $id]);
+		FSwpDB()->delete(FSwpTable('schedules') , ['id' => $id]);
 
 		CronJob::clearSchedule($id);
 
-		response(true);
+		FSresponse(true);
 	}
 
 	public function delete_schedules()
 	{
-		$ids = _post('ids' , [] , 'array');
+		$ids = FS_post('ids' , [] , 'array');
 		if( count($ids) == 0 )
 		{
-			response(false , 'No schedule selected!');
+			FSresponse(false , 'No schedule selected!');
 		}
 
 		foreach ($ids AS $id)
 		{
 			if( is_numeric($id) && $id > 0 )
 			{
-				$checkSchedule = wpFetch('schedules' , $id);
+				$checkSchedule = FSwpFetch('schedules' , $id);
 				if( !$checkSchedule )
 				{
-					response(false , esc_html__('Schedule not found!' , 'fs-poster'));
+					FSresponse(false , esc_html__('Schedule not found!' , 'fs-poster'));
 				}
 
 				else if( $checkSchedule['user_id'] != get_current_user_id() )
 				{
-					response(false , esc_html__('You do not have a permission to delete this schedule!' , 'fs-poster'));
+					FSresponse(false , esc_html__('You do not have a permission to delete this schedule!' , 'fs-poster'));
 				}
 
-				wpDB()->delete(wpTable('schedules') , ['id' => $id]);
+				FSwpDB()->delete(FSwpTable('schedules') , ['id' => $id]);
 
 				CronJob::clearSchedule($id);
 			}
 		}
 
-		response(true);
+		FSresponse(true);
 	}
 
 	public function schedule_change_status()
 	{
-		$id = _post('id' , 0 , 'num');
+		$id = FS_post('id' , 0 , 'num');
 
 		if( $id <= 0 )
 		{
-			response(false);
+			FSresponse(false);
 		}
 
-		$checkSchedule = wpFetch('schedules' , $id);
+		$checkSchedule = FSwpFetch('schedules' , $id);
 		if( !$checkSchedule )
 		{
-			response(false , esc_html__('Schedule not found!' , 'fs-poster'));
+			FSresponse(false , esc_html__('Schedule not found!' , 'fs-poster'));
 		}
 		else if( $checkSchedule['user_id'] != get_current_user_id() )
 		{
-			response(false , esc_html__('You do not have a permission to Pause/Play this schedule!' , 'fs-poster'));
+			FSresponse(false , esc_html__('You do not have a permission to Pause/Play this schedule!' , 'fs-poster'));
 		}
 
 		if( $checkSchedule['status'] != 'paused' && $checkSchedule['status'] != 'active' )
 		{
-			response(false , esc_html__('This schedule has finished!' , 'fs-poster'));
+			FSresponse(false , esc_html__('This schedule has finished!' , 'fs-poster'));
 		}
 
 		$newStatus = $checkSchedule['status'] == 'active' ? 'paused' : 'active';
 
-		wpDB()->update(wpTable('schedules') , ['status' => $newStatus] , ['id' => $id]);
+		$updateArr = ['status' => $newStatus];
 
-		response(true , ['a'=>$newStatus]);
+		if( $newStatus == 'paused' )
+		{
+			wp_clear_scheduled_hook( 'fs_check_scheduled_posts' , [ $id ] );
+		}
+		else
+		{
+			$locTime = current_time('timestamp');
+			$scheduleStarted = strtotime( $checkSchedule['start_date'] . ' ' . $checkSchedule['share_time'] );
+
+			$dif = $locTime - $scheduleStarted;
+
+			$interval = $checkSchedule['interval'] * 60;
+
+			$nextExecTime = ( $dif % $interval ) === 0 ? $locTime : $locTime + $interval - ( $dif % $interval );
+
+			$updateArr['next_execute_time'] = date('Y-m-d H:i', $nextExecTime);
+
+			CronJob::setScheduleTask( $id , $updateArr['next_execute_time'] );
+		}
+
+		FSwpDB()->update(FSwpTable('schedules') , $updateArr , ['id' => $id]);
+
+		FSresponse(true );
 	}
 
 	public function schedule_get_calendar()
 	{
-		$month = (int)_post('month' , date('m') , 'num', [1,2,3,4,5,6,7,8,9,10,11,12]);
-		$year = (int)_post('year' , date('Y') , 'num');
+		$month = (int)FS_post('month' , date('m') , 'num', [1,2,3,4,5,6,7,8,9,10,11,12]);
+		$year = (int)FS_post('year' , date('Y') , 'num');
 
 		if( $year > date('Y')+4 || $year < date('Y')-4 )
 		{
-			response(false, 'Loooooooooooooooolll :)');
+			FSresponse(false, 'Loooooooooooooooolll :)');
 		}
 
 		$firstDate = date('Y-m-01' , strtotime("{$year}-{$month}-01"));
@@ -369,7 +375,7 @@ trait FSPSchedule
 			$firstDate = date('Y-m-d');
 		}
 
-		$getPlannedDays = wpDB()->get_results("SELECT * FROM `".wpTable('schedules')."` WHERE (`start_date` BETWEEN '$firstDate' AND '$lastDate' OR `end_date` BETWEEN '$firstDate' AND '$lastDate' OR ( `start_date` < '$firstDate' AND `end_date` > '$lastDate' )) AND `status`='active' AND user_id='$myId'", ARRAY_A);
+		$getPlannedDays = FSwpDB()->get_results("SELECT * FROM `".FSwpTable('schedules')."` WHERE `start_date`<='$lastDate' AND `status`='active' AND user_id='$myId'", ARRAY_A);
 
 		$days = [];
 
@@ -377,7 +383,7 @@ trait FSPSchedule
 		{
 			$scheduleId = (int)$planInf['id'];
 			$planStart = strtotime($planInf['start_date']);
-			$planEnd = strtotime($planInf['end_date']);
+			$planEnd = strtotime($lastDate);
 			$interval = (int)$planInf['interval']>0 ? (int)$planInf['interval'] : 1;
 
 
@@ -386,24 +392,19 @@ trait FSPSchedule
 				$planStart = strtotime($firstDate);
 			}
 
-			if( $planEnd > strtotime($lastDate) )
-			{
-				$planEnd = strtotime($lastDate);
-			}
-
 			if( $planInf['post_sort'] != 'random' && $planInf['post_sort'] != 'random2' )
 			{
-				$filterQuery = scheduleNextPostFilters( $planInf );
-				$calcLimit = 1+(int)(( $planEnd - $planStart ) / 60 / 60 / $interval);
+				$filterQuery = FSscheduleNextPostFilters( $planInf );
+				$calcLimit = 1+(int)(( $planEnd - $planStart ) / 60 / $interval);
 
 				$calcLimit = $calcLimit > 0 ? $calcLimit : 1;
 
-				$getRandomPost = wpDB()->get_results("SELECT * FROM ".wpDB()->base_prefix."posts WHERE post_status='publish' {$filterQuery} LIMIT " . $calcLimit , ARRAY_A);
+				$getRandomPost = FSwpDB()->get_results("SELECT * FROM ".FSwpDB()->base_prefix."posts WHERE post_status='publish' {$filterQuery} LIMIT " . $calcLimit , ARRAY_A);
 			}
 
 			if( ( $planInf['interval'] % 24 ) != 0 || empty($planInf['share_time']) )
 			{
-				$getLastShareTime = wpDB()->get_row("SELECT MAX(send_time) AS max_share_time FROM ".wpTable('feeds')." WHERE schedule_id='$scheduleId'", ARRAY_A);
+				$getLastShareTime = FSwpDB()->get_row("SELECT MAX(send_time) AS max_share_time FROM ".FSwpTable('feeds')." WHERE schedule_id='$scheduleId'", ARRAY_A);
 				$planInf['share_time'] = date('H:i:s' , strtotime($getLastShareTime['max_share_time']));
 			}
 
@@ -415,7 +416,7 @@ trait FSPSchedule
 				$currentDate = date('Y-m-d', $cursorDayTimestamp);
 				$time = date('H:i', $cursorDayTimestamp);
 
-				$cursorDayTimestamp += 60 * 60 * $interval;
+				$cursorDayTimestamp += 60 * $interval;
 
 				if( strtotime( $currentDate . ' ' . $time ) < time() )
 				{
@@ -434,7 +435,7 @@ trait FSPSchedule
 
 					if( $thisPostInf )
 					{
-						$postDetails = '<b>Post ID:</b> ' . $thisPostInf['ID'] . "<br><b>Title:</b> " . htmlspecialchars(cutText($thisPostInf['post_title']) . '<br><br><i>Click to get the post page</i>');
+						$postDetails = '<b>Post ID:</b> ' . $thisPostInf['ID'] . "<br><b>Title:</b> " . htmlspecialchars(FScutText($thisPostInf['post_title']) . '<br><br><i>Click to get the post page</i>');
 						$postId = $thisPostInf['ID'];
 					}
 					else
@@ -446,7 +447,7 @@ trait FSPSchedule
 
 				$days[] = [
 					'id'		=>	$planInf['id'],
-					'title'		=>	htmlspecialchars( cutText($planInf['title'], 22) ),
+					'title'		=>	htmlspecialchars( FScutText($planInf['title'], 22) ),
 					'post_data'	=>	$postDetails,
 					'post_id'	=>	$postId,
 					'date'		=>	$currentDate,
@@ -458,7 +459,7 @@ trait FSPSchedule
 
 		}
 
-		response(true, ['days' => $days]);
+		FSresponse(true, ['days' => $days]);
 	}
 
 }
