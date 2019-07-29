@@ -40,7 +40,7 @@ class GoogleMyBusiness
 		{
 			$myInfo = '';
 		}
-
+		$myInfo = str_replace("\n", "", $myInfo);
 		preg_match('/window\.IJ_values \= (\[.*?\])\;/mi' , $myInfo , $matches);
 		if( isset($matches[1]) )
 		{

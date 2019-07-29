@@ -74,7 +74,7 @@ $publicCommunities = FSwpDB()->get_results(FSwpDB()->prepare("
 					}
 					?>
 					<a href="<?=FSprofileLink($accountInf)?>" target="_blank" class="ws_btn" title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
-					<span class="fs_communities_count"><?=$accountInf['ownpages']?> MY PAGES, <?=$accountInf['groups']?> GROUPS, <?=$accountInf['pages']?> LIKED PAGES</span>
+					<span class="fs_communities_count"><?=$accountInf['ownpages']?> MY PAGES, <?=$accountInf['groups']?> GROUPS</span>
 				</td>
 				<td style="width: 15%;">
 					<div class="fs_account_checkbox_public<?=$accountInf['is_public']?' fs_account_checked':''?><?=$accountInf['user_id']==get_current_user_id()?' my_account':''?>">

@@ -59,20 +59,13 @@ else
 
 	.sb_tab:not(.active_tab)
 	{
-		border-color: #FFF !important;
+		border-color: #EEE !important;
 	}
 
 	.sb_tab
 	{
 		color: #FFF !important;
 		box-shadow: none !important;
-	}
-
-	.active_tab
-	{
-		border-bottom: 0 !important;
-		background: #FFF !important;
-		color: #ff7675 !important;
 	}
 
 	#share_box1

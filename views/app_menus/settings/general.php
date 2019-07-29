@@ -80,6 +80,40 @@ $cronJobsCode = 'wget -O /dev/null ' . site_url() . '/?fs-poster-cron-job=1 >/de
 	</div>
 </div>
 
+<div class="fs_setting_item">
+	<div class="fs_setting_item_label" style="width: 50%;">
+		<div><?=esc_html__('Cron Job settings:' , 'fs-poster')?></div>
+		<div class="fs_s_help"><?=__('You can follow this <a href="https://www.fs-poster.com/doc/configure-cron-job-tasks-on-wordpress" target="_blank">documentation</a> and configure your WordPress Cron Jobs.' , 'fs-poster')?></div>
+	</div>
+	<div class="fs_s_input" style="width: 50%; display: block;">
+		<?php
+		$lastCronTaskRunnedOn = get_option('fs_cron_job_runned_on', '');
+
+		if( empty( $lastCronTaskRunnedOn ) )
+		{
+			print '<span style="color: #ff7784;">Not runned! Your schedule posts and background share may be not work! Please follow this <a href="https://www.fs-poster.com/doc/configure-cron-job-tasks-on-wordpress" target="_blank">documentation</a> and configure your WordPress Cron Jobs.</span>';
+		}
+		else
+		{
+			$lastCronTaskRunnedOn = strtotime($lastCronTaskRunnedOn);
+			$calcTime = time() - $lastCronTaskRunnedOn;
+			$calcTime = (int)($calcTime / 60);
+			$calcTime = $calcTime > 0 ? $calcTime : 4;
+			print date('Y-m-d H:i:s', $lastCronTaskRunnedOn) . ' ( ' . $calcTime . ' minute(s) ago )';
+
+			if( $calcTime > 3 )
+			{
+				print '<div style="color: #ff7784;">It looks like your Cron job runs with delay. Therefore your Scheduled posts and background shares may post with delay!</div>';
+			}
+		}
+
+
+
+
+		?>
+	</div>
+</div>
+
 <script>
 	var fadeSpeed = 0;
 	jQuery(document).ready(function()

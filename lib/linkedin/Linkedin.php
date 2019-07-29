@@ -34,7 +34,7 @@ class Linkedin
 
 		$dataSQL = [
 			'user_id'		=>	get_current_user_id(),
-			'name'		  	=>	$me['localizedFirstName'] .' ' . $me['localizedLastName'],
+			'name'		  	=>	(isset($me['localizedFirstName']) ? $me['localizedFirstName'] : '-') .' ' . (isset($me['localizedLastName']) ? $me['localizedLastName'] : ''),
 			'driver'		=>	'linkedin',
 			'profile_id'	=>	$meId,
 			'profile_pic'	=>	isset($me['profilePicture']['displayImage']) ? $me['profilePicture']['displayImage'] : '',
@@ -223,7 +223,7 @@ class Linkedin
 				'error_msg'	=>	$result['error']['message']
 			];
 		}
-		else if( isset($result['errorCode']) )
+		else if( isset($result['message']) )
 		{
 			$result2 = [
 				'status'	=>	'error',
@@ -232,12 +232,9 @@ class Linkedin
 		}
 		else
 		{
-			$postIdGet = explode('-' , $result['id']);
-			$postIdGet = end($postIdGet);
-
 			$result2 = [
 				'status'	=>  'ok',
-				'id'		=>	$postIdGet
+				'id'		=>	$result['id']
 			];
 		}
 

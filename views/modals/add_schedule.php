@@ -332,7 +332,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<label>Post type filter: <span class="ws_tooltip" data-title="You can select new post types in [ FS Poster > Settings > Share post types ]."><i class="fa fa-info-circle"></i></span></label>
 					<select class="ws_form_element post_type_filter" style="width: 300px;">
 						<?php
-						$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
+						$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', 'post|page|attachment|product'));
 
 						foreach( get_post_types() AS $post_type )
 						{
@@ -352,17 +352,27 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					<select class="ws_form_element category_filter" style="width: 300px;" data-placeholder="<?=esc_html__('Not  selected' , 'fs-poster')?>">
 						<option>-</option>
 						<?php
-						$lastTaxonomy = '';
-						foreach( get_terms( ['category', 'product_cat'], [ 'hide_empty' => false, 'orderby' => 'taxonomy' ] ) AS $categ )
-						{
-							if( $lastTaxonomy != $categ->taxonomy )
-							{
-								print '<optgroup label="' . htmlspecialchars( $categ->taxonomy == 'category' ? 'Post categories' : ( $categ->taxonomy == 'product_cat' ? 'Product categories' : $categ->taxonomy ) ) . '">';
-								$lastTaxonomy = $categ->taxonomy;
-							}
 
+						$taxonomies		= get_terms( [ 'category' ], [ 'hide_empty' => false ] );
+						$productTaxs	= get_terms( [ 'product_cat' ], [ 'hide_empty' => false ] );
+
+						print '<optgroup label="Post categories">';
+						foreach( $taxonomies AS $categ )
+						{
 							print '<option value="' . htmlspecialchars($categ->term_id) . '">' . htmlspecialchars($categ->name) . '</option>';
 						}
+						print '</optgroup>';
+
+						if( !isset($productTaxs->errors) )
+						{
+							print '<optgroup label="Product categories">';
+							foreach( $productTaxs AS $categ )
+							{
+								print '<option value="' . htmlspecialchars($categ->term_id) . '">' . htmlspecialchars($categ->name) . '</option>';
+							}
+							print '</optgroup>';
+						}
+
 						?>
 					</select>
 				</div>

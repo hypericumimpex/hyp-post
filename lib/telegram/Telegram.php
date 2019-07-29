@@ -108,7 +108,7 @@ class Telegram
 			$post = $this->cmd( 'sendPhoto' , [
 				'chat_id'		=>	$chatId,
 				'caption'		=>	$text,
-				'parse_mode'	=>	'Markdown',
+				'parse_mode'	=>	'HTML',
 				'photo'			=>	$media
 			] );
 		}
@@ -117,7 +117,7 @@ class Telegram
 			$post = $this->cmd( 'sendVideo' , [
 				'chat_id'		=>	$chatId,
 				'caption'		=>	$text,
-				'parse_mode'	=>	'Markdown',
+				'parse_mode'	=>	'HTML',
 				'video'			=>	$media
 			] );
 		}
@@ -126,7 +126,7 @@ class Telegram
 			$post = $this->cmd( 'sendMessage' , [
 				'chat_id'		=>	$chatId,
 				'text'			=>	$text,
-				'parse_mode'	=>	'Markdown'
+				'parse_mode'	=>	'HTML'
 			] );
 		}
 

@@ -131,7 +131,14 @@ class PostMetaBox
 
 	function onSave( $new_status, $old_status, $post )
 	{
+		global $wp_version;
+
 		// For WordPress 5 (Gutenberg)...
+		if( version_compare( $wp_version, '5.0', '>=' ) && isset($_GET['_locale']) && $_GET['_locale'] == 'user' && empty($_POST) )
+		{
+			return;
+		}
+
 		$metaBoxLoader = (int)FS_get('meta-box-loader', 0, 'num', ['1']);
 		if( $metaBoxLoader === 1 && FS_post('original_post_status', '', 'string') == 'publish' )
 		{
@@ -191,6 +198,8 @@ class PostMetaBox
 		// social networks lists
 		$nodesList = FS_post('share_on_nodes' , false , 'array' );
 
+		file_put_contents('D:/test0.txt', json_encode($nodesList) . "\n" . json_encode($_GET) . "\n" . json_encode($_POST) . "\n\n\n\n\n\n\n\n" , FILE_APPEND);
+
 		// if false, may be from xmlrpc, external application or etc... then load ol active nodes
 		if( $nodesList === false && !isset($_POST['share_checked']) && $new_status != 'draft' )
 		{
@@ -220,7 +229,7 @@ class PostMetaBox
 			}
 		}
 
-		if( !empty( $nodesList ) || $metaBoxLoader === 1 )
+		if( !empty( $nodesList ) /*|| $metaBoxLoader === 1 */)
 		{
 			FSwpDB()->delete(FSwpTable('feeds') , [
 				'post_id'       =>  $post_id,

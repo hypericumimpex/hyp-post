@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$settingTab = FS_get('setting' , 'general' , 'string' , ['general' , 'share', 'url' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'ok' , 'google_b', 'telegram', 'medium']);
+$settingTab = FS_get('setting' , 'share' , 'string' , ['general' , 'share', 'url' , 'facebook' , 'instagram' , 'twitter', 'linkedin' , 'vk' , 'tumblr' , 'pinterest' , 'reddit' , 'ok' , 'google_b', 'telegram', 'medium']);
 ?>
 
 <div class="fs_settings_title"><?=esc_html__('Settings' , 'fs-poster');?></div>

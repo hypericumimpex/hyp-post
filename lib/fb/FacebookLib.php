@@ -485,12 +485,12 @@ class FacebookLib
 		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
 		$appId = $appInf['app_id'];
 
-		$permissions = ['email', 'public_profile', 'user_birthday',/* 'user_posts' , 'user_likes' , */'publish_actions' , 'manage_pages' , 'publish_pages' , 'user_managed_groups' , 'pages_show_list'];
+		$permissions = [ 'public_profile', 'email', 'user_likes' , 'user_birthday' , 'manage_pages' , 'publish_pages' , 'publish_to_groups' ];
 		$permissions = implode(',' , array_map('urlencode' , $permissions));
 
 		$callbackUrl = self::callbackUrl();
 
-		return "https://www.facebook.com/v2.8/dialog/oauth?redirect_uri={$callbackUrl}&scope={$permissions}&response_type=code&client_id={$appId}";
+		return "https://www.facebook.com/v3.3/dialog/oauth?redirect_uri={$callbackUrl}&scope={$permissions}&response_type=code&client_id={$appId}";
 	}
 
 	/**
@@ -527,7 +527,7 @@ class FacebookLib
 			unset($_SESSION['fs_proxy_save']);
 		}
 		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
-		$appSecret = $appInf['app_secret'];
+		$appSecret = $appInf['app_key'];
 		$appId = $appInf['app_id'];
 
 		$token_url = "https://graph.facebook.com/oauth/access_token?"
@@ -540,7 +540,7 @@ class FacebookLib
 
 		if( isset( $params['error']['message'] ) )
 		{
-			print $params['error']['message'];
+			print 'Error... <script>if(typeof window.opener.setAccessToken == "function"){window.opener.fsCode.loading(0);window.opener.fsCode.toast("'.$token_url .esc_html($params['error']['message']).'" , "danger" , 30000);window.close();}else{document.write("Error! Please try again!");} </script>';
 			exit();
 		}
 

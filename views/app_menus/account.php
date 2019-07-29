@@ -171,7 +171,7 @@ $activeTab = FS_get('tab', 'fb', 'string');
 				.css('top' , $(this).offset().top + 25 - $(window).scrollTop())
 				.css('left' , $(this).offset().left - ($("#fs_sub_menu").width()/2) + 10)
 				.data('id' , dataId)
-				.data('type' , dataType);
+				.data('type' , dataType ? dataType : 'account');
 		}).on('click' , '.fs_account_checkbox_public' , function()
 		{
 			var checked			= $(this).hasClass("fs_account_checked"),
@@ -246,8 +246,8 @@ $activeTab = FS_get('tab', 'fb', 'string');
 
 		$("#fs_sub_menu > .deactivate_btn").click(function()
 		{
-			var dataId = $('#fs_sub_menu').data('id'),
-				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
+			var dataId		= $('#fs_sub_menu').data('id'),
+				dataType	= $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
 
 			fsCode.ajax(dataType , {'id': dataId, 'checked': 0} );
 			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").removeClass('fs_account_checked').removeClass('fs_account_checked2');

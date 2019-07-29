@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="fs_setting_item">
 			<div class="fs_setting_item_label">
 				<div><?=esc_html__('Limit the Custom text symbols:' , 'fs-poster')?></div>
-				<div class="fs_s_help"><?=esc_html__('Twitter limits Tweet length to a specific number of characters for display. Max allowed Tweet length is 280 characters. If you enable this option then your Tweet is first 140 symbol of your Custome text.' , 'fs-poster')?></div>
+				<div class="fs_s_help"><?=esc_html__('Twitter limits Tweet length to a specific number of characters for display. Max allowed Tweet length is 280 characters. If you enable this option then your Tweet is first 280 symbol of your Custome text.' , 'fs-poster')?></div>
 			</div>
 			<div class="fs_s_input">
 				<div class="fs_onoffswitch">

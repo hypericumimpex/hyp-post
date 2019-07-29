@@ -72,9 +72,9 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 				}
 			}
 
-			//$this->scheduler = $this->createScheduler($checkPeriod);
-			//$this->upgraderStatus = new Puc_v4p4_UpgraderStatus();
-			//$this->updateState = new Puc_v4p4_StateStore($this->optionName);
+			$this->scheduler = $this->createScheduler($checkPeriod);
+			$this->upgraderStatus = new Puc_v4p4_UpgraderStatus();
+			$this->updateState = new Puc_v4p4_StateStore($this->optionName);
 
 			if ( did_action('init') ) {
 				$this->loadTextDomain();

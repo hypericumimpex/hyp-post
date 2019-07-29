@@ -10,6 +10,8 @@ class CronJob
 			set_time_limit(0);
 		}
 
+		update_option('fs_cron_job_runned_on', date('Y-m-d H:i:s'));
+
 		add_action( 'fs_check_scheduled_posts' , [self::class , 'scheduledPost'] );
 		add_action( 'fs_check_background_shared_posts' , [self::class , 'sendPostBackground'] );
 	}

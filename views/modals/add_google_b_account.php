@@ -32,7 +32,7 @@
 	<div class="google_logo"><img src="<?=plugin_dir_url(__FILE__).'../../images/google_my_business.jpg'?>"></div>
 	<div style="width: 45%;">
 
-		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888;"><?=esc_html__('Add new google account' , 'fs-poster')?> <a href="https://youtu.be/Fff7BqCe1cc" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a></div>
+		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888;"><?=esc_html__('Add new google account' , 'fs-poster')?> <a href="https://youtu.be/D441Nn-wMwM" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a></div>
 
 		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
 			<input type="text" placeholder="Cookie - SID" class="ws_form_element cookie_sid" style="padding-left: 30px">

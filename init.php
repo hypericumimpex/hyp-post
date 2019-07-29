@@ -2,7 +2,7 @@
 /*
  * Plugin Name: HYP Poster
  * Description: Facebook, Twitter , Instagram, Google+, Linkedin, Reddit, Tumblr, VK, Pinterest Auto Poster Plugin. Post WooCommerce products. Schedule your posts i.e
- * Version: 3.0
+ * Version: 3.0.3
  * Author: HYP
  * Author URI: https://github.com/hypericumimpex/hyp-post
  * License: GNU General Public License v3 or later

@@ -805,7 +805,7 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 			}
 
 			fsCode.loading(1);
-			window.open('<?=site_url()?>?fb_app_redirect=' + appId + '&proxy=' + proxy);
+			window.open('<?=site_url()?>?fb_app_redirect=' + appId + '&proxy=' + proxy , 'fs-app', 'width=750,height=550');
 		});
 
 		$(".finishBTN").click(function()

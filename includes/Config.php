@@ -375,7 +375,7 @@ function FSend_session()
 
 function FScheckPermission( $p )
 {
-	$permissions = ['public_profile' , 'publish_actions' , 'manage_pages' , 'publish_pages' , 'user_managed_groups' , 'pages_show_list'];
+	/*$permissions = ['public_profile' , 'publish_actions' , 'manage_pages' , 'publish_pages' , 'user_managed_groups' , 'pages_show_list'];
 
 	$p2 = [];
 	foreach($p['data'] AS $pName)
@@ -395,7 +395,7 @@ function FScheckPermission( $p )
 	if( !empty( $not ) )
 	{
 		return esc_html__('This app does not include certain permissions!' , 'fs-poster') . ' ( '.implode(' , ' , $not).' )';
-	}
+	}*/
 
 	return true;
 }
@@ -615,7 +615,7 @@ function FSpostLink( $postId , $driver , $username = '', $feedType = '' )
 	}
 	else if( $driver == 'twitter' )
 	{
-		return 'https://twitter.com/statuses/' . $postId;
+		return 'https://twitter.com/' . $username . '/status/' . $postId;
 	}
 	else if( $driver == 'instagram' )
 	{
@@ -630,7 +630,7 @@ function FSpostLink( $postId , $driver , $username = '', $feedType = '' )
 	}
 	else if( $driver == 'linkedin' )
 	{
-		return 'https://www.linkedin.com/feed/update/urn:li:activity:' . $postId . '/';
+		return 'https://www.linkedin.com/feed/update/' . $postId . '/';
 		//return 'https://www.linkedin.com/updates?topic=' . $postId;
 	}
 	else if( $driver == 'vk' )
@@ -977,7 +977,7 @@ function FSscheduleNextPostFilters( $scheduleInf )
 	/* Post type filter */
 	$_postTypeFilter = $scheduleInf['post_type_filter'];
 
-	$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
+	$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', 'post|page|attachment|product'));
 	if( !in_array( $_postTypeFilter, $allowedPostTypes ) )
 	{
 		$_postTypeFilter = '';

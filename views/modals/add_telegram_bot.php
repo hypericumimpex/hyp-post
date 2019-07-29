@@ -31,7 +31,7 @@
 	<div class="telegram_logo"><img src="<?=plugin_dir_url(__FILE__).'../../images/telegram.svg'?>"></div>
 	<div style="width: 45%;">
 
-		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888;"><?=esc_html__('Add Telegram Bot' , 'fs-poster')?> <a href="https://youtu.be/Fff7BqCe1cc" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fab fa-youtube" style="color: #ff7171;"></i></a></div>
+		<div style="margin-bottom: 20px; font-size: 15px; font-weight: 600; color: #888;"><?=esc_html__('Add Telegram Bot' , 'fs-poster')?> <a href="https://www.fs-poster.com/doc/add-telegram-bot" target="_blank" class="ws_tooltip" data-title="How to?"><i class="fa fa-question-circle" style="color: #ff7171;"></i></a></div>
 
 		<div style="position: relative; margin-bottom: 17px; margin-right: 70px;">
 			<input type="text" placeholder="Bot Token" class="ws_form_element bot_token" style="padding-left: 30px">

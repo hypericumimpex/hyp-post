@@ -551,7 +551,7 @@ textarea.ws_form_element2
 
 	border-color: #E3EAF3 !important;
 
-	height: 40px;
+	min-height: 40px;
 	padding: 4px 10px;
 }
 
