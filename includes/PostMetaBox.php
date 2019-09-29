@@ -35,7 +35,7 @@ class PostMetaBox
 						case 'post':
 							$typeName = 'posts';
 							break;
-						case 'poge':
+						case 'page':
 							$typeName = 'pages';
 							break;
 						case 'attachment':
@@ -198,8 +198,6 @@ class PostMetaBox
 		// social networks lists
 		$nodesList = FS_post('share_on_nodes' , false , 'array' );
 
-		file_put_contents('D:/test0.txt', json_encode($nodesList) . "\n" . json_encode($_GET) . "\n" . json_encode($_POST) . "\n\n\n\n\n\n\n\n" , FILE_APPEND);
-
 		// if false, may be from xmlrpc, external application or etc... then load ol active nodes
 		if( $nodesList === false && !isset($_POST['share_checked']) && $new_status != 'draft' )
 		{
@@ -239,56 +237,40 @@ class PostMetaBox
 
 		$post_text_message = [];
 
-		$post_text_message['fb']		= FS_post('fs_post_text_message_fb' , '' , 'string');
-		$post_text_message['twitter']	= FS_post('fs_post_text_message_twitter' , '' , 'string');
-		$post_text_message['instagram']	= FS_post('fs_post_text_message_instagram' , '' , 'string');
-		$post_text_message['linkedin']	= FS_post('fs_post_text_message_linkedin' , '' , 'string');
-		$post_text_message['vk']		= FS_post('fs_post_text_message_vk' , '' , 'string');
-		$post_text_message['pinterest']	= FS_post('fs_post_text_message_pinterest' , '' , 'string');
-		$post_text_message['reddit']	= FS_post('fs_post_text_message_reddit' , '' , 'string');
-		$post_text_message['tumblr']	= FS_post('fs_post_text_message_tumblr' , '' , 'string');
-		$post_text_message['ok']		= FS_post('fs_post_text_message_ok' , '' , 'string');
-		$post_text_message['google_b']	= FS_post('fs_post_text_message_google_b' , '' , 'string');
-		$post_text_message['telegram']	= FS_post('fs_post_text_message_telegram' , '' , 'string');
-		$post_text_message['medium']	= FS_post('fs_post_text_message_medium' , '' , 'string');
+		$post_text_message['fb']			= FS_post('fs_post_text_message_fb' , '' , 'string');
+		$post_text_message['twitter']		= FS_post('fs_post_text_message_twitter' , '' , 'string');
+		$post_text_message['instagram']		= FS_post('fs_post_text_message_instagram' , '' , 'string');
+		$post_text_message['instagram_h']	= FS_post('fs_post_text_message_instagram_h' , '' , 'string');
+		$post_text_message['linkedin']		= FS_post('fs_post_text_message_linkedin' , '' , 'string');
+		$post_text_message['vk']			= FS_post('fs_post_text_message_vk' , '' , 'string');
+		$post_text_message['pinterest']		= FS_post('fs_post_text_message_pinterest' , '' , 'string');
+		$post_text_message['reddit']		= FS_post('fs_post_text_message_reddit' , '' , 'string');
+		$post_text_message['tumblr']		= FS_post('fs_post_text_message_tumblr' , '' , 'string');
+		$post_text_message['ok']			= FS_post('fs_post_text_message_ok' , '' , 'string');
+		$post_text_message['google_b']		= FS_post('fs_post_text_message_google_b' , '' , 'string');
+		$post_text_message['telegram']		= FS_post('fs_post_text_message_telegram' , '' , 'string');
+		$post_text_message['medium']		= FS_post('fs_post_text_message_medium' , '' , 'string');
 
 		if( $old_status == 'draft' )
 		{
 			delete_post_meta( $post_id, '_fs_poster_share' );
 			delete_post_meta( $post_id, '_fs_poster_node_list' );
-			delete_post_meta( $post_id, '_fs_poster_cm_fb' );
-			delete_post_meta( $post_id, '_fs_poster_cm_twitter' );
-			delete_post_meta( $post_id, '_fs_poster_cm_instagram' );
-			delete_post_meta( $post_id, '_fs_poster_cm_linkedin' );
-			delete_post_meta( $post_id, '_fs_poster_cm_vk' );
-			delete_post_meta( $post_id, '_fs_poster_cm_pinterest' );
-			delete_post_meta( $post_id, '_fs_poster_cm_reddit' );
-			delete_post_meta( $post_id, '_fs_poster_cm_tumblr' );
-			delete_post_meta( $post_id, '_fs_poster_cm_ok' );
-			delete_post_meta( $post_id, '_fs_poster_cm_google_b' );
-			delete_post_meta( $post_id, '_fs_poster_cm_telegram' );
-			delete_post_meta( $post_id, '_fs_poster_cm_medium' );
+
+			foreach ( $post_text_message AS $dr => $cmtxt )
+			{
+				delete_post_meta( $post_id, '_fs_poster_cm_' . $dr );
+			}
 		}
 
 		if( $new_status == 'draft' )
 		{
 			add_post_meta( $post_id, '_fs_poster_share', $share_checked, true );
-
 			add_post_meta( $post_id, '_fs_poster_node_list', $nodesList, true );
 
-			add_post_meta( $post_id, '_fs_poster_cm_fb', $post_text_message['fb'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_twitter', $post_text_message['twitter'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_instagram', $post_text_message['instagram'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_linkedin', $post_text_message['linkedin'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_vk', $post_text_message['vk'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_pinterest', $post_text_message['pinterest'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_reddit', $post_text_message['reddit'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_tumblr', $post_text_message['tumblr'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_ok', $post_text_message['ok'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_google_b', $post_text_message['google_b'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_telegram', $post_text_message['telegram'], true );
-			add_post_meta( $post_id, '_fs_poster_cm_medium', $post_text_message['medium'], true );
-
+			foreach ( $post_text_message AS $dr => $cmtxt )
+			{
+				add_post_meta( $post_id, '_fs_poster_cm_' . $dr , $cmtxt, true );
+			}
 			return;
 		}
 
@@ -310,55 +292,58 @@ class PostMetaBox
 				$filterType = isset($parse[3]) ? $parse[3] : 'no';
 				$categoriesStr = isset($parse[4]) ? $parse[4] : '';
 
-				$categoriesFilter = [];
-
-				if( !empty($categoriesStr) && $filterType != 'no' )
+				if( $postCats !== false ) // manual share panel...
 				{
-					foreach( explode(',' , $categoriesStr) AS $termId )
+					$categoriesFilter = [];
+
+					if( !empty($categoriesStr) && $filterType != 'no' )
 					{
-						if( is_numeric($termId) && $termId > 0 )
+						foreach( explode(',' , $categoriesStr) AS $termId )
 						{
-							$categoriesFilter[] = (int)$termId;
+							if( is_numeric($termId) && $termId > 0 )
+							{
+								$categoriesFilter[] = (int)$termId;
+							}
 						}
 					}
-				}
-				else
-				{
-					$filterType = 'no';
-				}
-
-				if( $filterType == 'in' )
-				{
-					$checkFilter = false;
-					foreach( $postCats AS $termInf )
+					else
 					{
-						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						$filterType = 'no';
+					}
+
+					if( $filterType == 'in' )
+					{
+						$checkFilter = false;
+						foreach( $postCats AS $termInf )
 						{
-							$checkFilter = true;
-							break;
+							if( in_array( $termInf->term_id , $categoriesFilter ) )
+							{
+								$checkFilter = true;
+								break;
+							}
+						}
+
+						if( !$checkFilter )
+						{
+							continue;
 						}
 					}
-
-					if( !$checkFilter )
+					else if( $filterType == 'ex' )
 					{
-						continue;
-					}
-				}
-				else if( $filterType == 'ex' )
-				{
-					$checkFilter = true;
-					foreach( $postCats AS $termInf )
-					{
-						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						$checkFilter = true;
+						foreach( $postCats AS $termInf )
 						{
-							$checkFilter = false;
-							break;
+							if( in_array( $termInf->term_id , $categoriesFilter ) )
+							{
+								$checkFilter = false;
+								break;
+							}
 						}
-					}
 
-					if( !$checkFilter )
-					{
-						continue;
+						if( !$checkFilter )
+						{
+							continue;
+						}
 					}
 				}
 
@@ -372,15 +357,17 @@ class PostMetaBox
 					continue;
 				}
 
-				$customMessage = isset($post_text_message[$driver]) ? $post_text_message[$driver] : null;
 
-				if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
-				{
-					$customMessage = null;
-				}
 
 				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
+					$customMessage = isset($post_text_message[$driver]) ? $post_text_message[$driver] : null;
+
+					if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
+					{
+						$customMessage = null;
+					}
+
 					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $post_id,
@@ -394,6 +381,13 @@ class PostMetaBox
 
 				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
+					$customMessage = isset($post_text_message[$driver . '_h']) ? $post_text_message[$driver . '_h'] : null;
+
+					if( $customMessage == get_option( 'fs_post_text_message_' . $driver . '_h' , "{title}" ) )
+					{
+						$customMessage = null;
+					}
+
 					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $post_id,

@@ -443,9 +443,25 @@ class FSInstagram
 	 * @param $title
 	 * @return null|string
 	 */
-	private static function imageForInstagramStory($imageURL , $title)
+	public static function imageForInstagramStory($imageURL , $title)
 	{
 		error_reporting(E_ALL);
+
+
+		$storyBackground	= get_option('fs_instagram_story_background', '636e72');
+
+		$titleBackground	= get_option('fs_instagram_story_title_background', '000000');
+		$titleBackgroundOpc	= get_option('fs_instagram_story_title_background_opacity', '30');
+		$titleColor			= get_option('fs_instagram_story_title_color', 'FFFFFF');
+		$titleTop			= get_option('fs_instagram_story_title_top', '125');
+		$titleLeft			= get_option('fs_instagram_story_title_left', '30');
+		$titleWidth			= get_option('fs_instagram_story_title_width', '660');
+		$titleFontSize		= get_option('fs_instagram_story_title_font_size', '30');
+
+		$titleBackgroundOpc = $titleBackgroundOpc > 100 || $titleBackgroundOpc < 0 ? 0.3 : $titleBackgroundOpc / 100;
+
+		$storyBackground = FShexToRgb( $storyBackground );
+		$storyBackground[] = 0;// opacity
 
 		$newFileName = null;
 		$storyW = 1080 / 1.5;
@@ -465,19 +481,17 @@ class FSInstagram
 		$imageInf->cleanup();
 		unset($imageInf);
 
-		if( $imageWidth > $imageHeight )
+		$w1 = $storyW;
+		$h1 = ($w1 / $imageWidth) * $imageHeight;
+
+		if( $h1 > $storyH )
 		{
-			$w1 = $storyW;
-			$h1 = ($w1 / $imageWidth) * $imageHeight;
-		}
-		else
-		{
+			$w1 = ($storyH / $h1) * $w1;
 			$h1 = $storyH;
-			$w1 = ( $h1 / $imageHeight ) * $imageWidth;
 		}
 
 		$image = new PHPImage();
-		$image->initialiseCanvas($storyW , $storyH , 'img' , [99, 110, 114 , 0]);
+		$image->initialiseCanvas($storyW , $storyH , 'img' , $storyBackground);
 
 		$image->draw($imageURL , '50%' , '50%' , $w1 , $h1);
 
@@ -495,29 +509,29 @@ class FSInstagram
 
 		// write title
 		$textPadding = 10;
-		$textWidth = 660;
+		$textWidth = $titleWidth;
 		$textHeight = 100 + $titlePercent;
-		$iX = floor(($storyW - $textWidth) / 2);
-		$iY = 125;
+		$iX = $titleLeft;
+		$iY = $titleTop;
 
 		$image->setFont(FS_LIB_DIR . 'PHPImage/font/Exo2-Regular.ttf');
-		$image->rectangle($iX, $iY, $textWidth + $textPadding, $textHeight - $textPadding, array(0, 0, 0), 0.3);
+		$image->rectangle($iX, $iY, $textWidth + $textPadding, $textHeight - $textPadding, FShexToRgb( $titleBackground ), $titleBackgroundOpc);
 
 		$image->textBox( $title , array(
-			'fontSize' => 30,
-			'x' => $iX,
-			'y' => $iY,
-			'strokeWidth' => 1,
-			'strokeColor' => array(99, 110, 114),
-			'width' => $textWidth,
-			'height' => $textHeight,
-			'alignHorizontal' => 'center',
-			'alignVertical' => 'center'
+			'fontSize'			=> $titleFontSize,
+			'fontColor'			=> FShexToRgb( $titleColor ),
+			'x'					=> $iX,
+			'y'					=> $iY,
+			'strokeWidth'		=> 1,
+			'strokeColor'		=> array(99, 110, 114),
+			'width'				=> $textWidth,
+			'height'			=> $textHeight,
+			'alignHorizontal'	=> 'center',
+			'alignVertical'		=> 'center'
 		));
 
 		$newFileName = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'instagram_stroy_tmp_' . rand(10000, 999999) . '_' . microtime(1) . '.png';
 		$image->save( $newFileName );
-
 
 		return $newFileName;
 	}

@@ -10,7 +10,7 @@ class OdnoKlassniki
 	 */
 	public static function callbackURL()
 	{
-		return site_url() . '?ok_callback=1';
+		return site_url() . '/?ok_callback=1';
 	}
 
 	/**

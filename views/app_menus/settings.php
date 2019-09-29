@@ -44,7 +44,8 @@ $settingTab = FS_get('setting' , 'share' , 'string' , ['general' , 'share', 'url
 	{
 		$('.append_to_text').click(function()
 		{
-			$("#custom_text_area").val($("#custom_text_area").val() + $(this).text().trim());
+			var txtarea = $(this).closest('.fs_setting_item').find("#custom_text_area");
+			txtarea.val( txtarea.val() + $(this).text().trim() );
 		});
 
 		$(".fs_image_buttons1 > div").click(function()

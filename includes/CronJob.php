@@ -3,6 +3,9 @@
 class CronJob
 {
 
+	private static $reScheduledList = [];
+
+
 	public static function initCronJobs()
 	{
 		if ( defined( 'DOING_CRON' ) )
@@ -59,9 +62,18 @@ class CronJob
 
 		wp_schedule_single_event( $nextScheduleTime, 'fs_check_scheduled_posts' , [ $scheduleId ] );
 
-		$nextScheduleLocalTime = current_time('timestamp') + $interval * 60;
+		$currentTimestamp = current_time('timestamp');
+		$nextScheduleLocalTime = $currentTimestamp + $interval * 60;
 
 		FSwpDB()->update(FSwpTable('schedules') , ['next_execute_time' => date('Y-m-d H:i', $nextScheduleLocalTime)] , ['id' => $scheduleId]);
+
+		// check if is sleep time...
+		$sleepTimeStart	= strtotime( $scheduleInf['sleep_time_start'] );
+		$sleepTimeEnd	= strtotime( $scheduleInf['sleep_time_end'] );
+		if( $currentTimestamp >= $sleepTimeStart && $currentTimestamp <= $sleepTimeEnd )
+		{
+			return;
+		}
 
 		$filterQuery = FSscheduleNextPostFilters( $scheduleInf );
 
@@ -164,41 +176,44 @@ class CronJob
 
 		foreach( $getActiveAccounts AS $accountInf )
 		{
-			$filterType = $accountInf['filter_type'];
-			$categoriesFilter = explode(',' , $accountInf['categories']);
-
-			if( $filterType == 'in' )
+			if( $postCats !== false )
 			{
-				$checkFilter = false;
-				foreach( $postCats AS $termInf )
+				$filterType = $accountInf['filter_type'];
+				$categoriesFilter = explode(',' , $accountInf['categories']);
+
+				if( $filterType == 'in' )
 				{
-					if( in_array( $termInf->term_id , $categoriesFilter ) )
+					$checkFilter = false;
+					foreach( $postCats AS $termInf )
 					{
-						$checkFilter = true;
-						break;
+						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						{
+							$checkFilter = true;
+							break;
+						}
+					}
+
+					if( !$checkFilter )
+					{
+						continue;
 					}
 				}
-
-				if( !$checkFilter )
+				else if( $filterType == 'ex' )
 				{
-					continue;
-				}
-			}
-			else if( $filterType == 'ex' )
-			{
-				$checkFilter = true;
-				foreach( $postCats AS $termInf )
-				{
-					if( in_array( $termInf->term_id , $categoriesFilter ) )
+					$checkFilter = true;
+					foreach( $postCats AS $termInf )
 					{
-						$checkFilter = false;
-						break;
+						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						{
+							$checkFilter = false;
+							break;
+						}
 					}
-				}
 
-				if( !$checkFilter )
-				{
-					continue;
+					if( !$checkFilter )
+					{
+						continue;
+					}
 				}
 			}
 
@@ -212,13 +227,13 @@ class CronJob
 				'is_sended'		=>	2
 			];
 
-			if( isset($customPostMessages[ $accountInf['driver'] ]) )
-			{
-				$insertData['custom_post_message'] = (string)$customPostMessages[ $accountInf['driver'] ];
-			}
-
 			if( !($accountInf['driver'] == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 			{
+				if( isset($customPostMessages[ $accountInf['driver'] ]) )
+				{
+					$insertData['custom_post_message'] = (string)$customPostMessages[ $accountInf['driver'] ];
+				}
+
 				if( FSwpDB()->insert( FSwpTable('feeds'), $insertData) )
 				{
 					$feedsArr[FSwpDB()->insert_id] = true;
@@ -227,6 +242,11 @@ class CronJob
 
 			if( $accountInf['driver'] == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 			{
+				if( isset($customPostMessages[ $accountInf['driver'] . '_h' ]) )
+				{
+					$insertData['custom_post_message'] = (string)$customPostMessages[ $accountInf['driver'] . '_h' ];
+				}
+
 				$insertData['feed_type'] = 'story';
 
 				if( FSwpDB()->insert( FSwpTable('feeds'), $insertData) )
@@ -321,16 +341,39 @@ class CronJob
 		$collectDrivers = [];
 		foreach ( $getFeeds AS $feedInf )
 		{
-			SocialNetworkPost::post( $feedInf['id'] );
+			$hasInterval = is_numeric($feedInf['interval']) && $feedInf['interval'] > 0;
+			$hasPostedSameSocialNetwork = isset( $collectDrivers[ $feedInf['driver'] ] );
 
-			if( is_numeric($feedInf['interval']) && $feedInf['interval'] > 0 && ( $fs_post_interval_type == 0 || ( $fs_post_interval_type == 1 && !isset( $collectDrivers[ $feedInf['driver'] ] ) ) ) )
+			if( $hasInterval && $fs_post_interval_type == 1 && $hasPostedSameSocialNetwork )
 			{
-				wp_schedule_single_event( time() + (int)$feedInf['interval'] ,  'fs_check_background_shared_posts' , [ $postId ] );
+				self::reSchedulePost( $postId, $feedInf['interval'] );
+				// change status for next schedule...
+				FSwpDB()->update(FSwpTable('feeds') , ['is_sended' => '0'] , ['id' => $feedInf['id']]);
+				continue;
+			}
+
+			if( $hasInterval && $fs_post_interval_type == 0 && !empty( $collectDrivers ) )
+			{
+				self::reSchedulePost( $postId, $feedInf['interval'] );
+				// change status for next schedule...
+				FSwpDB()->update(FSwpTable('feeds') , ['is_sended' => '0'] , ['post_id' => $postId , 'is_sended' => '2']);
 				break;
 			}
 
+			SocialNetworkPost::post( $feedInf['id'] );
 			$collectDrivers[ $feedInf['driver'] ] = true;
 		}
+	}
+
+	private static function reSchedulePost( $postId, $interval )
+	{
+		if( isset( self::$reScheduledList[ $postId ] ) )
+			return;
+
+		wp_schedule_single_event( time() + (int)$interval ,  'fs_check_background_shared_posts' , [ $postId ] );
+
+		// prevent dubpicate scheduling...
+		self::$reScheduledList[ $postId ] = true;
 	}
 
 }

@@ -195,7 +195,8 @@
 
 				if( $("#share_table>tbody>tr[data-status=0]").length > 0 )
 				{
-					$("#share_table>tbody>tr[data-status=0]:eq(0)").find('.status_td').html('<div class="ws_bg_warning" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('waiting interval...' , 'fs-poster')?>"+'</div>');
+					$("#share_table>tbody>tr[data-status=0]:eq(0)").find('.status_td').html('<div class="ws_bg_warning" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('waiting ' , 'fs-poster')?>"+'</div>');
+					FSwaitingTimer( $("#share_table>tbody>tr[data-status=0]:eq(0)") );
 
 					setTimeout(sendNext , parseInt($("#share_table>tbody>tr[data-status=0]:eq(0)").attr('data-interval')) * 1000 );
 				}
@@ -212,7 +213,8 @@
 
 				if( $("#share_table>tbody>tr[data-status=0]").length > 0 )
 				{
-					$("#share_table>tbody>tr[data-status=0]:eq(0)").find('.status_td').html('<div class="ws_bg_warning" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('waiting interval...' , 'fs-poster')?>"+'</div>');
+					$("#share_table>tbody>tr[data-status=0]:eq(0)").find('.status_td').html('<div class="ws_bg_warning" style="width: 55px; padding: 0px 10px; padding-bottom: 3px; -webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;">'+"<?=esc_html__('waiting ' , 'fs-poster')?>"+'</div>');
+					FSwaitingTimer( $("#share_table>tbody>tr[data-status=0]:eq(0)") );
 
 					setTimeout(sendNext , parseInt($("#share_table>tbody>tr[data-status=0]:eq(0)").attr('data-interval')) * 1000 );
 				}
@@ -223,6 +225,27 @@
 
 				reloadStats();
 			});
+
+		}
+
+		function FSwaitingTimer( e )
+		{
+			var time = e.data('interval');
+			time--;
+			if( time < 0 )
+			{
+				time = 0;
+			}
+			e.data('interval', time);
+			e.find('.status_td .ws_bg_warning').text("<?=esc_html__('waiting ' , 'fs-poster')?> [" + time + "sec]");
+
+			if( time > 0 )
+			{
+				setTimeout(function()
+				{
+					FSwaitingTimer(e);
+				}, 999);
+			}
 
 		}
 		sendNext();

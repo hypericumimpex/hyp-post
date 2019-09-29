@@ -302,6 +302,20 @@ $activeNodes = array_merge($accounts , $activeNodes);
 					</div>
 				</div>
 
+				<div class="fs_form_group">
+					<label>
+						<?=esc_html__('Set sleep time:' , 'fs-poster')?>
+						<span class="ws_tooltip" data-title="You can set sleep times in your Schedule. The plugin will not share any post during sleep times.">
+							<i class="fa fa-info-circle"></i>
+						</span>
+						<input type="checkbox" style="margin-left: 10px;" id="set_sleep_time">
+					</label>
+					<div style="display: flex; width: 300px;" id="set_sleep_time_area">
+						<input type="time" class="ws_form_element2 sleep_time_start">
+						<input type="time" class="ws_form_element2 sleep_time_end">
+					</div>
+				</div>
+
 				<div class="fs_form_group" style="width: 300px;">
 					<label>Order post by: <span class="ws_tooltip" data-title="Method for selecting posts."><i class="fa fa-info-circle"></i></span></label>
 					<select class="ws_form_element post_sort">
@@ -440,7 +454,8 @@ $activeNodes = array_merge($accounts , $activeNodes);
 				<div style="display: flex;">
 					<div class="custom-messages-sn">
 						<div data-sn-id="fb" class="active-sn"><i class="fab fa-facebook-square"></i> Facebook</div>
-						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
+						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram ( post )</div>
+						<div data-sn-id="instagram_h"><i class="fab fa-instagram"></i> Instagram ( story )</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
@@ -457,6 +472,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div class="social_network_custom_texts">
 							<textarea class="ws_form_element2" data-sn-id="fb"><?=esc_html(get_option('fs_post_text_message_fb', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="instagram"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
+							<textarea class="ws_form_element2" style="display: none;" data-sn-id="instagram_h"><?=esc_html(get_option('fs_post_text_message_instagram_h', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="twitter"><?=esc_html(get_option('fs_post_text_message_twitter', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="linkedin"><?=esc_html(get_option('fs_post_text_message_linkedin', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="tumblr"><?=esc_html(get_option('fs_post_text_message_tumblr', "{title}"))?></textarea>
@@ -593,6 +609,9 @@ $activeNodes = array_merge($accounts , $activeNodes);
 				category_filter		=   $("#proModal<?=$mn?> .category_filter").val(),
 				post_sort			=   $("#proModal<?=$mn?> .post_sort").val(),
 				post_date_filter	=   $("#proModal<?=$mn?> .post_date_filter").val(),
+				set_sleep_time		=   $("#proModal<?=$mn?> #set_sleep_time").is(':checked')?1:0,
+				sleep_time_start	=	set_sleep_time ? $("#proModal<?=$mn?> .sleep_time_start").val() : '',
+				sleep_time_end		=	set_sleep_time ? $("#proModal<?=$mn?> .sleep_time_end").val() : '',
 				custom_messages		=	{},
 				accounts_list		=	[];
 
@@ -647,6 +666,8 @@ $activeNodes = array_merge($accounts , $activeNodes);
 				'category_filter':		category_filter,
 				'post_sort':			post_sort,
 				'post_date_filter':		post_date_filter,
+				'sleep_time_start':		sleep_time_start,
+				'sleep_time_end':		sleep_time_end,
 				'custom_messages':		JSON.stringify(	custom_messages ),
 				'accounts_list':		JSON.stringify( accounts_list )
 			} , function(result)
@@ -699,6 +720,18 @@ $activeNodes = array_merge($accounts , $activeNodes);
 
 			$("#proModal<?=$mn?> .social_network_custom_texts > textarea[data-sn-id='" + activeTab + "']").append(tag);
 		});
+
+		$("#set_sleep_time").change(function()
+		{
+			if( $(this).is(':checked') )
+			{
+				$('#set_sleep_time_area').slideDown(200);
+			}
+			else
+			{
+				$('#set_sleep_time_area').slideUp(200);
+			}
+		}).trigger('change');
 	});
 
 	function addNodeToList( dataId, cover, name)

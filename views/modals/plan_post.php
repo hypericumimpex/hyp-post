@@ -300,7 +300,8 @@ $activeNodes = array_merge($accounts , $activeNodes);
 				<div style="display: flex;">
 					<div class="custom-messages-sn">
 						<div data-sn-id="fb" class="active-sn"><i class="fab fa-facebook-square"></i> Facebook</div>
-						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram</div>
+						<div data-sn-id="instagram"><i class="fab fa-instagram"></i> Instagram ( post )</div>
+						<div data-sn-id="instagram_h"><i class="fab fa-instagram"></i> Instagram ( story )</div>
 						<div data-sn-id="twitter"><i class="fab fa-twitter-square"></i> Twitter</div>
 						<div data-sn-id="linkedin"><i class="fab fa-linkedin"></i> Linkedin</div>
 						<div data-sn-id="tumblr"><i class="fab fa-tumblr-square"></i> Tumblr</div>
@@ -317,6 +318,7 @@ $activeNodes = array_merge($accounts , $activeNodes);
 						<div class="social_network_custom_texts">
 							<textarea class="ws_form_element2" data-sn-id="fb"><?=esc_html(get_option('fs_post_text_message_fb', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="instagram"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
+							<textarea class="ws_form_element2" style="display: none;" data-sn-id="instagram_h"><?=esc_html(get_option('fs_post_text_message_instagram_h', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="twitter"><?=esc_html(get_option('fs_post_text_message_twitter', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="linkedin"><?=esc_html(get_option('fs_post_text_message_linkedin', "{title}"))?></textarea>
 							<textarea class="ws_form_element2" style="display: none;" data-sn-id="google"><?=esc_html(get_option('fs_post_text_message_google', "{title}"))?></textarea>

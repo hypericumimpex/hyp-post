@@ -21,20 +21,20 @@ class SocialNetworkPost
 		$options				= $nInf['options'];
 		$accoundId				= $nInf['account_id'];
 
-		$link           = '';
-		$message        = '';
-		$sendType       = 'status';
-		$images         = null;
-		$imagesLocale   = null;
-		$videoURL       = null;
-		$videoURLLocale = null;
+		$link           		= '';
+		$message        		= '';
+		$sendType       		= 'status';
+		$images         		= null;
+		$imagesLocale   		= null;
+		$videoURL       		= null;
+		$videoURLLocale 		= null;
 
-		$postInf    = get_post($postId , ARRAY_A);
-		$postType   = $postInf['post_type'];
+		$postInf    			= get_post($postId , ARRAY_A);
+		$postType   			= $postInf['post_type'];
 
-		$postTitle = $postInf['post_title'];
+		$postTitle				= $postInf['post_title'];
 
-		$unlinkTmpFiles = [];
+		$unlinkTmpFiles 		= [];
 
 		if( $postType == 'attachment' && strpos($postInf['post_mime_type'] , 'image') !== false )
 		{
@@ -88,19 +88,17 @@ class SocialNetworkPost
 		}
 		else
 		{
-			$link = get_permalink($postInf['ID']);
-
-			$link = FScustomizePostLink($link , $feedId, $postInf, $nInf['info']);
+			$link = FSgetPostLink( $postInf, $feedId, $nInf['info'] );
 
 			if( empty( $custom_post_message ) )
 			{
-				$custom_post_message = get_option( 'fs_post_text_message_' . $driver , "{title}" );
+				$custom_post_message = get_option( 'fs_post_text_message_' . $driver . ( $driver == 'instagram' && $feedInf['feed_type'] == 'story' ? '_h' : '' ) , "{title}" );
 			}
 
 			$longLink = $link;
 			$shortLink = FSshortenerURL( $link );
 
-			$message = FSreplaceTags( $custom_post_message , $postInf , $link , $shortLink);
+			$message = FSreplaceTags( $custom_post_message , $postInf , $link , $shortLink );
 			$message = FSspintax( $message );
 
 			$link = $shortLink;
@@ -109,7 +107,8 @@ class SocialNetworkPost
 		if( $driver != 'medium' )
 		{
 			$message = strip_tags( $message );
-			$message = str_replace('&nbsp;', '', $message);
+			$message = str_replace(['&nbsp;', "\r\n"], ['', "\n"], $message);
+			//$message = preg_replace("/(\n\s*)+/", "\n", $message);
 		}
 
 		if( $driver == 'fb' )

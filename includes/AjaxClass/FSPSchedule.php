@@ -12,13 +12,27 @@ trait FSPSchedule
 		$interval 			= FS_post('interval' , '0' , 'num');
 		$share_time 		= FS_post('share_time' , '' , 'string');
 
-		$post_type_filter = FS_post('post_type_filter' , '' , 'string');
-		$category_filter = FS_post('category_filter' , [] , 'array');
-		$post_sort = FS_post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
-		$post_date_filter = FS_post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year' , 'last_30_days' , 'last_60_days']);
+		$post_type_filter	= FS_post('post_type_filter' , '' , 'string');
+		$category_filter	= FS_post('category_filter' , '0' , 'int');
+		$post_sort			= FS_post('post_sort' , 'random' , 'string' , ['random', 'random2' , 'old_first' , 'new_first']);
+		$post_date_filter	= FS_post('post_date_filter' , 'all' , 'string' , ['all' , 'this_week' , 'previously_week' , 'this_month' , 'previously_month' , 'this_year' , 'last_30_days' , 'last_60_days']);
 
-		$custom_messages = FS_post('custom_messages' , '' , 'string');
-		$accounts_list = FS_post('accounts_list' , '' , 'string');
+		$custom_messages	= FS_post('custom_messages' , '' , 'string');
+		$accounts_list		= FS_post('accounts_list' , '' , 'string');
+
+		$sleep_time_start	= FS_post('sleep_time_start' , '' , 'string');
+		$sleep_time_end		= FS_post('sleep_time_end' , '' , 'string');
+
+		if( empty($sleep_time_start) || empty($sleep_time_end) )
+		{
+			$sleep_time_start = null;
+			$sleep_time_end = null;
+		}
+		else
+		{
+			$sleep_time_start = date('H:i', strtotime( $sleep_time_start ));
+			$sleep_time_end = date('H:i', strtotime( $sleep_time_end ));
+		}
 
 		$_custom_messages = [];
 		if( !empty( $custom_messages ) )
@@ -28,7 +42,7 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'instagram_h', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
 				{
 					$_custom_messages[ $socialNetwork ] = $message1;
 				}
@@ -55,18 +69,6 @@ trait FSPSchedule
 			}
 		}
 		$_accounts_list = empty($_accounts_list) ? null : implode(',' , $_accounts_list);
-
-		// sanitize categories array...
-		$category_filterNew = [];
-		foreach( $category_filter AS $categId )
-		{
-			if( is_numeric($categId) && $categId > 0 )
-			{
-				$category_filterNew[] = $categId;
-			}
-		}
-		$category_filter = implode('|' , $category_filterNew);
-		unset($category_filterNew);
 
 		// sanitize post types array...
 		$allowedPostTypes = explode('|', get_option('fs_allowed_post_types', ''));
@@ -97,12 +99,15 @@ trait FSPSchedule
 			'next_execute_time'		=>	$cronStartTime,
 
 			'post_type_filter'		=>	$post_type_filter,
-			'category_filter'		=>	$category_filter,
+			'category_filter'		=>	$category_filter > 0 ? $category_filter : null,
 			'post_sort'				=>	$post_sort,
 			'post_date_filter'		=>	$post_date_filter,
 
 			'custom_post_message'	=>	$_custom_messages,
-			'share_on_accounts'		=>	$_accounts_list
+			'share_on_accounts'		=>	$_accounts_list,
+
+			'sleep_time_start'		=>	$sleep_time_start,
+			'sleep_time_end'		=>	$sleep_time_end
 		]);
 
 		CronJob::setScheduleTask( FSwpDB()->insert_id , $cronStartTime );
@@ -166,7 +171,7 @@ trait FSPSchedule
 
 			foreach ($custom_messages AS $socialNetwork => $message1 )
 			{
-				if( in_array( $socialNetwork , ['fb', 'instagram', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
+				if( in_array( $socialNetwork , ['fb', 'instagram', 'instagram_h', 'linkedin', 'twitter', 'pinterest', 'vk', 'ok', 'tumblr', 'reddit', 'google_b', 'telegram', 'medium'] ) && is_string( $message1 ) )
 				{
 					$_custom_messages[$socialNetwork] = $message1;
 				}

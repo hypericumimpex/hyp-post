@@ -212,7 +212,10 @@ $scheudleId = FS_post('schedule_id' , '0' , 'int');
 							result['data'][i]['name'] +
 							'<a href="'+result['data'][i]['profile_link']+'" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link' , 'fs-poster');?>" style="font-size: 13px; color: #fd79a8; background-color: transparent !important;"><i class="fa fa-external-link fa-external-link-alt"></i></a>' +
 							'</div>' +
-							'<div class="post_time"><i class="far fa-clock"></i> '+result['data'][i]['date']+'</div>' +
+							'<div class="post_time">' +
+							'<i class="far fa-clock"></i> '+result['data'][i]['date']+
+							'<a href="<?=site_url()?>/?p='+result['data'][i]['wp_post_id']+'" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Post link' , 'fs-poster');?>" style="font-size: 13px; color: #fd79a8; background-color: transparent !important;"><i class="fa fa-external-link fa-link"></i></a>' +
+							'</div>' +
 							'</div>' +
 							'</td>' +
 							'<td>' +
@@ -220,7 +223,7 @@ $scheudleId = FS_post('schedule_id' , '0' , 'int');
 								(
 									'<div class="post_link">' +
 									'<a href="' + result['data'][i]['post_link'] + '" target="_blank">' +
-									'<i class="fa fa-external-link fa-external-link-alt"></i> ' + "<?=esc_html__('Post Link' , 'fs-poster');?>" +
+									'<i class="fa fa-external-link fa-external-link-alt"></i> ' + "<?=esc_html__('Publication Link' , 'fs-poster');?>" +
 									'</a>' +
 									'</div>'
 								) : ' --- ') +

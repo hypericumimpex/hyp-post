@@ -44,7 +44,7 @@ class AdminMenuClass
 						'read',
 						'fs-poster',
 						array( $this, 'app_install' ),
-						'dashicons-share',
+						plugin_dir_url(__FILE__) . '../images/logo_xs.png',
 						90
 					);
 				});
@@ -66,7 +66,7 @@ class AdminMenuClass
 								'read',
 								'fs-poster',
 								array( $this, 'app_update' ),
-								'dashicons-share',
+								plugin_dir_url(__FILE__) . '../images/logo_xs.png',
 								90
 							);
 						});
@@ -84,7 +84,7 @@ class AdminMenuClass
 							'read',
 							'fs-poster',
 							array( $this, 'app_update' ),
-							'dashicons-share',
+							plugin_dir_url(__FILE__) . '../images/logo_xs.png',
 							90
 						);
 					});
@@ -102,7 +102,7 @@ class AdminMenuClass
 					'read',
 					'fs-poster',
 					array( $this, 'app_base' ),
-					'dashicons-share',
+					plugin_dir_url(__FILE__) . '../images/logo_xs.png',
 					90
 				);
 
@@ -115,7 +115,7 @@ class AdminMenuClass
 				add_submenu_page( 'fs-poster', esc_html__('Share' , 'fs-poster'), esc_html__('Share' , 'fs-poster'),
 					'read', 'fs-poster-share' , array( $this, 'app_base' ));
 
-				add_submenu_page( 'fs-poster', esc_html__('Logs' , 'fs-poster'), esc_html__('Posts' , 'fs-poster'),
+				add_submenu_page( 'fs-poster', esc_html__('Logs' , 'fs-poster'), esc_html__('Logs' , 'fs-poster'),
 					'read', 'fs-poster-posts' , array( $this, 'app_base' ));
 
 				add_submenu_page( 'fs-poster', esc_html__('Insights' , 'fs-poster'), esc_html__('Insights' , 'fs-poster'),
@@ -170,8 +170,8 @@ class AdminMenuClass
 
 		$fsPurchaseKey = get_option('fs_poster_plugin_purchase_key' , '');
 
-		$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
-		$result2 = file_get_contents($checkPurchaseCodeURL);
+		//$checkPurchaseCodeURL = FS_API_URL . "api.php?act=get_notifications&purchase_code=" . $fsPurchaseKey . "&domain=" . site_url();
+		//$result2 = file_get_contents($checkPurchaseCodeURL);
 		$result = json_decode($result2 , true);
 
 		if( $result['action'] == 'empty' )
@@ -225,7 +225,7 @@ class AdminMenuClass
 					'read',
 					'fs-poster',
 					array( $this, 'app_disable' ),
-					'dashicons-share',
+					plugin_dir_url(__FILE__) . '../images/logo_xs.png',
 					90
 				);
 			});

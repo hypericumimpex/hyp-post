@@ -3,6 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+FSwpDB()->query('DELETE FROM `'.FSwpTable('account_status').'` WHERE (SELECT count(0) FROM `'.FSwpTable('accounts').'` WHERE id=account_id)=0');
+FSwpDB()->query('DELETE FROM `'.FSwpTable('account_node_status').'` WHERE (SELECT count(0) FROM `'.FSwpTable('account_nodes').'` WHERE id=`'.FSwpTable('account_node_status').'`.node_id)=0');
+
 $accountsList = FSwpDB()->get_results(FSwpDB()->prepare("SELECT driver, COUNT(0) AS _count FROM ".FSwpTable('accounts')." WHERE (user_id=%d OR is_public=1) GROUP BY driver",  [get_current_user_id()]) , ARRAY_A);
 $accountsCount = [
 	'fb'		=>  0,
@@ -37,6 +40,11 @@ $activeTab = FS_get('tab', 'fb', 'string');
 	<div class="activate_btn">Activate</div>
 	<div class="activate_with_condition_btn">Activate with condition</div>
 	<div class="deactivate_btn">Deactivate</div>
+</div>
+
+<div id="fs_sub_menu2">
+	<div class="make_public_action">Make public <i class="fa fa-question-circle ws_tooltip" data-title="<?=__('Using this feature you will be able to allow other WordPress Users to share in this profile.' , 'fs-poster')?>"></i></div>
+	<div class="delete_account_action">Delete</div>
 </div>
 
 <div style="display: flex;">
@@ -118,19 +126,126 @@ $activeTab = FS_get('tab', 'fb', 'string');
 
 		$('#fs_account_supports>[data-setting="<?=htmlspecialchars($activeTab)?>"]').click();
 
-		$("#account_content").on('click' , '.delete_account_btn' , function()
+		$("#account_content").on('click' , '.fs_account_checkbox' , function()
 		{
-			var tr      = $(this).closest('tr'),
-				aId     = tr.data('id'),
-				type    = tr.data('type');
+			var checked     = $(this).hasClass("fs_account_checked"),
+				dataId      = $(this).closest('tr').data('id'),
+				dataType    = $(this).closest('tr').data('type');
+
+			$("#fs_sub_menu")
+				.show()
+				.css('top' , $(this).offset().top + 25 - $(window).scrollTop())
+				.css('left' , $(this).offset().left - ($("#fs_sub_menu").width()/2) + 10)
+				.data('id' , dataId)
+				.data('type' , dataType ? dataType : 'account');
+		}).on('click', '.more_options_account', function ()
+		{
+			var checked     = $(this).hasClass("fs_account_checked"),
+				dataId      = $(this).closest('tr').data('id'),
+				dataType    = $(this).closest('tr').data('type');
+
+			$("#fs_sub_menu2")
+				.show()
+				.css('top' , $(this).offset().top + 35 - $(window).scrollTop())
+				.css('left' , $(this).offset().left - ($("#fs_sub_menu2").width()/2) + 10)
+				.data('id' , dataId)
+				.data('type' , dataType ? dataType : 'account');
+		}).on('click', '.fs_expand_all_btn', function()
+		{
+			$('.fs_communities_area').slideDown(400, function()
+			{
+				$(this).prev('table').find('.fs_expand_icon > .fa-angle-right').attr('class', 'fa fa-angle-down');
+			});
+		}).on('click', '.fs_collapse_all_btn', function()
+		{
+			$('.fs_communities_area').slideUp(400, function()
+			{
+				$(this).prev('table').find('.fs_expand_icon > .fa-angle-down').attr('class', 'fa fa-angle-right');
+			});
+		}).on('click', '.fs_expand_icon', function()
+		{
+			var arrow = $(this).children('i');
+
+			$(this).closest('table').next('.fs_communities_area').slideToggle(400, function()
+			{
+				arrow.attr('class', arrow.hasClass('fa-angle-down') ? 'fa fa-angle-right' : 'fa fa-angle-down');
+			});
+		});
+
+		$(document).click(function(e)
+		{
+			if( !$(e.target).is('.fs_account_checkbox , .fs_account_checkbox > i') )
+			{
+				$("#fs_sub_menu").hide();
+			}
+			if( !$(e.target).is('.more_options_account , .more_options_account > i') )
+			{
+				$("#fs_sub_menu2").hide();
+			}
+		});
+
+		$("#fs_sub_menu > .activate_with_condition_btn").click(function()
+		{
+			var dataId      = $('#fs_sub_menu').data('id'),
+				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'node' : 'account';
+
+			fsCode.loadModal('activate_with_condition' , {'id': dataId, 'type': dataType});
+		});
+
+		$("#fs_sub_menu > .activate_btn").click(function()
+		{
+			var dataId      = $('#fs_sub_menu').data('id'),
+				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
+
+			fsCode.ajax(dataType , {'id': dataId, 'checked': 1});
+			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").addClass('fs_account_checked').removeClass('fs_account_checked2');
+		});
+
+		$("#fs_sub_menu > .deactivate_btn").click(function()
+		{
+			var dataId		= $('#fs_sub_menu').data('id'),
+				dataType	= $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
+
+			fsCode.ajax(dataType , {'id': dataId, 'checked': 0} );
+			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").removeClass('fs_account_checked').removeClass('fs_account_checked2');
+		});
+
+		$("#fs_sub_menu2 > .make_public_action").click(function()
+		{
+			var dataId		= $('#fs_sub_menu2').data('id'),
+				dataType	= $('#fs_sub_menu2').data('type');
+
+			var trObj		= $("tr[data-id='" + dataId + "'][data-type='" + dataType + "']");
+			var checked		= trObj.find(".fs_account_is_public").css('display') != 'none';
+
+			var ajaxAction = dataType == 'community' ? 'settings_node_make_public' : 'make_account_public';
+
+			fsCode.ajax(ajaxAction , {'id': dataId, 'checked': checked?0:1}, function()
+			{
+				if( checked )
+				{
+					trObj.find(".fs_account_is_public").hide(200);
+				}
+				else
+				{
+					trObj.find(".fs_account_is_public").show(200);
+				}
+			});
+		});
+
+		$("#fs_sub_menu2 > .delete_account_action").click(function()
+		{
+			var dataId		= $('#fs_sub_menu2').data('id'),
+				dataType	= $('#fs_sub_menu2').data('type'),
+				tr      	= $("tr[data-id='" + dataId + "'][data-type='" + dataType + "']");
 
 			fsCode.confirm("<?=esc_html__('Are you sure you want to delete?' , 'fs-poster')?>" , 'danger' , function ()
 			{
-				var ajaxAction = type == 'community' ? 'settings_node_delete' : 'delete_account';
+				var ajaxAction = dataType == 'community' ? 'settings_node_delete' : 'delete_account';
 
-				fsCode.ajax(ajaxAction , {'id': aId} , function(result)
+				fsCode.ajax(ajaxAction , {'id': dataId} , function(result)
 				{
-					if( type == 'community' )
+					if( dataType == 'community' )
 					{
 						tr.fadeOut(300, function()
 						{
@@ -160,97 +275,6 @@ $activeTab = FS_get('tab', 'fb', 'string');
 
 				});
 			}, true);
-		}).on('click' , '.fs_account_checkbox' , function()
-		{
-			var checked     = $(this).hasClass("fs_account_checked"),
-				dataId      = $(this).closest('tr').data('id'),
-				dataType    = $(this).closest('tr').data('type');
-
-			$("#fs_sub_menu")
-				.show()
-				.css('top' , $(this).offset().top + 25 - $(window).scrollTop())
-				.css('left' , $(this).offset().left - ($("#fs_sub_menu").width()/2) + 10)
-				.data('id' , dataId)
-				.data('type' , dataType ? dataType : 'account');
-		}).on('click' , '.fs_account_checkbox_public' , function()
-		{
-			var checked			= $(this).hasClass("fs_account_checked"),
-				is_my_account	= $(this).hasClass('my_account'),
-				dataId			= $(this).closest('tr').data('id'),
-				dataType        = $(this).closest('tr').data('type');
-
-			if( !is_my_account )
-			{
-				fsCode.alert("<?=esc_html__('This is not one of you added account/community, therefore you do not have a permission for make this profile/community public or private.' , 'fs-poster')?>");
-				return;
-			}
-
-			if( checked )
-			{
-				$(this).removeClass('fs_account_checked');
-			}
-			else
-			{
-				$(this).addClass('fs_account_checked');
-			}
-
-			var ajaxAction = dataType == 'community' ? 'settings_node_make_public' : 'make_account_public';
-
-			fsCode.ajax(ajaxAction , {'id': dataId, 'checked': checked?0:1});
-		}).on('click', '.fs_expand_all_btn', function()
-		{
-			$('.fs_communities_area').slideDown(400, function()
-			{
-				$(this).prev('table').find('.fs_expand_icon > .fa-angle-right').attr('class', 'fa fa-angle-down');
-			});
-		}).on('click', '.fs_collapse_all_btn', function()
-		{
-			$('.fs_communities_area').slideUp(400, function()
-			{
-				$(this).prev('table').find('.fs_expand_icon > .fa-angle-down').attr('class', 'fa fa-angle-right');
-			});
-		}).on('click', '.fs_expand_icon', function()
-		{
-			var arrow = $(this).children('i');
-
-			$(this).closest('table').next('.fs_communities_area').slideToggle(400, function()
-			{
-				arrow.attr('class', arrow.hasClass('fa-angle-down') ? 'fa fa-angle-right' : 'fa fa-angle-down');
-			});
-		});
-
-		$(document).click(function(e)
-		{
-			if( !$(e.target).is('.fs_account_checkbox , .fs_account_checkbox > i') )
-			{
-				$("#fs_sub_menu").hide();
-			}
-		});
-
-		$("#fs_sub_menu > .activate_with_condition_btn").click(function()
-		{
-			var dataId      = $('#fs_sub_menu').data('id'),
-				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'node' : 'account';
-
-			fsCode.loadModal('activate_with_condition' , {'id': dataId, 'type': dataType});
-		});
-
-		$("#fs_sub_menu > .activate_btn").click(function()
-		{
-			var dataId      = $('#fs_sub_menu').data('id'),
-				dataType    = $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
-
-			fsCode.ajax(dataType , {'id': dataId, 'checked': 1});
-			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").addClass('fs_account_checked').removeClass('fs_account_checked2');
-		});
-
-		$("#fs_sub_menu > .deactivate_btn").click(function()
-		{
-			var dataId		= $('#fs_sub_menu').data('id'),
-				dataType	= $('#fs_sub_menu').data('type') == 'community' ? 'settings_node_activity_change' : 'account_activity_change';
-
-			fsCode.ajax(dataType , {'id': dataId, 'checked': 0} );
-			$("tr[data-id=\"" + dataId + "\"] .fs_account_checkbox").removeClass('fs_account_checked').removeClass('fs_account_checked2');
 		});
 
 	});

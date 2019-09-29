@@ -55,7 +55,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<div class="fs_setting_item" style="width: 100%;">
+<div class="fs_setting_item" style="width: 50%;">
+	<div class="fs_setting_item_label">
+		<div><?=esc_html__('Share custom URL instead of WP Post link:' , 'fs-poster')?></div>
+		<div class="fs_s_help"><?=esc_html__('If you activate this option you will type your Custom Post URL using specific keywords.' , 'fs-poster')?></div>
+	</div>
+	<div class="fs_s_input">
+		<div class="fs_onoffswitch">
+			<input type="checkbox" onautocomplete="off" name="fs_share_custom_url" class="fs_onoffswitch-checkbox" id="fs_share_custom_url"<?=get_option('fs_share_custom_url', '0')?' checked':''?>>
+			<label class="fs_onoffswitch-label" for="fs_share_custom_url"></label>
+		</div>
+	</div>
+</div>
+
+<div class="fs_setting_item" id="addition_url_parameters_section" style="width: 100%;">
 	<div class="fs_setting_item_label" style="width: 50%;">
 		<div>
 			<?=esc_html__('Additional URL parameters:' , 'fs-poster')?>
@@ -100,10 +113,90 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
+<div class="fs_setting_item" id="custom_url_section" style="width: 100%;">
+	<div class="fs_setting_item_label" style="width: 50%;">
+		<div><?=esc_html__('Custom URL:' , 'fs-poster')?></div>
+		<div class="fs_s_help">
+			<div><?=esc_html__('Also, you can use the following keywords on your parameters:' , 'fs-poster')?></div>
+			<div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Post ID' , 'fs-poster')?></div>
+					<div class="ws_color_info">{post_id}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Feed ID' , 'fs-poster')?></div>
+					<div class="ws_color_info">{feed_id}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Post title' , 'fs-poster')?></div>
+					<div class="ws_color_info">{post_title}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Social Network name' , 'fs-poster')?></div>
+					<div class="ws_color_info">{network_name}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Social Network code' , 'fs-poster')?></div>
+					<div class="ws_color_info">{network_code}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Account name' , 'fs-poster')?></div>
+					<div class="ws_color_info">{account_name}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Site name' , 'fs-poster')?></div>
+					<div class="ws_color_info">{site_name}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Site URL' , 'fs-poster')?></div>
+					<div class="ws_color_info">{site_url}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Site URL ( URL Encoded )' , 'fs-poster')?></div>
+					<div class="ws_color_info">{site_url_encoded}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Post URL' , 'fs-poster')?></div>
+					<div class="ws_color_info">{post_url}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Post URL ( URL Encoded )' , 'fs-poster')?></div>
+					<div class="ws_color_info">{post_url_encoded}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Unique ID' , 'fs-poster')?></div>
+					<div class="ws_color_info">{uniq_id}</div>
+				</div>
+				<div class="fs_text_codes">
+					<div><?=esc_html__('Custom fields' , 'fs-poster')?></div>
+					<div class="ws_color_info">{cf_KEY}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="fs_s_input" style="width: 45%;">
+		<input type="text" onautocomplete="off" name="fs_custom_url_to_share" id="fs_custom_url_to_share" class="ws_form_element" value="<?=esc_html(get_option('fs_custom_url_to_share', '{site_url}/?feed_id={feed_id}'))?>">
+	</div>
+</div>
+
 <script>
 	var fadeSpeed = 0;
 	jQuery(document).ready(function()
 	{
+		$("#fs_share_custom_url").change(function()
+		{
+			if( $(this).is(':checked') )
+			{
+				$("#addition_url_parameters_section").slideUp(fadeSpeed);
+				$("#custom_url_section").slideDown(fadeSpeed);
+			}
+			else
+			{
+				$("#custom_url_section").slideUp(fadeSpeed);
+				$("#addition_url_parameters_section").slideDown(fadeSpeed);
+			}
+		}).trigger('change');
+
 		$("#save_btn").click(function()
 		{
 			var data = fsCode.serialize($(".settings_form"));

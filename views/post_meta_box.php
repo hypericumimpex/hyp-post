@@ -17,6 +17,7 @@ if( isset($postId) && $postId > 0 && get_post_status() == 'draft' )
 	$cm_fs_post_text_message_fb			= get_post_meta($postId, '_fs_poster_cm_fb', true);
 	$cm_fs_post_text_message_twitter	= get_post_meta($postId, '_fs_poster_cm_twitter', true);
 	$cm_fs_post_text_message_instagram	= get_post_meta($postId, '_fs_poster_cm_instagram', true);
+	$cm_fs_post_text_message_instagram_h= get_post_meta($postId, '_fs_poster_cm_instagram_h', true);
 	$cm_fs_post_text_message_linkedin	= get_post_meta($postId, '_fs_poster_cm_linkedin', true);
 	$cm_fs_post_text_message_vk			= get_post_meta($postId, '_fs_poster_cm_vk', true);
 	$cm_fs_post_text_message_pinterest	= get_post_meta($postId, '_fs_poster_cm_pinterest', true);
@@ -90,18 +91,19 @@ else
 {
 	$shareCheckbox						= get_option('fs_auto_share_new_posts', '1') || FS_get('page')=='fs-poster-share' || FS_post('post_id', null) !== null;
 
-	$cm_fs_post_text_message_fb			= get_option('fs_post_text_message_fb');
-	$cm_fs_post_text_message_twitter	= get_option('fs_post_text_message_twitter');
-	$cm_fs_post_text_message_instagram	= get_option('fs_post_text_message_instagram');
-	$cm_fs_post_text_message_linkedin	= get_option('fs_post_text_message_linkedin');
-	$cm_fs_post_text_message_vk			= get_option('fs_post_text_message_vk');
-	$cm_fs_post_text_message_pinterest	= get_option('fs_post_text_message_pinterest');
-	$cm_fs_post_text_message_reddit		= get_option('fs_post_text_message_reddit');
-	$cm_fs_post_text_message_tumblr		= get_option('fs_post_text_message_tumblr');
-	$cm_fs_post_text_message_ok			= get_option('fs_post_text_message_ok');
-	$cm_fs_post_text_message_google_b	= get_option('fs_post_text_message_google_b');
-	$cm_fs_post_text_message_telegram	= get_option('fs_post_text_message_telegram');
-	$cm_fs_post_text_message_medium		= get_option('fs_post_text_message_medium');
+	$cm_fs_post_text_message_fb				= get_option('fs_post_text_message_fb');
+	$cm_fs_post_text_message_twitter		= get_option('fs_post_text_message_twitter');
+	$cm_fs_post_text_message_instagram		= get_option('fs_post_text_message_instagram');
+	$cm_fs_post_text_message_instagram_h	= get_option('fs_post_text_message_instagram_h');
+	$cm_fs_post_text_message_linkedin		= get_option('fs_post_text_message_linkedin');
+	$cm_fs_post_text_message_vk				= get_option('fs_post_text_message_vk');
+	$cm_fs_post_text_message_pinterest		= get_option('fs_post_text_message_pinterest');
+	$cm_fs_post_text_message_reddit			= get_option('fs_post_text_message_reddit');
+	$cm_fs_post_text_message_tumblr			= get_option('fs_post_text_message_tumblr');
+	$cm_fs_post_text_message_ok				= get_option('fs_post_text_message_ok');
+	$cm_fs_post_text_message_google_b		= get_option('fs_post_text_message_google_b');
+	$cm_fs_post_text_message_telegram		= get_option('fs_post_text_message_telegram');
+	$cm_fs_post_text_message_medium			= get_option('fs_post_text_message_medium');
 
 	$accounts = FSwpDB()->get_results(
 		FSwpDB()->prepare("
@@ -363,7 +365,14 @@ else
 			</div>
 			<div data-tab="instagram">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Instagram post message' , 'fs-poster')?></label></div>
-				<div class="fs_cm_d2"><textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram"><?=htmlspecialchars($cm_fs_post_text_message_instagram)?></textarea><span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span></div>
+				<div class="fs_cm_d2">
+					<label style="display: block;">Instagram Post message:</label>
+					<textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram"><?=htmlspecialchars($cm_fs_post_text_message_instagram)?></textarea>
+					<span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span>
+					<label style="display: block;">Instagram History title:</label>
+					<textarea class="ws_form_element2" maxlength="2000" name="fs_post_text_message_instagram_h"><?=htmlspecialchars($cm_fs_post_text_message_instagram_h)?></textarea>
+					<span><?=__('Max length: 2000 symbol' , 'fs-poster')?></span>
+				</div>
 			</div>
 			<div data-tab="linkedin">
 				<div class="fs_cm_d1"><label><i class="fa fa-angle-right"></i> <?=__('Customize Linkedin post message' , 'fs-poster')?></label></div>

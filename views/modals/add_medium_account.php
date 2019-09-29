@@ -82,7 +82,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'medium']);
 
 	$("#addAccountBTN").click(function ()
 	{
-		var openURL = "<?=site_url().'?medium_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
+		var openURL = "<?=site_url().'/?medium_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
 		if( $("#appIdSelect>:selected").attr('data-standart') == '1' )
 		{
 			openURL = "<?=standartFSAppRedirectURL('medium')?>&proxy=" + $("#proxyInput").val();

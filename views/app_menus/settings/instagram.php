@@ -1,4 +1,55 @@
+<script type="text/javascript" src="<?=FS_PLUGIN_URL?>/js/jscolor.js"></script>
 
+<style>
+
+
+	.ig_story_customize_inpt
+	{
+		width: 70px;
+	}
+
+	#instagram_status_preview
+	{
+		position: relative;
+		background-color: #636e72;
+
+		width: 720px;
+		height: 1280px;
+		margin-left: 30px;
+		margin-bottom: 30px;
+
+		transform: scale(0.3);
+
+		margin-top: -475px;
+		margin-left: -200px;
+
+	}
+	.story_img
+	{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.story_img > img
+	{
+		width: 100%;
+	}
+	.story_title
+	{
+		position: absolute;
+		top: 125px;
+		left: 20px;
+		width: 660px;
+		padding: 30px 0;
+		text-align: center;
+		background-color: rgba(0, 0, 0, 0.3);
+		font-size: 30px;
+		color: #FFF;
+		line-height: normal;
+	}
+</style>
 
 <div style="display: flex;">
 	<div style="width: 50%;">
@@ -35,10 +86,9 @@
 	</div>
 </div>
 
-
 <div class="fs_setting_item">
-	<div class="fs_setting_item_label" style="width: 55%;">
-		<div><?=esc_html__('Custom text:' , 'fs-poster')?></div>
+	<div class="fs_setting_item_label" style="width: 40%;">
+		<div><?=esc_html__('Custom text ( for post ):' , 'fs-poster')?></div>
 		<div class="fs_s_help">
 			<div><?=esc_html__('Text of shared post. Using keywords, you can create your wanted text. Keywords:' , 'fs-poster')?></div>
 			<div>
@@ -105,54 +155,105 @@
 			</div>
 		</div>
 	</div>
-	<div class="fs_s_input" style="width: 45%;">
-		<textarea class="ws_form_element2" name="fs_post_text_message_instagram" id="custom_text_area" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
+	<div class="fs_s_input" style="width: 60%; display: flex;">
+		<div style="width: 50%;">
+			<label>For Post</label>
+			<textarea class="ws_form_element2" name="fs_post_text_message_instagram" id="custom_text_area" style="width: 100%; height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram', "{title}"))?></textarea>
+		</div>
+		<div style="width: 50%; padding-left: 5px;">
+			<label>For Story</label>
+			<textarea class="ws_form_element2" name="fs_post_text_message_instagram_h" style="height: 150px !important;"><?=esc_html(get_option('fs_post_text_message_instagram_h', "{title}"))?></textarea>
+		</div>
 	</div>
 </div>
 
-<!--
-<div style="display: flex;">
-	<div style="width: 50%;">
-		<div class="fs_setting_item">
+<hr>
+
+<div style="color: #ff7675; font-size: 16px; margin: 10px 0 20px 0;">Customize Story Image</div>
+
+<div style="display: flex; height: 450px;">
+	<div style="width: 300px;">
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
 			<div class="fs_setting_item_label">
-				<div>Hashtag for story:</div>
-				<div class="fs_s_help">Paylashilan story-e hashtag elave etmek isteyirsizse aktiv edin</div>
+				<div>Story background color: </div>
 			</div>
 			<div class="fs_s_input">
-				<div class="fs_onoffswitch">
-					<input type="checkbox" name="instagram_story_hashtag" class="fs_onoffswitch-checkbox" id="instagram_story_hashtag"<?/*=get_option('fs_instagram_story_hashtag', '0')?' checked':''*/?> onchange="if($(this).is(':checked')){$('#hashtag_details').show(fadeSpeed);}else{$('#hashtag_details').hide(fadeSpeed);}">
-					<label class="fs_onoffswitch-label" for="instagram_story_hashtag"></label>
-				</div>
+				#<input type="text" class="jscolor ig_story_customize_inpt" name="fs_instagram_story_background" value="<?=get_option('fs_instagram_story_background', '636e72')?>" data-type="story-background"/>
 			</div>
 		</div>
-	</div>
 
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title background: </div>
+			</div>
+			<div class="fs_s_input">
+				#<input type="text" class="jscolor ig_story_customize_inpt" name="fs_instagram_story_title_background" value="<?=get_option('fs_instagram_story_title_background', '000000')?>" data-type="title-background-color"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title background opacity: </div>
+			</div>
+			<div class="fs_s_input">
+				%<input type="text" name="fs_instagram_story_title_background_opacity" value="<?=get_option('fs_instagram_story_title_background_opacity', '30')?>" class="ig_story_customize_inpt" data-type="title-background-opacity"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title color: </div>
+			</div>
+			<div class="fs_s_input">
+				#<input type="text" name="fs_instagram_story_title_color" class="jscolor ig_story_customize_inpt" data-type="title-color" value="<?=get_option('fs_instagram_story_title_color', 'FFFFFF')?>"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title - top position: </div>
+			</div>
+			<div class="fs_s_input">
+				px<input type="text" name="fs_instagram_story_title_top" value="<?=get_option('fs_instagram_story_title_top', '125')?>" class="ig_story_customize_inpt" data-type="title-top"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title - left position:</div>
+			</div>
+			<div class="fs_s_input">
+				px<input type="text" name="fs_instagram_story_title_left" value="<?=get_option('fs_instagram_story_title_left', '30')?>" class="ig_story_customize_inpt" data-type="title-left"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title - width <small>(max: 720px)</small>:</div>
+			</div>
+			<div class="fs_s_input">
+				px<input type="text" name="fs_instagram_story_title_width" value="<?=get_option('fs_instagram_story_title_width', '660')?>" class="ig_story_customize_inpt" data-type="title-width"/>
+			</div>
+		</div>
+
+		<div class="fs_setting_item" style="margin-bottom: 10px;">
+			<div class="fs_setting_item_label">
+				<div>Title - font-size:</div>
+			</div>
+			<div class="fs_s_input">
+				px<input type="text" name="fs_instagram_story_title_font_size" value="<?=get_option('fs_instagram_story_title_font_size', '30')?>" class="ig_story_customize_inpt" data-type="title-font-size"/>
+			</div>
+		</div>
+
+	</div>
+	<div style="width: 400px;">
+		<div id="instagram_status_preview">
+			<div class="story_title">{Story title}</div>
+			<div class="story_img"><img src="<?=FS_PLUGIN_URL?>/images/sample_story_img.png"</div>
+		</div>
+	</div>
 </div>
-
-<div style="display: flex;" id="hashtag_details">
-	<div style="width: 35%;">
-		<div class="fs_setting_item">
-			<div class="fs_setting_item_label">
-				<div>Hashtag:</div>
-				<div class="fs_s_help">Hashtagi buraya daxil edin</div>
-			</div>
-			<input type="text" name="instagram_story_hashtag_name" value="<?/*=esc_html(get_option('fs_instagram_story_hashtag_name'))*/?>" class="ws_form_element" placeholder="#example" style="max-width: 150px;">
-		</div>
-	</div>
-	<div style="width: 100px;"></div>
-	<div style="width: 35%;">
-		<div class="fs_setting_item">
-			<div class="fs_setting_item_label">
-				<div>Hashtag Position:</div>
-				<div class="fs_s_help">Hashtagin yerlesheceyi yeri sechin</div>
-			</div>
-			<select class="ws_form_element" name="instagram_story_hashtag_position" style="max-width: 120px;">
-				<option value="top">Top</option>
-				<option value="bottom"<?/*=get_option('fs_instagram_story_hashtag_position') == 'bottom'?' selected':''*/?>>Bottom</option>
-			</select>
-		</div>
-	</div>
-</div>-->
 
 <script>
 	var fadeSpeed = 0;
@@ -171,5 +272,52 @@
 		$("#instagram_story_hashtag").trigger('change');
 
 		fadeSpeed = 400;
+
+		$(".ig_story_customize_inpt").on('change keyup', function()
+		{
+			var type	= $(this).data('type'),
+				val		= $(this).val();
+
+			if( type == 'story-background' )
+			{
+				$("#instagram_status_preview").css('background', '#' + val);
+			}
+			else if( type == 'title-background-color' || type == 'title-background-opacity' )
+			{
+				var hex = $(".ig_story_customize_inpt[data-type='title-background-color']").val();
+				var rgb = hexToRgb( hex );
+				var opacity = $(".ig_story_customize_inpt[data-type='title-background-opacity']").val();
+				opacity = (opacity > 100 ? 100 : opacity) / 100;
+
+				$("#instagram_status_preview .story_title").css('background', 'rgba(' + rgb + ',' + opacity + ')');
+			}
+			else
+			{
+				type = type.substr(6);
+
+				if( type == 'color' )
+				{
+					val = '#' + val;
+				}
+				else
+				{
+					val = val + 'px';
+				}
+
+				$("#instagram_status_preview .story_title").css(type, val);
+			}
+
+		}).trigger('change');
+
+		function hexToRgb(hex)
+		{
+			var bigint = parseInt(hex, 16);
+			var r = (bigint >> 16) & 255;
+			var g = (bigint >> 8) & 255;
+			var b = bigint & 255;
+
+			return r + "," + g + "," + b;
+		}
+
 	});
 </script>

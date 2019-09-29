@@ -31,52 +31,50 @@ if( version_compare(PHP_VERSION, '5.6.0') < 0 )
 		<thead>
 		<tr>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
-			<th><?=esc_html__('USERNAME', 'fs-poster')?></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to allow do publications for other WordPress Users in this profile, active MAKE PUBLIC&#013;Notice: This will be done public only profile. Pages/Groups are need to MAKE PUBLIC specially.' , 'fs-poster')?>"></i></th>
-			<th style="width: 15%;"><?=esc_html__('SHARE ON PROFILE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to happen your publications in this profile, active the SHARE ON PROFILE' , 'fs-poster')?>"></i></th>
+			<th style="width: 190px;"><?=esc_html__('USERNAME', 'fs-poster')?></th>
+			<th style="width: 15%;"><?=esc_html__('ACTIVATE', 'fs-poster')?></th>
 		</tr>
 		</thead>
-		<tbody>
-		<?php
-		foreach($accountsList AS $accountInf)
-		{
-			?>
-			<tr data-id="<?=$accountInf['id']?>">
-				<td>
-					<img class="ws_img_style" src="<?=FSprofilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
-					<span style="vertical-align: middle;"><?php print esc_html($accountInf['name']);?></span>
-					<?php
-					if( !empty($accountInf['proxy']) )
-					{
-						?>
-						<span style="padding-left: 10px; color: #74b9ff;" class="ws_tooltip" data-title="Proxy: <?=esc_html($accountInf['proxy'])?>"><i class="fa fa-globe"></i></span>
-						<?php
-					}
-					?>
-					<a href="<?=FSprofileLink($accountInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
-				</td>
-				<td><?=esc_html($accountInf['username']);?></td>
-				<td>
-					<div class="fs_account_checkbox_public<?=$accountInf['is_public']?' fs_account_checked':''?><?=$accountInf['user_id']==get_current_user_id()?' my_account':''?> ws_tooltip" data-title="<?=esc_html__('Activate for making this profile public/private for other WordPress users' , 'fs-poster')?>" data-float="left">
-						<i class="fa fa-check"></i>
-					</div>
-				</td>
-				<td>
-					<div class="fs_account_checkbox<?=$accountInf['is_active'] == '' ? '' : ' fs_account_checked' . ($accountInf['is_active']=='no'?'':'2') ?> ws_tooltip" data-title="<?=esc_html__('Click to change status', 'fs-poster')?>">
-						<i class="fa fa-check"></i>
-					</div>
-					<button class="delete_account_btn delete_btn_desing ws_tooltip" data-title="<?=esc_html__('Delete account', 'fs-poster')?>" data-float="left"><i class="fa fa-trash"></i></button>
-				</td>
-			</tr>
-			<?php
-		}
-		if( empty($accountsList) )
-		{
-			?>
-			<tr><td colspan="100%" style="color: #999;"><?=esc_html__('No accound found', 'fs-poster')?></td></tr>
-			<?php
-		}
-		?>
-		</tbody>
 	</table>
+
+	<?php
+	foreach($accountsList AS $accountInf)
+	{
+		?>
+		<table class="ws_table">
+			<tbody>
+				<tr data-id="<?=$accountInf['id']?>" data-type="account">
+					<td>
+						<img class="ws_img_style" src="<?=FSprofilePic($accountInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
+						<span style="vertical-align: middle;"><?php print esc_html($accountInf['name']);?></span>
+						<?php
+						if( !empty($accountInf['proxy']) )
+						{
+							?>
+							<span style="padding-left: 10px; color: #74b9ff;" class="ws_tooltip" data-title="Proxy: <?=esc_html($accountInf['proxy'])?>"><i class="fa fa-globe"></i></span>
+							<?php
+						}
+						?>
+						<span style="padding-left: 10px; color: #ffbd72;<?=!$accountInf['is_public']?' display: none;':''?>" class="fs_account_is_public ws_tooltip" data-title="<?=esc_html__('This profile is public for all WordPress users.', 'fs-poster')?>"><i class="fa fa-star"></i></span>
+						<a href="<?=FSprofileLink($accountInf)?>" target="_blank" class="ws_btn ws_tooltip" data-title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
+					</td>
+					<td style="width: 190px;"><?=esc_html($accountInf['username']);?></td>
+					<td style="width: 15%;">
+						<div class="fs_account_checkbox<?=$accountInf['is_active'] == '' ? '' : ' fs_account_checked' . ($accountInf['is_active']=='no'?'':'2') ?> ws_tooltip" data-title="<?=esc_html__('Click to change status', 'fs-poster')?>">
+							<i class="fa fa-check"></i>
+						</div>
+						<button class="more_options_account fs_more_options_design"><i class="fa fa-ellipsis-v"></i></button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+	}
+	if( empty($accountsList) )
+	{
+		?>
+		<table class="ws_table"><tbody><tr><td colspan="100%" style="color: #999;"><?=esc_html__('No accound found', 'fs-poster')?></td></tr></tbody></table>
+		<?php
+	}
+	?>
 </div>

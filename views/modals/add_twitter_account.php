@@ -79,7 +79,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'twitter']);
 
 	$("#addAccountBTN").click(function ()
 	{
-		var openURL = "<?=site_url().'?twitter_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
+		var openURL = "<?=site_url().'/?twitter_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
 		if( $("#appIdSelect>:selected").attr('data-standart') == '1' )
 		{
 			openURL = "<?=standartFSAppRedirectURL('twitter')?>&proxy=" + $("#proxyInput").val();

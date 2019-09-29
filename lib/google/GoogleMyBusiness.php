@@ -34,12 +34,13 @@ class GoogleMyBusiness
 	{
 		try
 		{
-			$myInfo = (string)$this->client->request('GET' , 'https://aboutme.google.com')->getBody();
+			$myInfo = (string)$this->client->request('GET' , 'https://business.google.com/locations')->getBody();
 		}
 		catch( Exception $e )
 		{
 			$myInfo = '';
 		}
+
 		$myInfo = str_replace("\n", "", $myInfo);
 		preg_match('/window\.IJ_values \= (\[.*?\])\;/mi' , $myInfo , $matches);
 		if( isset($matches[1]) )
@@ -49,10 +50,10 @@ class GoogleMyBusiness
 			preg_match( '/url\((https?\:\/\/.+googleusercontent\.com.+)\)/Ui' , $myInfo, $profilePhoto );
 
 			$userInfo = [
-				'id'			=>	isset($jsonInf[46]) ? $jsonInf[46] : null,
-				'name'			=>	isset($jsonInf[34]) ? $jsonInf[34] : null,
-				'email'			=>	isset($jsonInf[36]) ? $jsonInf[36] : null,
-				'gender'		=>	isset($jsonInf[37]) && $jsonInf[37]=='male' ? 1 : 2,
+				'id'			=>	isset($jsonInf[60]) ? $jsonInf[60] : null,
+				'name'			=>	isset($jsonInf[58]) ? $jsonInf[58] : null,
+				'email'			=>	isset($jsonInf[58]) ? $jsonInf[58] : null,
+				'gender'		=>	1,//isset($jsonInf[61]) && $jsonInf[61]=='male' ? 1 : 2,
 				'profile_image'	=>	isset($profilePhoto[1]) ? $profilePhoto[1] : null
 			];
 
@@ -73,6 +74,10 @@ class GoogleMyBusiness
 
 	public function sendPost( $postTo , $text , $link = null, $linkButton = 'LEARN_MORE', $imageURL = '', $productName = null, $productPrice = null, $productCurrency = null )
 	{
+		$productPrice = explode('.', (string)$productPrice);
+		$productPrice1 = (int)$productPrice[0];
+		$productPrice2 = isset($productPrice[1]) ? (int)substr($productPrice[1] . '000000000', 0, 9) : null;
+		
 		if( !$this->getAT() )
 		{
 			return [
@@ -81,9 +86,9 @@ class GoogleMyBusiness
 			];
 		}
 
-		$postType = !is_null( $productName ) ? 1 : 4;
+		$postType = is_null( $productName ) ? 1 : 4;
 
-		$productArr = is_null( $productName ) ? null : [ $productName ,[ $productCurrency, $productPrice, null ],[ $productCurrency, $productPrice, null ]];
+		$productArr = is_null( $productName ) ? null : [ $productName ,[ $productCurrency, $productPrice1, $productPrice2 ],[ $productCurrency, $productPrice1, $productPrice2 ]];
 
 		$fReqParam = [
 			[
@@ -138,9 +143,12 @@ class GoogleMyBusiness
 
 		if( !isset($postId[1]) )
 		{
+			$getErrorMessage = json_decode( str_replace( [ ")]}'", "\n", '\n' ], '', $post ), true );
+			$errorMessage = isset( $getErrorMessage[0][5][2][0][1][0][0][2] ) ? 'Error: ' . $getErrorMessage[0][5][2][0][1][0][0][2] : 'Error! Can\'t share the post!';
+
 			return [
 				'status'		=> 'error',
-				'error_msg'		=> 'Error! Can\'t share the post!'
+				'error_msg'		=> $errorMessage
 			];
 		}
 

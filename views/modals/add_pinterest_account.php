@@ -33,7 +33,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'pinterest']);
 		<div style="margin-bottom: 25px; font-size: 15px; font-weight: 500; color: #969696;margin-right: 30px; border-left: 3px solid #DDD; padding-left: 10px;"> <?=esc_html__('Select an app. Next click the "GET ACCESS" button. Next, click the "Authorize App" button within an open window.' , 'fs-poster')?></div>
 
 		<div style="width: 200px; margin-bottom: 10px; ">
-			<select class="ws_form_element" id="appIdSelect">
+			<select class="ws_form_element" id="appIdSelect" style="width: 180px;">
 				<?php
 				foreach ($applications AS $appInf)
 				{
@@ -41,6 +41,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'pinterest']);
 				}
 				?>
 			</select>
+			<a href="admin.php?page=fs-poster-app&tab=pinterest" style="color: #ff7675 !important;" class="ws_tooltip" data-title="<?=esc_html__('Add a new Pinterest App', 'fs-poster')?>"><i class="fa fa-plus"></i></a>
 		</div>
 
 		<div style="margin-bottom: 20px;" onclick="$(this).slideUp(200 , function(){ $('#proxy_show').slideDown(200); });">
@@ -81,7 +82,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'pinterest']);
 
 	$("#addAccountBTN").click(function ()
 	{
-		var openURL = "<?=site_url().'?pinterest_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
+		var openURL = "<?=site_url().'/?pinterest_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
 		if( $("#appIdSelect>:selected").attr('data-standart') == '1' )
 		{
 			openURL = "<?=standartFSAppRedirectURL('pinterest')?>&proxy=" + $("#proxyInput").val();

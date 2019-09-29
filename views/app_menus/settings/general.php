@@ -98,7 +98,7 @@ $cronJobsCode = 'wget -O /dev/null ' . site_url() . '/?fs-poster-cron-job=1 >/de
 			$lastCronTaskRunnedOn = strtotime($lastCronTaskRunnedOn);
 			$calcTime = time() - $lastCronTaskRunnedOn;
 			$calcTime = (int)($calcTime / 60);
-			$calcTime = $calcTime > 0 ? $calcTime : 4;
+			$calcTime = $calcTime > 0 ? $calcTime : 1;
 			print date('Y-m-d H:i:s', $lastCronTaskRunnedOn) . ' ( ' . $calcTime . ' minute(s) ago )';
 
 			if( $calcTime > 3 )

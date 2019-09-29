@@ -40,8 +40,7 @@ $publicCommunities = FSwpDB()->get_results(FSwpDB()->prepare("
 		<tr>
 			<th style="width: 10px;"></th>
 			<th><?=esc_html__('NAME', 'fs-poster')?> <i class="fa fa-caret-down"></i></th>
-			<th style="width: 15%;"><?=__('MAKE PUBLIC' , 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to allow do publications for other WordPress Users in this profile/community, active the MAKE PUBLIC checkbox.' , 'fs-poster')?>"></i></th>
-			<th style="width: 15%;"><?=esc_html__('SHARE', 'fs-poster')?> <i style="color: #ff9c97;" class="fa fa-question-circle ws_tooltip" data-title="<?=__('If you would like to happen your publications in this profile/community automatically, active the SHARE checkbox.' , 'fs-poster')?>"></i></th>
+			<th style="width: 15%;"><?=esc_html__('ACTIVATE', 'fs-poster')?></th>
 		</tr>
 		</thead>
 	</table>
@@ -72,15 +71,13 @@ $publicCommunities = FSwpDB()->get_results(FSwpDB()->prepare("
 						<?php
 					}
 					?>
+					<span style="padding-left: 10px; color: #ffbd72;<?=!$accountInf['is_public']?' display: none;':''?>" class="fs_account_is_public ws_tooltip" data-title="<?=esc_html__('This profile is public for all WordPress users.', 'fs-poster')?>"><i class="fa fa-star"></i></span>
 					<a href="<?=FSprofileLink($accountInf)?>" target="_blank" class="ws_btn" title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
 					<span class="fs_communities_count"><?=$accountInf['chats']?> CHATS</span>
 					<button type="button" class="ws_btn ws_btn_small ws_bg_purple" style="margin-left: 10px;" data-load-modal="telegram_add_chat" data-parameter-account_id="<?=(int)$accountInf['id']?>">add chat</button>
 				</td>
 				<td style="width: 15%;">
-
-				</td>
-				<td style="width: 15%;">
-					<button class="delete_account_btn delete_btn_desing"><i class="fa fa-trash"></i></button>
+					<button class="more_options_account fs_more_options_design"><i class="fa fa-ellipsis-v"></i></button>
 				</td>
 			</tr>
 			</tbody>
@@ -99,22 +96,17 @@ $publicCommunities = FSwpDB()->get_results(FSwpDB()->prepare("
 								<img class="ws_img_style" src="<?=FSprofilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
 								<span style="vertical-align: middle;"><?php print esc_html($nodeInf['name']);?></span>
 								<a href="<?=FSprofileLink($nodeInf)?>" target="_blank" class="ws_btn" title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
-
+								<span style="padding-left: 10px; color: #ffbd72;<?=!$nodeInf['is_public']?' display: none;':''?>" class="fs_account_is_public ws_tooltip" data-title="<?=esc_html__('This profile is public for all WordPress users.', 'fs-poster')?>"><i class="fa fa-star"></i></span>
 								<span class="fs_community_categ">
-								<i class="far fa-paper-plane"></i>
-								<?=ucfirst(esc_html( empty($nodeInf['category']) ? 'no flair' : $nodeInf['category'] ))?>
-							</span>
-							</td>
-							<td style="width: 15%;">
-								<div class="fs_account_checkbox_public<?=$nodeInf['is_public']?' fs_account_checked':''?><?=$nodeInf['user_id']==get_current_user_id()?' my_account':''?>">
-									<i class="fa fa-check"></i>
-								</div>
+									<i class="far fa-paper-plane"></i>
+									<?=ucfirst(esc_html( empty($nodeInf['category']) ? 'no flair' : $nodeInf['category'] ))?>
+								</span>
 							</td>
 							<td style="width: 15%;">
 								<div class="fs_account_checkbox<?=$nodeInf['is_active'] == '' ? '' : ' fs_account_checked' . ($nodeInf['is_active']=='no'?'':'2') ?>">
 									<i class="fa fa-check"></i>
 								</div>
-								<button class="delete_account_btn delete_btn_desing"><i class="fa fa-trash"></i></button>
+								<button class="more_options_account fs_more_options_design"><i class="fa fa-ellipsis-v"></i></button>
 							</td>
 						</tr>
 						<?php
@@ -141,22 +133,17 @@ $publicCommunities = FSwpDB()->get_results(FSwpDB()->prepare("
 						<img class="ws_img_style" src="<?=FSprofilePic($nodeInf)?>" onerror="$(this).attr('src', '<?=plugin_dir_url(__FILE__).'../../../images/no-photo.png'?>');">
 						<span style="vertical-align: middle;"><?php print esc_html($nodeInf['name']);?></span>
 						<a href="<?=FSprofileLink($nodeInf)?>" target="_blank" class="ws_btn" title="<?=esc_html__('Profile link', 'fs-poster')?>" style="font-size: 13px; color: #fd79a8;"><i class="fa fa-external-link fa-external-link-alt"></i></a>
-
+						<span style="padding-left: 10px; color: #ffbd72;<?=!$nodeInf['is_public']?' display: none;':''?>" class="fs_account_is_public ws_tooltip" data-title="<?=esc_html__('This profile is public for all WordPress users.', 'fs-poster')?>"><i class="fa fa-star"></i></span>
 						<span class="fs_community_categ">
 							<i class="far fa-paper-plane"></i>
 							<?=ucfirst(esc_html( empty($nodeInf['category']) ? 'no flair' : $nodeInf['category'] ))?>
 						</span>
 					</td>
 					<td style="width: 15%;">
-						<div class="fs_account_checkbox_public<?=$nodeInf['is_public']?' fs_account_checked':''?><?=$nodeInf['user_id']==get_current_user_id()?' my_account':''?>">
-							<i class="fa fa-check"></i>
-						</div>
-					</td>
-					<td style="width: 15%;">
 						<div class="fs_account_checkbox<?=$nodeInf['is_active'] == '' ? '' : ' fs_account_checked' . ($nodeInf['is_active']=='no'?'':'2') ?>">
 							<i class="fa fa-check"></i>
 						</div>
-						<button class="delete_account_btn delete_btn_desing"><i class="fa fa-trash"></i></button>
+						<button class="more_options_account fs_more_options_design"><i class="fa fa-ellipsis-v"></i></button>
 					</td>
 				</tr>
 				<?php

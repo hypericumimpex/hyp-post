@@ -22,10 +22,10 @@ trait FSPShare
 
 	public function share_saved_post()
 	{
-		$postId = FS_post('post_id' , '0' , 'num');
-		$nodes = FS_post('nodes' , [] , 'array');
-		$background = !(FS_post('background' , '0' , 'string')) ? 0 : 1;
-		$custom_messages = FS_post('custom_messages' , [] , 'array');
+		$postId				=	FS_post('post_id' , '0' , 'num');
+		$nodes				=	FS_post('nodes' , [] , 'array');
+		$background			=	!(FS_post('background' , '0' , 'string')) ? 0 : 1;
+		$custom_messages	=	FS_post('custom_messages' , [] , 'array');
 
 		if( empty($postId) || empty($nodes) || $postId <= 0 )
 		{
@@ -48,55 +48,58 @@ trait FSPShare
 				$filterType = isset($parse[3]) ? $parse[3] : 'no';
 				$categoriesStr = isset($parse[4]) ? $parse[4] : '';
 
-				$categoriesFilter = [];
-
-				if( !empty($categoriesStr) && $filterType != 'no' )
+				if( $postCats !== false )
 				{
-					foreach( explode(',' , $categoriesStr) AS $termId )
+					$categoriesFilter = [];
+
+					if( !empty($categoriesStr) && $filterType != 'no' )
 					{
-						if( is_numeric($termId) && $termId > 0 )
+						foreach( explode(',' , $categoriesStr) AS $termId )
 						{
-							$categoriesFilter[] = (int)$termId;
+							if( is_numeric($termId) && $termId > 0 )
+							{
+								$categoriesFilter[] = (int)$termId;
+							}
 						}
 					}
-				}
-				else
-				{
-					$filterType = 'no';
-				}
-
-				if( $filterType == 'in' )
-				{
-					$checkFilter = false;
-					foreach( $postCats AS $termInf )
+					else
 					{
-						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						$filterType = 'no';
+					}
+
+					if( $filterType == 'in' )
+					{
+						$checkFilter = false;
+						foreach( $postCats AS $termInf )
 						{
-							$checkFilter = true;
-							break;
+							if( in_array( $termInf->term_id , $categoriesFilter ) )
+							{
+								$checkFilter = true;
+								break;
+							}
+						}
+
+						if( !$checkFilter )
+						{
+							continue;
 						}
 					}
-
-					if( !$checkFilter )
+					else if( $filterType == 'ex' )
 					{
-						continue;
-					}
-				}
-				else if( $filterType == 'ex' )
-				{
-					$checkFilter = true;
-					foreach( $postCats AS $termInf )
-					{
-						if( in_array( $termInf->term_id , $categoriesFilter ) )
+						$checkFilter = true;
+						foreach( $postCats AS $termInf )
 						{
-							$checkFilter = false;
-							break;
+							if( in_array( $termInf->term_id , $categoriesFilter ) )
+							{
+								$checkFilter = false;
+								break;
+							}
 						}
-					}
 
-					if( !$checkFilter )
-					{
-						continue;
+						if( !$checkFilter )
+						{
+							continue;
+						}
 					}
 				}
 
@@ -110,17 +113,19 @@ trait FSPShare
 					continue;
 				}
 
-				$customMessage = isset($custom_messages[$driver]) && is_string($custom_messages[$driver]) ? $custom_messages[$driver] : null;
 
-				if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
-				{
-					$customMessage = null;
-				}
 
 				$insertedCount++;
 
 				if( !($driver == 'instagram' && get_option('fs_instagram_post_in_type', '1') == '2') )
 				{
+					$customMessage = isset($custom_messages[$driver]) && is_string($custom_messages[$driver]) ? $custom_messages[$driver] : null;
+
+					if( $customMessage == get_option( 'fs_post_text_message_' . $driver , "{title}" ) )
+					{
+						$customMessage = null;
+					}
+
 					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $postId,
@@ -134,6 +139,13 @@ trait FSPShare
 
 				if( $driver == 'instagram' && (get_option('fs_instagram_post_in_type', '1') == '2' || get_option('fs_instagram_post_in_type', '1') == '3') )
 				{
+					$customMessage = isset($custom_messages[$driver . '_h']) && is_string($custom_messages[$driver . '_h']) ? $custom_messages[$driver . '_h'] : null;
+
+					if( $customMessage == get_option( 'fs_post_text_message_' . $driver . '_h' , "{title}" ) )
+					{
+						$customMessage = null;
+					}
+
 					FSwpDB()->insert( FSwpTable('feeds'), [
 						'driver'                =>  $driver,
 						'post_id'               =>  $postId,

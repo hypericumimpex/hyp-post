@@ -10,7 +10,7 @@ class Vk
 	 */
 	public static function callbackURL()
 	{
-		return site_url() . '?vk_callback=1';
+		return site_url() . '/?vk_callback=1';
 	}
 
 	/**

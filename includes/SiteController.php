@@ -172,7 +172,7 @@ class SiteController
 	{
 		if( isset($_GET['linkedin_callback']) && $_GET['linkedin_callback'] == '1' )
 		{
-			require_once plugin_dir_path(__FILE__ ) . "../lib/linkedin/Linkedin.php";
+			require_once FS_LIB_DIR . "linkedin/Linkedin.php";
 
 			Linkedin::getAccessToken();
 		}
@@ -183,7 +183,7 @@ class SiteController
 		if( isset($_GET['linkedin_app_redirect']) && is_numeric($_GET['linkedin_app_redirect']) && $_GET['linkedin_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['linkedin_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/linkedin/Linkedin.php";
+			require_once FS_LIB_DIR . "linkedin/Linkedin.php";
 
 			$link = Linkedin::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -195,7 +195,7 @@ class SiteController
 	{
 		if( isset($_GET['pinterest_callback']) && $_GET['pinterest_callback'] == '1' )
 		{
-			require_once plugin_dir_path(__FILE__ ) . "../lib/pinterest/Pinterest.php";
+			require_once FS_LIB_DIR . "pinterest/Pinterest.php";
 
 			Pinterest::getAccessToken();
 		}
@@ -206,7 +206,7 @@ class SiteController
 		if( isset($_GET['pinterest_app_redirect']) && is_numeric($_GET['pinterest_app_redirect']) && $_GET['pinterest_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['pinterest_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/pinterest/Pinterest.php";
+			require_once FS_LIB_DIR . "pinterest/Pinterest.php";
 
 			$link = Pinterest::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -229,7 +229,7 @@ class SiteController
 		if( isset($_GET['reddit_app_redirect']) && is_numeric($_GET['reddit_app_redirect']) && $_GET['reddit_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['reddit_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/reddit/Reddit.php";
+			require_once FS_LIB_DIR . "reddit/Reddit.php";
 
 			$link = Reddit::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -252,7 +252,7 @@ class SiteController
 		if( isset($_GET['tumblr_app_redirect']) && is_numeric($_GET['tumblr_app_redirect']) && $_GET['tumblr_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['tumblr_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/tumblr/Tumblr.php";
+			require_once FS_LIB_DIR . "tumblr/Tumblr.php";
 
 			$link = Tumblr::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -264,7 +264,7 @@ class SiteController
 	{
 		if( isset($_GET['ok_callback']) && $_GET['ok_callback'] == '1' )
 		{
-			require_once plugin_dir_path(__FILE__ ) . "../lib/ok/Odnoklassniki.php";
+			require_once FS_LIB_DIR . "ok/Odnoklassniki.php";
 
 			Odnoklassniki::getAccessToken();
 		}
@@ -275,7 +275,7 @@ class SiteController
 		if( isset($_GET['ok_app_redirect']) && is_numeric($_GET['ok_app_redirect']) && $_GET['ok_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['ok_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/ok/Odnoklassniki.php";
+			require_once FS_LIB_DIR . "ok/Odnoklassniki.php";
 
 			$link = Odnoklassniki::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -298,7 +298,7 @@ class SiteController
 		if( isset($_GET['medium_app_redirect']) && is_numeric($_GET['medium_app_redirect']) && $_GET['medium_app_redirect'] > 0 )
 		{
 			$appId = (int)$_GET['medium_app_redirect'];
-			require_once plugin_dir_path(__FILE__ ) . "../lib/medium/Medium.php";
+			require_once FS_LIB_DIR . "medium/Medium.php";
 
 			$link = Medium::getLoginURL($appId);
 			header('Location: ' . $link);
@@ -309,7 +309,7 @@ class SiteController
 
 	public function standartFSApp()
 	{
-		$supportedFSApps = ['twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr' , 'ok', 'medium'];
+		$supportedFSApps	= ['fb', 'twitter' , 'linkedin' , 'pinterest' , 'reddit' , 'tumblr' , 'ok', 'medium'];
 
 		$sn                 = FS_get('sn' , '' , 'string' , $supportedFSApps);
 		$callback           = FS_get('fs_app_redirect' , '0' , 'num' , ['1']);
@@ -320,7 +320,21 @@ class SiteController
 
 		$appInf = FSwpFetch('apps' , ['driver' => $sn , 'is_standart' => '1']);
 
-		if( $sn == 'twitter' )
+		if( $sn == 'fb' )
+		{
+			$access_token	= FS_get('access_token' , '' , 'string');
+
+			if( empty($access_token) )
+				return;
+
+			require_once FS_LIB_DIR . 'fb/FacebookLib.php';
+
+			FacebookLib::authorizeFbUser($appInf['id'] , $access_token , $proxy);
+
+			print esc_html__('Loading...' , 'fs-poster') . ' <script>if( typeof window.opener.compleateOperation == "function" ){ window.opener.compleateOperation(true);window.close();}else{document.write("'.esc_html__('Error! Please try again!' , 'fs-poster').'");} </script>';
+			exit();
+		}
+		else if( $sn == 'twitter' )
 		{
 			$oauth_token = FS_get('oauth_token' , '' , 'string');
 			$oauth_token_secret = FS_get('oauth_token_secret' ,'' , 'string');

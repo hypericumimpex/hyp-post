@@ -72,9 +72,9 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 				}
 			}
 
-			$this->scheduler = $this->createScheduler($checkPeriod);
-			$this->upgraderStatus = new Puc_v4p4_UpgraderStatus();
-			$this->updateState = new Puc_v4p4_StateStore($this->optionName);
+			//$this->scheduler = $this->createScheduler($checkPeriod);
+			//$this->upgraderStatus = new Puc_v4p4_UpgraderStatus();
+			//$this->updateState = new Puc_v4p4_StateStore($this->optionName);
 
 			if ( did_action('init') ) {
 				$this->loadTextDomain();
@@ -268,7 +268,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 * @return Puc_v4p4_Update|null
 		 */
 		public function getUpdate() {
-			$update = $this->updateState->getUpdate();
+			//$update = $this->updateState->getUpdate();
 
 			//Is there an update available?
 			if ( isset($update) ) {
@@ -685,7 +685,7 @@ if ( !class_exists('Puc_v4p4_UpdateChecker', false) ):
 		 * @return array
 		 */
 		public function getTranslationUpdates() {
-			return $this->updateState->getTranslations();
+			//return $this->updateState->getTranslations();
 		}
 
 		/**

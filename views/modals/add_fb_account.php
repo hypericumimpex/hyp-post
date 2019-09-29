@@ -1,9 +1,7 @@
-<?php defined('MODAL') or exit();?>
-
 <?php
-$authURL = FSwpDB()->get_row("SELECT * FROM " . FSwpTable('apps') . " WHERE is_standart=3 AND driver='fb' LIMIT 1" , ARRAY_A);
-$authURL = esc_html($authURL['app_authenticate_link']);
-$applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','user_id' => get_current_user_id()]);
+defined('MODAL') or exit();
+
+$applications = FSwpFetchAll('apps' , ['driver' => 'fb']);
 ?>
 
 <style>
@@ -51,7 +49,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 		font-size: 10px !important;
 		font-weight: 600;
 	}
-
 
 	.ws_method_box>.ws_method_box_img
 	{
@@ -147,142 +144,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 		font-weight: 300;
 	}
 
-	.ws_step3>.ws_step3_left
-	{
-		position: absolute;
-		width: 230px;
-		height: 100%;
-		background: #F7FAFF;
-		border-top-left-radius: 10px;
-		border-bottom-left-radius: 10px;
-		border-right: 1px solid #f6f9fe;
-	}
-	.ws_step3 .ws_step3_profile_img
-	{
-		text-align: center;
-		margin-top: 55px;
-	}
-	.ws_step3 .ws_step3_profile_img>img
-	{
-		-webkit-border-radius: 50%;
-		-moz-border-radius: 50%;
-		border-radius: 50%;
-	}
-
-	.ws_step3_profile_title
-	{
-		text-align: center;
-		color: #5e738b;
-		font-weight: 700;
-		font-size: 15px;
-		padding-bottom: 10px;
-	}
-	.ws_step3_profile_email,.ws_step3_profile_birthday
-	{
-		text-align: center;
-		color: #808e9b;
-		margin-top: 10px;
-	}
-	.ws_step3_right
-	{
-		margin-left: 231px;
-	}
-	.ws_step3_right_node
-	{
-		position: relative;
-		padding-top: 20px;
-	}
-	.ws_step3_right_node_title
-	{
-		font-size: 15px;
-		font-weight: 700;
-		color: #bdc3c7;
-		padding: 10px 0;
-		padding-left: 10px;
-	}
-	.ws_step3_right_node_title>b
-	{
-		font-weight: 700;
-		color: #a7adb1;
-	}
-	.ws_step3_right_node_pics
-	{
-		height: 45px;
-		text-align: left;
-		white-space: nowrap;
-		overflow: hidden;
-	}
-	.ws_step3_right_node_pics>div
-	{
-		display: inline-block;
-		padding: 5px;
-		width: 35px;
-		height: 35px;
-	}
-	.ws_step3_right_node_pics img
-	{
-		-webkit-border-radius: 50%;
-		-moz-border-radius: 50%;
-		border-radius: 50%;
-		width: 100%;
-		height: 100%;
-	}
-	.open_profile_btn
-	{
-		background: transparent;
-		border: 1px solid #808e9b;
-		color: #808e9b !important;
-	}
-	.ws_step3_right_node .ws_right_arrow
-	{
-		position: absolute;
-		right: 0;
-		bottom: 0px;
-		margin: auto;
-		background: rgba(0,0,0,0.2);
-		text-align: center;
-		width: 20px;
-		cursor: pointer;
-		height: 45px;
-		display: none;
-		-webkit-animation: fadein1 0.6s;
-		animation: fadein1 0.6s;
-	}
-	.ws_step3_right_node:hover .ws_right_arrow
-	{
-		display: block;
-	}
-	.ws_step3_right_node .ws_right_arrow>i
-	{
-		margin-top: 14px;
-		font-size: 16px;
-		color: #FFF;
-	}
-	.ws_step3_right_node .ws_left_arrow
-	{
-		position: absolute;
-		left: 0;
-		bottom: 0px;
-		margin: auto;
-		background: rgba(0,0,0,0.2);
-		text-align: center;
-		width: 20px;
-		cursor: pointer;
-		height: 45px;
-		display: none;
-		-webkit-animation: fadein1 0.6s;
-		animation: fadein1 0.6s;
-	}
-	.ws_step3_right_node:hover .ws_left_arrow
-	{
-		display: block;
-	}
-	.ws_step3_right_node .ws_left_arrow>i
-	{
-		margin-top: 14px;
-		font-size: 16px;
-		color: #FFF;
-	}
 
 	@keyframes fadein1 {
 		from { opacity: 0; }
@@ -368,15 +229,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 		text-shadow: 0 0px 4px #555;
 	}
 
-	#console_code_input
-	{
-		cursor: pointer;
-		background: #EFEFEF !important;
-		width: 150px;
-		font-size: 10px !important;
-	}
-
-
 	.fb_logo > img
 	{
 		width: 60%;
@@ -424,7 +276,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 
 	<div style="text-align: center; margin-top: 15px;">
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #74B9FF; display: inline-block; margin: 1px;"></div>
-		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 	</div>
 </div>
@@ -477,7 +328,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 	<div style="text-align: center; margin-top: 15px;">
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #74B9FF; display: inline-block; margin: 1px;"></div>
-		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 	</div>
 </div>
 
@@ -525,7 +375,6 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 	<div style="text-align: center; margin-top: 15px;">
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #74B9FF; display: inline-block; margin: 1px;"></div>
-		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 	</div>
 </div>
 
@@ -540,7 +389,7 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 			<?php
 			foreach($applications AS $application)
 			{
-				print '<option value="'.$application['id'].'">' . esc_html($application['name']) . '</option>';
+				print '<option value="'.$application['id'].'" data-standart="'.(int)$application['is_standart'].'">' . esc_html($application['name']) . '</option>';
 			}
 			if( empty($applications) )
 			{
@@ -570,51 +419,25 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 	<div style="text-align: center; margin-top: 15px;">
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
 		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #74B9FF; display: inline-block; margin: 1px;"></div>
-		<div style="width: 6px; height: 6px; -webkit-border-radius: 50%;-moz-border-radius: 50%;border-radius: 50%; background: #CCC; display: inline-block; margin: 1px;"></div>
-	</div>
-</div>
-
-<div class="ws_step3" style="display: none;">
-	<div class="ws_step3_left">
-
-		<div class="ws_step3_profile_img"><img src=""></div>
-		<div class="ws_step3_profile_title"></div>
-		<div class="ws_step3_profile_email"><i class="far fa-envelope-open "></i> <span></span></div>
-		<div class="ws_step3_profile_birthday"><i class="far fa-calendar-alt "></i> <span></span></div>
-		<div style="margin-top: 15px; text-align: center;">
-			<a class="ws_btn open_profile_btn" target="_blank"><?=esc_html__('OPEN PROFILE', 'fs-poster')?></a>
-
-			<button class="ws_btn ws_bg_danger finishBTN" type="button" data-modal-close="true"><?=esc_html__('FINISH', 'fs-poster')?></button>
-		</div>
-
-	</div>
-	<div class="ws_step3_right">
-
-		<div class="ws_step3_right_node" data-type="groups">
-			<div class="ws_step3_right_node_title"><b>0</b> <?=esc_html__('groups', 'fs-poster')?></div>
-			<div class="ws_step3_right_node_pics">
-
-			</div>
-		</div>
-
-		<div class="ws_step3_right_node" data-type="ownpages">
-			<div class="ws_step3_right_node_title"><b>0</b> <?=esc_html__('my pages', 'fs-poster')?></div>
-			<div class="ws_step3_right_node_pics">
-
-			</div>
-		</div>
-
-		<div class="ws_step3_right_node" data-type="pages">
-			<div class="ws_step3_right_node_title"><b>0</b> <?=esc_html__('liked pages', 'fs-poster')?></div>
-			<div class="ws_step3_right_node_pics">
-
-			</div>
-		</div>
-
 	</div>
 </div>
 
 <script>
+
+	function compleateOperation( status, errorMsg )
+	{
+		fsCode.loading(0);
+		if( status )
+		{
+			fsCode.toast("<?=esc_html__('Account added successfully!' , 'fs-poster')?>" , 'success');
+			fsCode.modalHide($("#proModal<?=$mn?>"));
+			$('#fs_account_supports .fs_social_network_div[data-setting="fb"]').click();
+		}
+		else
+		{
+			fsCode.toast(errorMsg , 'danger', 10000);
+		}
+	}
 
 	function setAccessToken(access_token)
 	{
@@ -630,86 +453,8 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 
 		fsCode.ajax('add_new_fb_account_with_at' , {'access_token': access_token , 'proxy': proxy} , function(result)
 		{
-			$("#proModal<?=$mn?> .ws_step23").fadeOut(200, function()
-			{
-				$("#proModal<?=$mn?> .ws_step3").fadeIn(200);
-			});
-
-			displayStep3(result);
+			compleateOperation(true);
 		});
-	}
-
-	function displayStep3(result)
-	{
-		$(".ws_step3_profile_title").text(result['data']['name']);
-		$(".ws_step3_profile_email>span").text(result['data']['email']);
-		$(".ws_step3_profile_birthday>span").text(result['data']['birthday']);
-		$(".ws_step3_profile_img>img").attr('src' , 'https://graph.facebook.com/' + result['data']['id'] + '/picture?redirect=0&height=80&width=80&type=normal&redirect=1');
-
-		$(".open_profile_btn").attr('href' , 'https://fb.com/' + result['data']['id']);
-
-		if( result['data']['nodes']['ownpages'] )
-		{
-			$(".ws_step3_right_node[data-type=ownpages]>.ws_step3_right_node_title>b").text(result['data']['nodes']['ownpages'].length);
-			for(var i in result['data']['nodes']['ownpages'])
-			{
-				$(".ws_step3_right_node[data-type=ownpages]>.ws_step3_right_node_pics").append('<div title="'+result['data']['nodes']['ownpages'][i][1]+'"><img src="https://graph.facebook.com/' + result['data']['nodes']['ownpages'][i][0] + '/picture?redirect=1&height=40&width=40&type=normal"></div>');
-			}
-
-			$(".ws_step3_right_node[data-type=ownpages]").append('<div class="ws_left_arrow"><i class="fa fa-angle-left"></i></div>');
-			$(".ws_step3_right_node[data-type=ownpages]").append('<div class="ws_right_arrow"><i class="fa fa-angle-right"></i></div>');
-		}
-		else
-		{
-			$(".ws_step3_right_node[data-type=ownpages]>.ws_step3_right_node_pics").html('<span style="padding-left: 11px; color: #888;">'+"<?=esc_html__('\'Load own-pages\' option is disabled in settings', 'fs-poster')?>"+'</span>');
-		}
-
-
-		if( result['data']['nodes']['pages'] )
-		{
-			$(".ws_step3_right_node[data-type=pages]>.ws_step3_right_node_title>b").text(result['data']['nodes']['pages'].length);
-			for(var i in result['data']['nodes']['pages'])
-			{
-				$(".ws_step3_right_node[data-type=pages]>.ws_step3_right_node_pics").append('<div title="'+result['data']['nodes']['pages'][i][1]+'"><img src="https://graph.facebook.com/' + result['data']['nodes']['pages'][i][0] + '/picture?redirect=1&height=40&width=40&type=normal"></div>');
-			}
-
-			$(".ws_step3_right_node[data-type=pages]").append('<div class="ws_left_arrow"><i class="fa fa-angle-left"></i></div>');
-			$(".ws_step3_right_node[data-type=pages]").append('<div class="ws_right_arrow"><i class="fa fa-angle-right"></i></div>');
-		}
-		else
-		{
-			$(".ws_step3_right_node[data-type=pages]>.ws_step3_right_node_pics").html('<span style="padding-left: 11px; color: #888;">'+"<?=esc_html__('\'Load my liked pages\' option is disabled in settings', 'fs-poster')?>"+'</span>');
-		}
-
-		if( result['data']['nodes']['groups'] )
-		{
-			$(".ws_step3_right_node[data-type=groups]>.ws_step3_right_node_title>b").text(result['data']['nodes']['groups'].length);
-			for(var i in result['data']['nodes']['groups'])
-			{
-				$(".ws_step3_right_node[data-type=groups]>.ws_step3_right_node_pics").append('<div title="'+result['data']['nodes']['groups'][i][1]+'"><img src="' + result['data']['nodes']['groups'][i][2] + '"></div>');
-			}
-
-			$(".ws_step3_right_node[data-type=groups]").append('<div class="ws_left_arrow"><i class="fa fa-angle-left"></i></div>');
-			$(".ws_step3_right_node[data-type=groups]").append('<div class="ws_right_arrow"><i class="fa fa-angle-right"></i></div>');
-		}
-		else
-		{
-			$(".ws_step3_right_node[data-type=groups]>.ws_step3_right_node_pics").html('<span style="padding-left: 11px; color: #888;">'+"<?=esc_html__('\'Load groups\' option is disabled in settings', 'fs-poster')?>"+'</span>');
-		}
-
-		$(".ws_left_arrow").click(function()
-		{
-			var leftPos = $(this).closest('.ws_step3_right_node').children('.ws_step3_right_node_pics').scrollLeft();
-			$(this).closest('.ws_step3_right_node').children('.ws_step3_right_node_pics').stop().animate({scrollLeft: leftPos - 150}, 500);
-		});
-
-		$(".ws_right_arrow").click(function()
-		{
-			var leftPos = $(this).closest('.ws_step3_right_node').children('.ws_step3_right_node_pics').scrollLeft();
-			$(this).closest('.ws_step3_right_node').children('.ws_step3_right_node_pics').stop(true).animate({scrollLeft: leftPos + 150}, 500);
-		});
-
-		fsCode.toast("<?=esc_html__('New account successfully added', 'fs-poster')?>");
 	}
 
 	jQuery(document).ready(function()
@@ -750,23 +495,18 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 
 		$("#proModal<?=$mn?> .ws_step21 .next_step_btn2").click(function()
 		{
-			var actoken = $("#proModal<?=$mn?> .ws_step21 .access_token_txtbox").val(),
+			var access_token = $("#proModal<?=$mn?> .ws_step21 .access_token_txtbox").val(),
 				proxy   =   $("#proModal<?=$mn?> .ws_step21 .proxy").val();
 
-			if( actoken == '' )
+			if( access_token == '' )
 			{
 				fsCode.toast("<?=esc_html__('Please copy content within opened window here!', 'fs-poster')?>" , 'danger');
 				return;
 			}
 
-			fsCode.ajax('add_new_fb_account_with_at' , {'access_token': actoken , 'proxy': proxy} , function(result)
+			fsCode.ajax('add_new_fb_account_with_at' , {'access_token': access_token , 'proxy': proxy} , function(result)
 			{
-				$("#proModal<?=$mn?> .ws_step21").fadeOut(200, function()
-				{
-					$("#proModal<?=$mn?> .ws_step3").fadeIn(200);
-				});
-
-				displayStep3(result);
+				compleateOperation(true);
 			});
 		});
 
@@ -784,12 +524,7 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 
 			fsCode.ajax('add_new_fb_account_with_cookie' , {'cookie_c_user': cookie_c_user , 'cookie_xs': cookie_xs, 'proxy': proxy} , function(result)
 			{
-				$("#proModal<?=$mn?> .ws_step22").fadeOut(200, function()
-				{
-					$("#proModal<?=$mn?> .ws_step3").fadeIn(200);
-				});
-
-				displayStep3(result);
+				compleateOperation(true);
 			});
 		});
 
@@ -805,36 +540,14 @@ $applications = FSwpFetchAll('apps' , ['is_standart' => '0', 'driver' => 'fb','u
 			}
 
 			fsCode.loading(1);
-			window.open('<?=site_url()?>?fb_app_redirect=' + appId + '&proxy=' + proxy , 'fs-app', 'width=750,height=550');
-		});
 
-		$(".finishBTN").click(function()
-		{
-			location.reload();
-		});
-
-		$("#console_code_input").click(function()
-		{
-			var target = $("#console_code_input")[0],
-				s1 = target.selectionStart,
-				s2 = target.selectionEnd;
-
-			var currentFocus = document.activeElement;
-			target.focus();
-			target.setSelectionRange(0, target.value.length);
-
-			try
+			var openURL = '<?=site_url()?>/?fb_app_redirect=' + appId + '&proxy=' + proxy;
+			if( $("#appSelect2>:selected").attr('data-standart') == '1' )
 			{
-				document.execCommand("copy");
-			} catch(e) { }
-
-			if (currentFocus && typeof currentFocus.focus === "function")
-			{
-				currentFocus.focus();
+				openURL = "<?=standartFSAppRedirectURL('fb')?>&proxy=" + proxy;
 			}
-			target.setSelectionRange(s1,s2);
 
-			fsCode.toast("<?=esc_html__('Code has been copied!', 'fs-poster')?>" , 'success')
+			window.open(openURL , 'fs-app', 'width=750,height=550');
 		});
 
 	});

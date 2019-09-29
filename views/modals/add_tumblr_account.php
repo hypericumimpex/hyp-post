@@ -81,7 +81,7 @@ $applications = FSwpFetchAll('apps' , ['driver' => 'tumblr']);
 
 	$("#addAccountBTN").click(function ()
 	{
-		var openURL = "<?=site_url().'?tumblr_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
+		var openURL = "<?=site_url().'/?tumblr_app_redirect='?>" + $("#appIdSelect").val() + '&proxy=' + $("#proxyInput").val();
 		if( $("#appIdSelect>:selected").attr('data-standart') == '1' )
 		{
 			openURL = "<?=standartFSAppRedirectURL('tumblr')?>&proxy=" + $("#proxyInput").val();

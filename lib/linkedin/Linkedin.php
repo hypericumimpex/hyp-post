@@ -10,7 +10,7 @@ class Linkedin
 	 */
 	public static function callbackURL()
 	{
-		return site_url() . '?linkedin_callback=1';
+		return site_url() . '/?linkedin_callback=1';
 	}
 
 	/**

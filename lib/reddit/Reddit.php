@@ -173,7 +173,7 @@ class Reddit
 		{
 			$result2 = [
 				'status'	=>	'error',
-				'error_msg'	=>	'Error result!' . json_encode( $result )
+				'error_msg'	=>	'Error result!' . htmlspecialchars( json_encode( $result ) )
 			];
 		}
 		else

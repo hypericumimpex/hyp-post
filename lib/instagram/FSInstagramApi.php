@@ -307,7 +307,7 @@ class FSInstagramApi
 
 	public function uploadPhotoStory( $photo , $link )
 	{
-		$photo = new \InstagramAPI\Media\Photo\InstagramPhoto( $photo );
+		$photo = new \InstagramAPI\Media\Photo\InstagramPhoto( $photo, ['targetFeed' => \InstagramAPI\Constants::FEED_STORY] );
 
 		try
 		{

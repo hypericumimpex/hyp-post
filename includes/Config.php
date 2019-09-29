@@ -131,81 +131,6 @@ function FSspintax( $text )
 	);
 }
 
-function FScustomizePostLink( $link , $feedId, $postInf = [], $accountInf = [] )
-{
-	$parameters = [];
-
-	if( get_option('fs_collect_statistics', '1') )
-	{
-		$parameters[] = 'feed_id=' . $feedId;
-	}
-
-	if( get_option('fs_unique_link', '1') == 1 )
-	{
-		$parameters[] = '_unique_id=' . uniqid();
-	}
-
-	$fs_url_additional = get_option('fs_url_additional', '');
-	if( !empty( $fs_url_additional ) )
-	{
-		$postId		= isset($postInf['ID']) ? $postInf['ID'] : 0;
-		$postTitle	= isset($postInf['post_title']) ? $postInf['post_title'] : '';
-		$network	= isset($accountInf['driver']) ? $accountInf['driver'] : '-';
-
-		$networks = [
-			'fb'		=> ['FB', 'Facebook'],
-			'twitter'	=> ['TW', 'Twitter'],
-			'instagram'	=> ['IG', 'Instagram'],
-			'linkedin'	=> ['LN', 'LinkedIn'],
-			'vk'		=> ['VK', 'VKontakte'],
-			'pinterest'	=> ['PI', 'Pinterest'],
-			'reddit'	=> ['RE', 'Reddit'],
-			'tumblr'	=> ['TU', 'Tumblr'],
-			'ok'		=> ['OK', 'OK.ru'],
-			'google_b'	=> ['GB', 'Google My Business'],
-			'telegram'	=> ['TG', 'Telegram'],
-			'medium'	=> ['ME', 'Medium'],
-		];
-
-		$networkCode	= isset($networks[$network]) ? $networks[$network][0] : '';
-		$networkName	= isset($networks[$network]) ? $networks[$network][1] : '';
-
-		$userInf		= wp_get_current_user();
-		$accountName	= isset( $userInf->user_login ) ? $userInf->user_login : '-';
-
-		$fs_url_additional = str_replace([
-			'{post_id}',
-			'{post_title}',
-			'{network_name}',
-			'{network_code}',
-			'{account_name}',
-			'{site_name}',
-			'{uniq_id}'
-		], [
-			rawurlencode( $postId ),
-			rawurlencode( $postTitle ),
-			rawurlencode( $networkName ),
-			rawurlencode( $networkCode ),
-			rawurlencode( $accountName ),
-			rawurlencode( get_bloginfo( 'name' ) ),
-			uniqid( )
-		], $fs_url_additional);
-
-		$parameters[] = $fs_url_additional;
-	}
-
-	if( !empty( $parameters ) )
-	{
-		$link .= strpos($link , '?') !== false ? '' : '?';
-
-		$parameters = implode('&', $parameters);
-
-		$link .= $parameters;
-	}
-
-	return $link;
-}
-
 function FSgetAccessToken( $nodeType , $nodeId )
 {
 	if( $nodeType == 'account' )
@@ -453,7 +378,8 @@ function FSprofilePic($info , $w = 40 , $h = 40)
 
 		$connection = new Abraham\TwitterOAuth\TwitterOAuth($twitterAppInfo['app_key'], $twitterAppInfo['app_secret']);
 		$user = $connection->get("users/show", ['screen_name' => $info['username']]);
-		return $user->profile_image_url;
+
+		return str_replace('http://', 'https://', $user->profile_image_url);
 	}
 	else if( $info['driver'] == 'instagram' )
 	{
@@ -742,7 +668,7 @@ function FSgetProductPrice( $productInf, $getType = '' )
 	}
 }
 
-function FSreplaceTags($message , $postInf , $link , $shortLink)
+function FSreplaceTags( $message , $postInf , $link , $shortLink )
 {
 	$message = preg_replace_callback('/\{content_short_?([0-9]+)?\}/' , function($n) use( $postInf )
 	{
@@ -755,7 +681,7 @@ function FSreplaceTags($message , $postInf , $link , $shortLink)
 			$cut = 40;
 		}
 
-		return FScutText(strip_tags( $postInf['post_content'] ) , $cut );
+		return FScutText( strip_tags( $postInf['post_content'] ), $cut );
 	} , $message);
 
 	// custom fields
@@ -786,6 +712,7 @@ function FSreplaceTags($message , $postInf , $link , $shortLink)
 	return str_replace([
 		'{id}' ,
 		'{title}' ,
+		'{title_ucfirst}' ,
 		'{content_full}' ,
 		'{link}' ,
 		'{short_link}' ,
@@ -799,8 +726,9 @@ function FSreplaceTags($message , $postInf , $link , $shortLink)
 		'{featured_image_url}'
 	] , [
 		$postInf['ID'] ,
-		strip_tags( $postInf['post_title'] ) ,
-		strip_tags( $postInf['post_content'] ) ,
+		$postInf['post_title'],
+		ucfirst( strtolower( $postInf['post_title'] ) ),
+		$postInf['post_content'],
 		$link ,
 		$shortLink ,
 		$productRegularPrice ,
@@ -844,12 +772,18 @@ function FSgetPostTags( $postInf )
 	}
 	$tagsString = implode(' ' , $tagsString);
 
-	return $tagsString;
+	return strtolower( $tagsString );
 }
 
 function FSgetPostCatsArr( $postId )
 {
-	if( get_post_type($postId) == 'product' )
+	$postType = get_post_type($postId);
+
+	if( $postType == 'fs_post' || $postType == 'fs_post_tmp' )
+	{
+		return false;
+	}
+	else if( $postType == 'product' )
 	{
 		return wp_get_post_terms( $postId ,'product_cat' );
 	}
@@ -882,7 +816,7 @@ function FSgetPostCats( $postInf )
 	$catsString = implode(' ' , $catsString);
 
 
-	return $catsString;
+	return strtolower( $catsString );
 }
 
 function FSshortenerURL( $url )
@@ -935,6 +869,157 @@ function FSshortURLbitly( $url )
 	$results = bitly_get('shorten', $params);
 
 	return isset($results['data']['url']) && !empty($results['data']['url']) ? $results['data']['url'] : $url;
+}
+
+function FScustomizePostLink( $link , $feedId, $postInf = [], $accountInf = [] )
+{
+	$parameters = [];
+
+	if( get_option('fs_collect_statistics', '1') )
+	{
+		$parameters[] = 'feed_id=' . $feedId;
+	}
+
+	if( get_option('fs_unique_link', '1') == 1 )
+	{
+		$parameters[] = '_unique_id=' . uniqid();
+	}
+
+	$fs_url_additional = get_option('fs_url_additional', '');
+	if( !empty( $fs_url_additional ) )
+	{
+		$postId		= isset($postInf['ID']) ? $postInf['ID'] : 0;
+		$postTitle	= isset($postInf['post_title']) ? $postInf['post_title'] : '';
+		$network	= isset($accountInf['driver']) ? $accountInf['driver'] : '-';
+
+		$networks = [
+			'fb'		=> ['FB', 'Facebook'],
+			'twitter'	=> ['TW', 'Twitter'],
+			'instagram'	=> ['IG', 'Instagram'],
+			'linkedin'	=> ['LN', 'LinkedIn'],
+			'vk'		=> ['VK', 'VKontakte'],
+			'pinterest'	=> ['PI', 'Pinterest'],
+			'reddit'	=> ['RE', 'Reddit'],
+			'tumblr'	=> ['TU', 'Tumblr'],
+			'ok'		=> ['OK', 'OK.ru'],
+			'google_b'	=> ['GB', 'Google My Business'],
+			'telegram'	=> ['TG', 'Telegram'],
+			'medium'	=> ['ME', 'Medium'],
+		];
+
+		$networkCode	= isset($networks[$network]) ? $networks[$network][0] : '';
+		$networkName	= isset($networks[$network]) ? $networks[$network][1] : '';
+
+		$userInf		= get_userdata( $postInf['post_author'] );
+		$accountName	= isset( $userInf->user_login ) ? $userInf->user_login : '-';
+
+		$fs_url_additional = str_replace([
+			'{post_id}',
+			'{post_title}',
+			'{network_name}',
+			'{network_code}',
+			'{account_name}',
+			'{site_name}',
+			'{uniq_id}'
+		], [
+			rawurlencode( $postId ),
+			rawurlencode( $postTitle ),
+			rawurlencode( $networkName ),
+			rawurlencode( $networkCode ),
+			rawurlencode( $accountName ),
+			rawurlencode( get_bloginfo( 'name' ) ),
+			uniqid( )
+		], $fs_url_additional);
+
+		$parameters[] = $fs_url_additional;
+	}
+
+	if( !empty( $parameters ) )
+	{
+		$link .= strpos($link , '?') !== false ? '' : '?';
+
+		$parameters = implode('&', $parameters);
+
+		$link .= $parameters;
+	}
+
+	return $link;
+}
+
+function FSgetPostLink( $postInf, $feedId, $accountInf )
+{
+	if( get_option('fs_share_custom_url', '0') )
+	{
+		$link = get_option('fs_custom_url_to_share', '{site_url}/?feed_id={feed_id}');
+
+		$postId		= isset($postInf['ID']) ? $postInf['ID'] : 0;
+		$postTitle	= isset($postInf['post_title']) ? $postInf['post_title'] : '';
+		$network	= isset($accountInf['driver']) ? $accountInf['driver'] : '-';
+
+		$networks = [
+			'fb'		=> ['FB', 'Facebook'],
+			'twitter'	=> ['TW', 'Twitter'],
+			'instagram'	=> ['IG', 'Instagram'],
+			'linkedin'	=> ['LN', 'LinkedIn'],
+			'vk'		=> ['VK', 'VKontakte'],
+			'pinterest'	=> ['PI', 'Pinterest'],
+			'reddit'	=> ['RE', 'Reddit'],
+			'tumblr'	=> ['TU', 'Tumblr'],
+			'ok'		=> ['OK', 'OK.ru'],
+			'google_b'	=> ['GB', 'Google My Business'],
+			'telegram'	=> ['TG', 'Telegram'],
+			'medium'	=> ['ME', 'Medium'],
+		];
+
+		$networkCode	= isset($networks[$network]) ? $networks[$network][0] : '';
+		$networkName	= isset($networks[$network]) ? $networks[$network][1] : '';
+
+		$userInf		= get_userdata( $postInf['post_author'] );
+		$accountName	= isset( $userInf->user_login ) ? $userInf->user_login : '-';
+
+		$link = str_replace([
+			'{post_id}',
+			'{feed_id}',
+			'{post_title}',
+			'{network_name}',
+			'{network_code}',
+			'{account_name}',
+			'{site_name}',
+			'{uniq_id}',
+			'{site_url}',
+			'{site_url_encoded}',
+			'{post_url}',
+			'{post_url_encoded}',
+		], [
+			rawurlencode( $postId ),
+			rawurlencode( $feedId ),
+			rawurlencode( $postTitle ),
+			rawurlencode( $networkName ),
+			rawurlencode( $networkCode ),
+			rawurlencode( $accountName ),
+			rawurlencode( get_bloginfo( 'name' ) ),
+			uniqid( ),
+			site_url(),
+			rawurlencode( site_url() ),
+			get_permalink( $postInf['ID'] ),
+			rawurlencode( get_permalink( $postInf['ID'] ) )
+		], $link);
+
+		// custom fields
+		$link = preg_replace_callback('/\{cf_(.+)\}/iU' , function($n) use( $postInf )
+		{
+			$customField = isset($n[1]) ? $n[1] : '';
+
+			return rawurlencode( get_post_meta($postInf['ID'], $customField, true) );
+		} , $link);
+	}
+	else
+	{
+		$link = get_permalink( $postInf['ID'] );
+		$link = FScustomizePostLink( $link , $feedId, $postInf, $accountInf );
+	}
+
+	return $link;
 }
 
 function FScheckRequirments( $response = true )
@@ -1194,6 +1279,7 @@ function fsPosterPluginRemove()
 		'fs_post_text_message_fb',
 		'fs_post_text_message_google',
 		'fs_post_text_message_instagram',
+		'fs_post_text_message_instagram_h',
 		'fs_post_text_message_linkedin',
 		'fs_post_text_message_ok',
 		'fs_post_text_message_pinterest',
@@ -1216,7 +1302,9 @@ function fsPosterPluginRemove()
 		'fs_plugin_disabled',
 		'fs_collect_statistics',
 		'fs_url_additional',
-		'fs_post_text_message_medium'
+		'fs_post_text_message_medium',
+		'fs_share_custom_url',
+		'fs_custom_url_to_share'
 	];
 
 	foreach( $fsOptions AS $optionName )
@@ -1297,4 +1385,12 @@ function FSLocalTime2UTC( $dateTime )
 	$dateTime->setTimezone( new DateTimeZone( date_default_timezone_get( ) ) );
 
 	return $dateTime->getTimestamp();
+}
+
+function FShexToRgb( $hex )
+{
+	if( strpos('#', $hex) === 0 )
+		$hex = substr($hex, 1);
+
+	return sscanf($hex, "%02x%02x%02x");
 }

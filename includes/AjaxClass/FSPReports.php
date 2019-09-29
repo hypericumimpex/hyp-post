@@ -100,7 +100,7 @@ trait FSPReports
 		$userId = (int)get_current_user_id();
 
 		$allCount = FSwpDB()->get_row("SELECT COUNT(0) AS c FROM " . FSwpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd , ARRAY_A);
-		$getData = FSwpDB()->get_results("SELECT * FROM " . FSwpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd . " ORDER BY id DESC LIMIT $offset , $limit" , ARRAY_A);
+		$getData = FSwpDB()->get_results("SELECT * FROM " . FSwpTable('feeds') . ' tb1 WHERE is_sended=1 AND ( (node_type=\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('accounts').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\' OR tb2.is_public=1))>0) OR (node_type<>\'account\' AND (SELECT COUNT(0) FROM '.FSwpTable('account_nodes').' tb2 WHERE tb2.id=tb1.node_id AND (tb2.user_id=\'' . $userId . '\')>0 OR tb2.is_public=1)) ) ' . $queryAdd . " ORDER BY send_time DESC LIMIT $offset , $limit" , ARRAY_A);
 		$resultData = [];
 
 		foreach($getData AS $feedInf)
@@ -213,7 +213,8 @@ trait FSPReports
 				'insights'      =>  $insights,
 				'node_type'     =>  ucfirst($feedInf['node_type']),
 				'feed_type'     =>  ucfirst((string)$feedInf['feed_type']),
-				'date'          =>  date('Y-m-d H:i' , strtotime($feedInf['send_time']))
+				'date'          =>  date('Y-m-d H:i' , strtotime($feedInf['send_time'])),
+				'wp_post_id'	=>	$feedInf['post_id']
 			];
 		}
 

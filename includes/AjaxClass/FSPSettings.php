@@ -2,6 +2,7 @@
 
 trait FSPSettings
 {
+
 	private function isAdmin()
 	{
 		if( !current_user_can('administrator') )
@@ -81,12 +82,17 @@ trait FSPSettings
 		$fs_url_short_access_token_bitly	= FS_post('fs_url_short_access_token_bitly' , '' , 'string' );
 		$fs_url_additional					= FS_post('fs_url_additional' , '' , 'string' );
 
+		$fs_share_custom_url				= FS_post('fs_share_custom_url' , 0 , 'string' , ['on']) === 'on' ? 1 : 0;
+		$fs_custom_url_to_share				= FS_post('fs_custom_url_to_share' , '' , 'string' );
 
 		update_option('fs_unique_link' , (string)$fs_unique_link);
 		update_option('fs_url_shortener' , (string)$fs_url_shortener);
 		update_option('fs_shortener_service' , $fs_shortener_service);
 		update_option('fs_url_short_access_token_bitly' , $fs_url_short_access_token_bitly);
 		update_option('fs_url_additional' , $fs_url_additional);
+
+		update_option('fs_share_custom_url' , (string)$fs_share_custom_url);
+		update_option('fs_custom_url_to_share' , $fs_custom_url_to_share);
 
 		FSresponse(true);
 	}
@@ -143,8 +149,20 @@ trait FSPSettings
 		}
 
 		$fs_post_text_message_instagram = FS_post('fs_post_text_message_instagram' , '' , 'string');
+		$fs_post_text_message_instagram_h = FS_post('fs_post_text_message_instagram_h' , '' , 'string');
+
+		$fs_instagram_story_background = FS_post('fs_instagram_story_background' , '' , 'string');
+		$fs_instagram_story_title_background = FS_post('fs_instagram_story_title_background' , '' , 'string');
+		$fs_instagram_story_title_background_opacity = FS_post('fs_instagram_story_title_background_opacity' , '' , 'int');
+		$fs_instagram_story_title_color = FS_post('fs_instagram_story_title_color' , '' , 'string');
+		$fs_instagram_story_title_top = FS_post('fs_instagram_story_title_top' , '' , 'string');
+		$fs_instagram_story_title_left = FS_post('fs_instagram_story_title_left' , '' , 'string');
+		$fs_instagram_story_title_width = FS_post('fs_instagram_story_title_width' , '' , 'string');
+		$fs_instagram_story_title_font_size = FS_post('fs_instagram_story_title_font_size' , '' , 'string');
+
 
 		update_option('fs_post_text_message_instagram' , $fs_post_text_message_instagram);
+		update_option('fs_post_text_message_instagram_h' , $fs_post_text_message_instagram_h);
 
 		update_option('fs_instagram_post_in_type' , $fs_instagram_post_in_type);
 		update_option('fs_instagram_story_link' , (string)$fs_instagram_story_link);
@@ -152,6 +170,15 @@ trait FSPSettings
 
 		update_option('fs_instagram_story_hashtag_name' , $fs_instagram_story_hashtag ? $fs_instagram_story_hashtag_name : '');
 		update_option('fs_instagram_story_hashtag_position' , $fs_instagram_story_hashtag ? $fs_instagram_story_hashtag_position : '');
+
+		update_option('fs_instagram_story_background' , $fs_instagram_story_background );
+		update_option('fs_instagram_story_title_background' , $fs_instagram_story_title_background );
+		update_option('fs_instagram_story_title_background_opacity' , ($fs_instagram_story_title_background_opacity > 100 || $fs_instagram_story_title_background_opacity < 0 ? 30 : $fs_instagram_story_title_background_opacity) );
+		update_option('fs_instagram_story_title_color' , $fs_instagram_story_title_color );
+		update_option('fs_instagram_story_title_top' , $fs_instagram_story_title_top );
+		update_option('fs_instagram_story_title_left' , $fs_instagram_story_title_left );
+		update_option('fs_instagram_story_title_width' , $fs_instagram_story_title_width );
+		update_option('fs_instagram_story_title_font_size' , $fs_instagram_story_title_font_size );
 
 		FSresponse(true);
 	}

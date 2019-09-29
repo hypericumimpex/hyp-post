@@ -16,7 +16,7 @@ trait FSPAccounts
 
 		if( $data === false )
 		{
-			FSresponse(false, 'The entered cookies is wrong!');
+			FSresponse(false, 'The entered cookies are wrong!');
 		}
 
 		FSresponse(true , ['data' => $data]);
@@ -671,7 +671,7 @@ trait FSPAccounts
 
 		if( empty( $data['id'] ) )
 		{
-			FSresponse(false, 'The entered cookies is wrong!');
+			FSresponse(false, 'The entered cookies are wrong!');
 		}
 
 		$options = json_encode( [

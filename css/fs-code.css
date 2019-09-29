@@ -70,29 +70,28 @@
 
 .delete_btn_desing
 {
-	background: #F1F1F1;
+	background: #FFF;
+	border: 0;
 	cursor: pointer;
 	position: absolute !important;
-	width: 28px;
-	height: 28px;
-	border: 1px solid #F1F1F1;
-	right: -14px;
+	right: 13px;
 	top: 0;
 	bottom: 0;
 	margin: auto;
-	text-align: center;
-	padding: 0 !important;
-	-webkit-border-radius: 50%;
-	-moz-border-radius: 50%;
-	border-radius: 50%;
-	line-height: 0px;
-	outline: none !important;
+	color: #ff7675;
 }
 
-.delete_btn_desing>i
+.fs_more_options_design
 {
-	font-size: 13px !important;
-	color: #EF4836;
+	background: #FFF;
+	border: 0;
+	cursor: pointer;
+	position: absolute !important;
+	right: 15px;
+	top: 0;
+	bottom: 0;
+	margin: auto;
+	color: #999;
 }
 
 .ws_btn
@@ -327,14 +326,6 @@ select.ws_form_element
 	appearance: none;
 
 	background: url("../images/arrow_down.png") white no-repeat 95% !important;
-}
-textarea.ws_form_element
-{
-	height: 60px !important;
-}
-textarea.ws_form_element2
-{
-	height: 60px !important;
 }
 
 .ws_form_element::placeholder,
@@ -666,6 +657,7 @@ textarea.ws_form_element2
 	color: #8194B0 !important;
 	font-weight: 600;
 	font-size: 12px;
+	padding-left: 10px;
 }
 
 .fs_accounts_count
@@ -790,18 +782,22 @@ td.ws_tooltip
 	cursor: pointer;
 }
 
-#fs_sub_menu
+#fs_sub_menu, #fs_sub_menu2
 {
 	position: fixed;
 	background: #FFF;
 	border-top: 2px solid #ffb8b8;
 	display: none;
 	z-index: 999;
-	width: 190px;
+	width: 180px;
 	margin-top: 10px;
+
+	-webkit-box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.05);
+	-moz-box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.05);
+	box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.05);
 }
 
-#fs_sub_menu:before
+#fs_sub_menu:before, #fs_sub_menu2:before
 {
 	content: '';
 	border: 10px solid transparent;
@@ -811,7 +807,7 @@ td.ws_tooltip
 	left: calc(50% - 9px);
 }
 
-#fs_sub_menu > div
+#fs_sub_menu > div, #fs_sub_menu2 > div
 {
 	padding: 8px 20px;
 	font-size: 14px;
@@ -819,7 +815,7 @@ td.ws_tooltip
 	color: #777;
 }
 
-#fs_sub_menu > div:hover
+#fs_sub_menu > div:hover, #fs_sub_menu2 > div:hover
 {
 	background: #f5f5f5;
 	cursor: pointer;

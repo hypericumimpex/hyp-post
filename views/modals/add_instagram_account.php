@@ -59,8 +59,6 @@
 	</div>
 </div>
 
-
-
 <script>
 
 	function require_action(response , username , password , proxy)

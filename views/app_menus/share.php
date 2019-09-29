@@ -161,7 +161,7 @@ else
 						<tr>
 							<th style="width: 50px;">ID</th>
 							<th>Content</th>
-							<th style="width: 150px;">Date</th>
+							<th style="width: 200px;">Date</th>
 						</tr>
 					</thead>
 					<tbody>

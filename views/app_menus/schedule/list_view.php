@@ -77,7 +77,23 @@ $namesArray2 = [
 		color: #888;
 		display: none;
 	}
+	.fs_warning_box
+	{
+		margin: 20px 80px;
+		padding: 13px 20px;
+		background: rgba(255, 215, 230, 0.64);
+		border: 1px solid rgba(253, 160, 168, 0.75);
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+		font-size: 15px;
+		color: #555;
+	}
 </style>
+
+<div class="fs_warning_box">
+	If Scheduled posts do not work properly, please read this instruction: <a href="https://www.fs-poster.com/doc/configure-cron-job-tasks-on-wordpress" target="_blank">Configure Cron Job</a>
+</div>
 
 <div style="margin: 40px 80px;">
 	<span style="color: #888; font-size: 17px; font-weight: 600; line-height: 36px;"><span id="schedules_count"><?php print count($schedules);?></span> <?=esc_html__('schedule(s) added' , 'fs-poster');?></span>
@@ -142,20 +158,51 @@ $namesArray2 = [
 
 					<div style="display: inline-block; vertical-align: middle">
 						<div>
-							<?=esc_html(FScutText($scheduleInf['title'], 55))?>
+							<?php
+							print esc_html(FScutText($scheduleInf['title'], 55));
+
+							if( !empty( $scheduleInf['sleep_time_start'] ) && !empty( $scheduleInf['sleep_time_end'] ) )
+							{
+								print '<i class="far fa-moon ws_tooltip" data-title="Sleep times: ' . date('H:i', strtotime($scheduleInf['sleep_time_start'])) . ' - ' . date('H:i', strtotime($scheduleInf['sleep_time_end'])) . '" style="color: #a29bfe; margin-left: 10px;"></i>';
+							}
+							?>
 						</div>
 						<div style="font-size: 11px; font-weight: 500; color: #999; margin-right: 25px;">
-							Post type: <u><?=esc_html(ucfirst($scheduleInf['post_type_filter']))?></u><?=$categoryFiltersTxt?><?=$addTxt?>
+							<?php
+							if( count( $postIds ) == 1 )
+							{
+								print 'Post ID: ' . reset( $postIds ) . ' ( <a href="' . esc_html(get_permalink( reset( $postIds ) )) . '" target="_blank">' . esc_html( FScutText( get_the_title( reset( $postIds ) ) ) ) . '</a> )';
+							}
+							else
+							{
+								print 'Post type: <u>' . esc_html(ucfirst($scheduleInf['post_type_filter'])) . '</u>' . $categoryFiltersTxt . $addTxt;
+							}
+							?>
 						</div>
 					</div>
 				</td>
 				<td style="font-size: 14px; color: #888;">
-					<div>
-						Start date: <i class="far fa-calendar-alt"></i> <?=date('Y-m-d H:i' , strtotime($scheduleInf['start_date'] . ' ' . $scheduleInf['share_time']))?>
-					</div>
-					<div>
-						Next post: <i class="far fa-calendar-alt"></i> <?=$nextPostDate?>
-					</div>
+					<?php
+
+					if( count( $postIds ) == 1 )
+					{
+						?>
+						<i class="far fa-calendar-alt"></i> <?=date('Y-m-d H:i' , strtotime($scheduleInf['start_date'] . ' ' . $scheduleInf['share_time']))?>
+						<?php
+					}
+					else
+					{
+						?>
+						<div>
+							Start date: <i class="far fa-calendar-alt"></i> <?=date('Y-m-d H:i' , strtotime($scheduleInf['start_date'] . ' ' . $scheduleInf['share_time']))?>
+						</div>
+						<div>
+							Next post: <i class="far fa-calendar-alt"></i> <?=$nextPostDate?>
+						</div>
+						<?php
+					}
+
+					?>
 				</td>
 				<td style="font-size: 14px; color: #888;"><i class="fa fa-sync"></i> <?=( count( $postIds ) == 1 ? 'no interval' : ($scheduleInf['interval'] % 1440 == 0 ? ($scheduleInf['interval'] / 1440) . ' day(s)' : ($scheduleInf['interval'] % 60 == 0 ? ($scheduleInf['interval'] / 60) . ' hour(s)' : $scheduleInf['interval'] . ' minute(s)')))?></td>
 				<td>

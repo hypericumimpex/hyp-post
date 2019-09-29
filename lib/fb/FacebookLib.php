@@ -10,7 +10,7 @@ class FacebookLib
 	 */
 	public static function callbackURL()
 	{
-		return site_url() . '?fb_callback=1';
+		return site_url() . '/?fb_callback=1';
 	}
 
 	/**
@@ -241,7 +241,12 @@ class FacebookLib
 		$loadedOwnPages = [];
 		if( get_option('fs_load_own_pages' , 1) == 1 )
 		{
-			$accountsList = self::cmd('/me/accounts', 'GET' , $accessToken , ['fields' => 'access_token,category,name,id,likes'] , $proxy );
+			$accountsList = self::cmd('/me/accounts', 'GET' , $accessToken , ['fields' => 'access_token,category,name,id,likes', 'limit' => 100] , $proxy );
+
+			if( isset( $accountsList['error']['code'] ) && $accountsList['error']['code'] == '4' && isset( $accountsList['error']['error_subcode'] ) && $accountsList['error']['error_subcode'] == '1349193' )
+			{
+				$accountsList = self::cmd('/me/accounts', 'GET' , $accessToken , ['fields' => 'access_token,category,name,id,likes', 'limit' => '3'] , $proxy );
+			}
 
 			if( isset($accountsList['data']) && is_array($accountsList['data']) )
 			{
@@ -310,7 +315,7 @@ class FacebookLib
 			$limit = $limit >= 0 ? $limit : 0;
 
 			$accountsList = self::cmd('/me/groups' , 'GET' , $accessToken , [
-				'fields'	=>	'name,privacy,id,member_count,icon,cover{source}',
+				'fields'	=>	'name,privacy,id,icon,cover{source},administrator',
 				'limit'		=>	$limit
 			] , $proxy);
 			if( isset($accountsList['data']) && is_array($accountsList['data']) )
@@ -318,6 +323,9 @@ class FacebookLib
 				$returnStatisticsData['groups'] = [];
 				foreach($accountsList['data'] AS $accountInfo)
 				{
+					if( $appId > 0 && !$accountInfo['administrator'] )
+						continue;
+
 					$cover = '';
 					if( isset($accountInfo['cover']['source']) )
 					{
@@ -337,8 +345,7 @@ class FacebookLib
 						'node_id'			=>	$accountInfo['id'],
 						'name'				=>	$accountInfo['name'],
 						//'access_token'		=>	null,
-						'category'			=>	$accountInfo['privacy'],
-						'fan_count'			=>	$accountInfo['member_count'],
+						'category'			=>	isset($accountInfo['privacy']) ? $accountInfo['privacy'] : 'group',
 						'cover'				=>	$cover
 					]);
 				}
@@ -485,7 +492,7 @@ class FacebookLib
 		$appInf = FSwpFetch('apps' , ['id' => $appId , 'driver' => 'fb']);
 		$appId = $appInf['app_id'];
 
-		$permissions = [ 'public_profile', 'email', 'user_likes' , 'user_birthday' , 'manage_pages' , 'publish_pages' , 'publish_to_groups' ];
+		$permissions = [ 'public_profile', 'email', 'manage_pages' , 'publish_pages' , 'publish_to_groups' ];
 		$permissions = implode(',' , array_map('urlencode' , $permissions));
 
 		$callbackUrl = self::callbackUrl();
